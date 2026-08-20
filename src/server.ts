@@ -184,6 +184,45 @@ async function route(
       }
       return textResponse(repository.readme, "text/markdown; charset=utf-8");
     }
+
+    if (request.method === "GET" && repositoryRoute.suffix === "commits") {
+      const commits = await repositories.listCommits(
+        repositoryRoute.owner,
+        repositoryRoute.name,
+        actor,
+        url.searchParams.get("ref") ?? undefined
+      );
+      return jsonResponse({ commits });
+    }
+
+    if (request.method === "GET" && repositoryRoute.suffix === "tree") {
+      const tree = await repositories.listTree(
+        repositoryRoute.owner,
+        repositoryRoute.name,
+        actor,
+        url.searchParams.get("ref") ?? undefined,
+        url.searchParams.get("path") ?? undefined
+      );
+      return jsonResponse({ tree });
+    }
+
+    if (request.method === "GET" && repositoryRoute.suffix === "blob") {
+      const path = url.searchParams.get("path");
+      if (path === null) {
+        throw new Response("path is required.", { status: 400 });
+      }
+      const content = await repositories.readFile(
+        repositoryRoute.owner,
+        repositoryRoute.name,
+        actor,
+        url.searchParams.get("ref") ?? undefined,
+        path
+      );
+      if (content === null) {
+        return notFound();
+      }
+      return textResponse(content, "text/plain; charset=utf-8");
+    }
   }
 
   return notFound();

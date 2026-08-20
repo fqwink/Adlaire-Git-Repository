@@ -1,4 +1,19 @@
 import { validateRepositoryName } from "../domain/repository.ts";
+import { validateGitRef, validateRepositoryPath } from "../domain/repository_path.ts";
+
+export interface CommitSummary {
+  readonly sha: string;
+  readonly author: string;
+  readonly authoredAt: string;
+  readonly subject: string;
+}
+
+export interface TreeEntry {
+  readonly mode: string;
+  readonly type: "blob" | "tree" | "commit";
+  readonly sha: string;
+  readonly path: string;
+}
 
 export class GitService {
   constructor(private readonly repositoryRoot: string) {}
@@ -60,6 +75,48 @@ export class GitService {
       }
     }
     return null;
+  }
+
+  async listCommits(owner: string, name: string, ref = "HEAD", limit = 50): Promise<CommitSummary[]> {
+    const path = this.repositoryPath(owner, name);
+    const safeRef = validateGitRef(ref);
+    const safeLimit = Math.max(1, Math.min(limit, 100));
+    const output = await this.tryGit(path, ["log", `-${safeLimit}`, "--format=%H%x1f%an%x1f%aI%x1f%s", safeRef]);
+    if (output === null || output.trim() === "") {
+      return [];
+    }
+
+    return output.trim().split("\n").map((line) => {
+      const [sha, author, authoredAt, subject] = line.split("\u001f");
+      return { sha, author, authoredAt, subject };
+    });
+  }
+
+  async listTree(owner: string, name: string, ref = "HEAD", repositoryPath = ""): Promise<TreeEntry[]> {
+    const path = this.repositoryPath(owner, name);
+    const safeRef = validateGitRef(ref);
+    const safePath = validateRepositoryPath(repositoryPath);
+    const target = safePath === "" ? safeRef : `${safeRef}:${safePath}`;
+    const output = await this.tryGit(path, ["ls-tree", target]);
+    if (output === null || output.trim() === "") {
+      return [];
+    }
+
+    return output.trim().split("\n").map((line) => {
+      const [metadata, entryPath] = line.split("\t");
+      const [mode, type, sha] = metadata.split(" ");
+      return { mode, type: type as TreeEntry["type"], sha, path: entryPath };
+    });
+  }
+
+  async readFile(owner: string, name: string, repositoryPath: string, ref = "HEAD"): Promise<string | null> {
+    const path = this.repositoryPath(owner, name);
+    const safeRef = validateGitRef(ref);
+    const safePath = validateRepositoryPath(repositoryPath);
+    if (safePath === "") {
+      throw new Error("repository path is required.");
+    }
+    return await this.tryGit(path, ["show", `${safeRef}:${safePath}`]);
   }
 
   private async git(repositoryPath: string, args: string[]): Promise<string> {

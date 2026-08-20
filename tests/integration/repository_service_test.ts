@@ -67,6 +67,18 @@ class MemoryGit {
   readReadme(): Promise<string | null> {
     return Promise.resolve("# Project");
   }
+
+  listCommits(): Promise<unknown[]> {
+    return Promise.resolve([{ sha: "abc", author: "Alice", authoredAt: "2026-08-21T00:00:00Z", subject: "Initial" }]);
+  }
+
+  listTree(): Promise<unknown[]> {
+    return Promise.resolve([{ mode: "100644", type: "blob", sha: "def", path: "README.md" }]);
+  }
+
+  readFile(): Promise<string | null> {
+    return Promise.resolve("# Project");
+  }
 }
 
 class MemoryAudit {
@@ -117,4 +129,24 @@ Deno.test("private repository access is denied anonymously and allowed for the o
   const visible = await service.getRepository("platform", "secret", owner);
   assertEquals(visible.readme, "# Project");
   assertEquals(visible.branches[0], "main");
+});
+
+Deno.test("visible repository exposes commit and tree views through repository service", async () => {
+  const repository = new MemoryRepository();
+  const service = new RepositoryService(repository, new MemoryGit(), new MemoryAudit());
+  const owner: Principal = { id: "u1", username: "platform", role: "developer" };
+
+  await service.createRepository({
+    owner: "platform",
+    name: "source",
+    visibility: "public"
+  }, owner);
+
+  const commits = await service.listCommits("platform", "source", null);
+  const tree = await service.listTree("platform", "source", null);
+  const file = await service.readFile("platform", "source", null, "HEAD", "README.md");
+
+  assertEquals(commits.length, 1);
+  assertEquals(tree.length, 1);
+  assertEquals(file, "# Project");
 });

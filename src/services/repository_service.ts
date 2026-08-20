@@ -24,6 +24,9 @@ export interface GitStorage {
   listBranches(owner: string, name: string): Promise<string[]>;
   listTags(owner: string, name: string): Promise<string[]>;
   readReadme(owner: string, name: string): Promise<string | null>;
+  listCommits(owner: string, name: string, ref?: string, limit?: number): Promise<unknown[]>;
+  listTree(owner: string, name: string, ref?: string, repositoryPath?: string): Promise<unknown[]>;
+  readFile(owner: string, name: string, repositoryPath: string, ref?: string): Promise<string | null>;
 }
 
 export class RepositoryService {
@@ -77,6 +80,21 @@ export class RepositoryService {
       tags,
       readme
     };
+  }
+
+  async listCommits(owner: string, name: string, actor: Principal | null, ref?: string): Promise<unknown[]> {
+    const repository = await this.requireVisibleRepository(owner, name, actor);
+    return await this.git.listCommits(repository.owner, repository.name, ref);
+  }
+
+  async listTree(owner: string, name: string, actor: Principal | null, ref?: string, path?: string): Promise<unknown[]> {
+    const repository = await this.requireVisibleRepository(owner, name, actor);
+    return await this.git.listTree(repository.owner, repository.name, ref, path);
+  }
+
+  async readFile(owner: string, name: string, actor: Principal | null, ref: string | undefined, path: string): Promise<string | null> {
+    const repository = await this.requireVisibleRepository(owner, name, actor);
+    return await this.git.readFile(repository.owner, repository.name, path, ref);
   }
 
   async updateVisibility(owner: string, name: string, visibility: RepositoryVisibility, actor: Principal): Promise<RepositoryRecord> {
