@@ -23,3 +23,14 @@ export function assertRejects(fn: () => unknown, expectedMessage: string): void 
   }
   throw new Error("Expected function to throw.");
 }
+
+export async function assertRejectsAsync(fn: () => Promise<unknown>, expectedStatus: number): Promise<void> {
+  try {
+    await fn();
+  } catch (error) {
+    assert(error instanceof Response, "Expected a Response error.");
+    assertEquals(error.status, expectedStatus);
+    return;
+  }
+  throw new Error("Expected promise to reject.");
+}

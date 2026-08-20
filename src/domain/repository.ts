@@ -13,6 +13,12 @@ export interface RepositoryRecord extends RepositoryInput {
   readonly updatedAt: string;
 }
 
+export interface RepositoryDetail extends RepositoryRecord {
+  readonly branches: string[];
+  readonly tags: string[];
+  readonly readme: string | null;
+}
+
 const NAME_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,62}$/;
 
 export function validateRepositoryName(value: string, field: "owner" | "name"): string {
