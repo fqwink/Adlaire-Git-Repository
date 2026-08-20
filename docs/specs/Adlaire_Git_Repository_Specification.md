@@ -99,6 +99,45 @@ Turso Cloud 等のクラウドDBホスティングを採用するかどうかは
 
 将来移行を容易にするため、DBアクセスは `db.ts` または専用サービス層に集約する。SQL は可能な限り SQLite 標準互換に保ち、libSQL 固有機能へ直接依存する場合はマスター仕様書に明記する。
 
+### データベースアクセス層仕様
+
+直接 SQLite を触る設計は、libSQL への移行計画の弊害になるため禁止する。
+
+アプリケーションコードは、以下の層を経由してデータベースへアクセスする。
+
+```text
+HTTP ハンドラー / Web UI / Git 操作 / 認証処理
+    ↓
+サービス層
+    ↓
+Repository 層
+    ↓
+Database Gateway
+    ↓
+SQLite driver（Phase 1）
+```
+
+各層の責務は以下とする。
+
+| 層 | 責務 |
+|---|---|
+| サービス層 | ユースケース、権限確認、トランザクション要求 |
+| Repository 層 | エンティティ単位の保存・取得・検索 |
+| Database Gateway | 接続、SQL 実行、トランザクション、driver 差し替え境界 |
+| SQLite driver | Phase 1 の実DBアクセス実装 |
+
+禁止事項:
+
+- HTTP ハンドラーから SQLite 接続を直接生成すること
+- サービス層から生 SQL を直接実行すること
+- Git 操作処理から DB ファイルを直接読み書きすること
+- migration をアプリケーション各所に分散させること
+- SQLite 固有機能を Repository 層より上位へ漏らすこと
+
+Phase 1 では `DB_DRIVER=sqlite` を前提値とする。将来 `DB_DRIVER=libsql` または `DB_DRIVER=turso` を追加する場合も、サービス層と HTTP ハンドラーの変更を最小化できる構造にする。
+
+schema、migration、seed は専用ディレクトリに集約し、Database Gateway からのみ適用する。
+
 ---
 
 ## アーキテクチャ
