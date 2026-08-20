@@ -1,0 +1,17 @@
+{
+  "name": "adlaire-git-repository",
+  "version": "1.2.0",
+  "license": "CLOSED",
+  "exports": "./src/main.ts",
+  "tasks": {
+    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run src/main.ts",
+    "fmt": "deno fmt deno.json src/ tests/",
+    "lint": "deno lint",
+    "test": "deno test --allow-read --allow-write --allow-env --allow-run tests/",
+    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=adlaire-git-repo src/main.ts"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["deno.ns", "dom", "dom.iterable"]
+  }
+}
