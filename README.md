@@ -4,6 +4,7 @@
 
 - 最上位ルールブック: [AGENTS.md](./AGENTS.md)
 - ポリシー群: [docs/policies/](./docs/policies/)
+- マスター開発計画: [docs/plans/DEVELOPMENT_PLAN.md](./docs/plans/DEVELOPMENT_PLAN.md)
 - マスター仕様書群: [docs/specs/](./docs/specs/)
 
 ## 現在のドキュメント構成
@@ -13,6 +14,8 @@
 ├── AGENTS.md
 ├── README.md
 └── docs/
+    ├── plans/
+    │   └── DEVELOPMENT_PLAN.md
     ├── policies/
     │   └── DEVELOPMENT_POLICY_RULEBOOK.md
     └── specs/
@@ -21,4 +24,4 @@
         └── WYSIWYG_Editor_Specification.md
 ```
 
-`docs/specs/Auris_System_Design.md` は、システム全体の最上位マスター仕様書である。ソースコード実装作業は、このマスター仕様書に基づいて行う。
+`docs/specs/Auris_System_Design.md` は、システム全体の最上位マスター仕様書である。ソースコード実装作業は、このマスター仕様書と `docs/plans/DEVELOPMENT_PLAN.md` の承認済みフェーズ計画に基づいて行う。
