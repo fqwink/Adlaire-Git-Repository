@@ -66,6 +66,8 @@ GitHub 互換を目標とする場合でも、GitHub 固有サービスへの直
 
 参考にした機能を採用する場合は、本プロジェクトの目的、セキュリティ方針、依存関係方針、運用方針に合わせて3類マスター仕様書へ再定義し、現時点で必要な機能かどうかを判断し、ユーザー承認を得てから実装対象に含める。
 
+実装機能候補、優先実装候補、保留候補は、`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` を参照する。同ファイルは候補整理であり、実装承認ではない。候補を実装対象へ確定する場合は、本書、`docs/specs/Auris_System_Design.md`、`docs/plans/DEVELOPMENT_PLAN.md` へ反映し、ユーザー承認を得る。
+
 ---
 
 ## 必須機能

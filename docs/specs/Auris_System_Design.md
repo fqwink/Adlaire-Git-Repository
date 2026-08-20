@@ -24,6 +24,8 @@
 
 フェーズ単位の実装計画、フェーズ別バージョン、実装対象、対象外、検証範囲、完了条件は、マスター開発計画である `docs/plans/DEVELOPMENT_PLAN.md` で管理する。
 
+実装機能候補、優先実装候補、保留候補、候補選定基準は、マスター実装機能候補リストである `docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` で管理する。ただし、同ファイルは候補整理であり、実装承認ではない。候補を実装対象へ確定する場合は、本書、個別3類マスター仕様書、マスター開発計画へ反映し、ユーザー承認を得る。
+
 矛盾がある場合は、以下の順に優先する。
 
 1. `AGENTS.md`
@@ -31,6 +33,7 @@
 3. 本書
 4. 個別マスター仕様書
 5. `docs/plans/DEVELOPMENT_PLAN.md`
+6. `docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md`
 
 ---
 
