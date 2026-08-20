@@ -38,9 +38,9 @@
 
 Adlaire Git Repository は、Adlaire Group 内部向けのセルフホスト型 Git ホスティング基盤である。
 
-機能体系、用語、主要ワークフローは GitHub 互換を目標とする。
+機能互換は GitHub 互換方針とする。
 
-GitHub 互換とは、Repository、Issue、Pull Request、Code Review、Wiki、Release、Webhook、REST API、Personal Access Token、Organization / Team、Projects、Discussions 等について、GitHub 利用経験を前提に理解・移行しやすい振る舞いを目指すことを指す。
+GitHub 互換とは、Repository、Issue、Pull Request、Code Review、Wiki、Release、Webhook、REST API、Personal Access Token、Organization / Team、Projects、Discussions 等の機能体系、用語、主要ワークフローについて、GitHub 利用経験を前提に理解・移行しやすい振る舞いを目指すことを指す。
 
 ただし、UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換の対象外とする。UI は本プロジェクト独自の設計とし、GitHub の画面、デザイン、ブランド表現、商標表現を模倣しない。
 
