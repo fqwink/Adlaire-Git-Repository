@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**バージョン**: v.0.1
+**文書バージョン**: v.0.1
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
 
@@ -19,8 +19,10 @@
 - 内部ツール / ライブラリ管理
 
 **特徴**
-- Git 基本操作に特化
-- 管理画面は必要最小限
+- 基本的な機能互換は GitHub 互換基準とする
+- オープンソース Git プロバイダーはサブの機能互換インスパイア対象とする
+- Git 基本操作と開発支援機能を段階的に実装する
+- UI は GitHub 互換の対象外とし、本プロジェクト独自の利用体験として段階的に拡張する
 - 外部依存ゼロ（Deno std のみ）
 - ワンバイナリで起動
 
@@ -28,6 +30,43 @@
 - 開発者（ソースコード push / pull）
 - プロジェクトオーナー（リポジトリ管理）
 - IT 管理者（ユーザー・アクセス管理）
+
+---
+
+## GitHub 互換方針
+
+本プロジェクトの基本的な機能互換は、GitHub 互換基準とする。
+
+GitHub 互換とは、GitHub の機能概念、用語、主要ワークフロー、権限確認、API の考え方に近い振る舞いを持ち、GitHub 利用経験のある利用者が理解・移行しやすいことを指す。
+
+互換対象の中心は以下とする。
+
+- Repository、Branch、Tag、Release
+- Issue、Pull Request、Code Review
+- Wiki、Projects、Discussions
+- Organization、Team、User、権限管理
+- Webhook、REST API、Personal Access Token、SSH key
+- README、commit、tree、blob、diff、履歴表示
+
+GitHub 互換は、マスター仕様書とマスター開発計画で定義された範囲に限る。GitHub の全機能を無条件に実装対象へ含めるものではない。現時点で不要な機能は、GitHub に存在する機能であっても実装対象から除外する。
+
+UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換の対象外とする。UI は本プロジェクト独自の設計とし、GitHub の画面、デザイン、ブランド表現、商標表現を模倣しない。
+
+GitHub Actions、GitHub Pages、Package registry、Container registry、Copilot、Advanced Security 等は、個別に採用可否、実装時期、必要性、外部依存、セキュリティ、ライセンスを評価し、ユーザー承認を得るまで実装対象に含めない。
+
+GitHub 互換を目標とする場合でも、GitHub 固有サービスへの直接依存、GitHub の商標・ブランド表現の無承認利用、GitHub API の完全再現を前提にした無承認実装は行わない。
+
+## OSS Git プロバイダー参考方針
+
+オープンソースの Git プロバイダーやセルフホスト型 Git ホスティング製品は、サブの機能互換インスパイア対象として扱う。
+
+参考対象には、Gitea、Forgejo、GitLab、GitPrep 等を含めてよい。
+
+ただし、これらは主たる互換基準ではない。特定 OSS Git プロバイダーとの機能互換、API 互換、UI 互換、画面設計互換、運用モデル互換を目標にしてはならない。
+
+参考にした機能を採用する場合は、本プロジェクトの目的、セキュリティ方針、依存関係方針、運用方針に合わせて3類マスター仕様書へ再定義し、現時点で必要な機能かどうかを判断し、ユーザー承認を得てから実装対象に含める。
+
+実装機能候補、優先実装候補、保留候補は、`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` を参照する。同ファイルは候補整理であり、実装承認ではない。候補を実装対象へ確定する場合は、本書、`docs/specs/Auris_System_Design.md`、`docs/plans/DEVELOPMENT_PLAN.md` へ反映し、ユーザー承認を得る。
 
 ---
 
@@ -77,9 +116,9 @@
 | 層 | 技術 |
 |----|------|
 | **言語** | TypeScript |
-| **ランタイム** | Deno 2.2+ |
+| **ランタイム** | Deno |
 | **HTTP** | Deno.serve |
-| **DB** | SQLite (内製 or Deno.Command) |
+| **DB** | SQLite（Database Gateway / SQLite driver 経由） |
 | **Git** | Deno.Command |
 | **認証** | SSH / HTTP Basic |
 | **UI** | HTML + Vanilla JavaScript（内製） |
@@ -89,6 +128,9 @@
 - フレームワーク採用禁止（内製化のみ）
 - 必要最小限の外部ライブラリ
 - 外部ライブラリは内製ラッパー、内製driver、または Database Gateway の内部に閉じ込める
+- 採用バージョンは各技術の最新の安定版を基本方針とする
+- TypeScript は 6系を採用方針とする
+- 具体的な固定バージョンは、採用または更新の時点で公式情報を確認し、ユーザー承認を得てから反映する
 
 ### データベース採用方針
 
@@ -106,7 +148,7 @@ libSQL は、SQLite 互換を活かした将来の移行候補として保持す
 
 Turso Cloud 等のクラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングは新しいデータベースエンジンではなく、libSQL の接続先または運用形態の候補として扱う。採用する場合は、外部サービス依存、データ所在、認証トークン管理、バックアップ、障害時の復旧、運用費用を評価し、例外採用としてユーザー承認を得る。
 
-将来移行を容易にするため、DBアクセスは `db.ts` または専用サービス層に集約する。SQL は可能な限り SQLite 標準互換に保ち、libSQL 固有機能へ直接依存する場合はマスター仕様書に明記する。
+将来移行を容易にするため、DBアクセスは Database Gateway と専用 driver 層に集約する。SQL は可能な限り SQLite 標準互換に保ち、libSQL 固有機能へ直接依存する場合はマスター仕様書に明記する。
 
 ### データベースアクセス層仕様
 
@@ -170,7 +212,8 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
   ├─ Git Ops (clone / push / pull)
   ├─ Auth (SSH / Basic)
   ├─ Web UI handler
-  └─ SQLite Query
+  └─ Database Gateway
+      └─ SQLite driver
     ↓
 [Storage]
   ├─ SQLite Database (metadata)
@@ -181,35 +224,24 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
 
 ## deno.json
 
-正式バージョン表記は `v.0.1` とする。`deno.json` に互換性上 `0.1.0` 形式を記載する場合は、正式表記 `v.0.1` に対応する内部表記として扱う。
+正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。たとえば `1.2.0` は正式表記 `v.1.2` に対応する。
 
 ```json
 {
   "name": "adlaire-git-repository",
-  "version": "0.1.0",
+  "version": "1.2.0",
   "license": "CLOSED",
-
-  "imports": {
-    "std/": "jsr:@std/",
-    "std/http": "jsr:@std/http",
-    "std/crypto": "jsr:@std/crypto",
-    "std/fs": "jsr:@std/fs",
-    "std/json": "jsr:@std/json",
-    "std/encoding": "jsr:@std/encoding",
-    "std/path": "jsr:@std/path"
-  },
-
+  "exports": "./src/main.ts",
   "tasks": {
-    "dev": "deno run --allow-all --watch src/main.ts",
-    "test": "deno test --allow-all tests/",
-    "lint": "deno lint src/",
-    "fmt": "deno fmt src/",
-    "compile": "deno compile --allow-all --output=adlaire-git-repo src/main.ts"
+    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run src/main.ts",
+    "fmt": "deno fmt deno.json src/ tests/",
+    "lint": "deno lint",
+    "test": "deno test --allow-read --allow-write --allow-env --allow-run tests/",
+    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=adlaire-git-repo src/main.ts"
   },
-
   "compilerOptions": {
     "strict": true,
-    "lib": ["deno.window", "dom"]
+    "lib": ["deno.ns", "dom", "dom.iterable"]
   }
 }
 ```
@@ -220,40 +252,49 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
 
 ```
 adlaire-git-repository/
+├── AGENTS.md
+├── Dockerfile
+├── README.md
+├── compose.yaml
 ├── deno.json
-├── deno.lock
-├── tsconfig.json
 ├── src/
 │   ├── main.ts              (エントリーポイント)
 │   ├── server.ts            (HTTP サーバー)
-│   ├── types.ts             (型定義)
-│   ├── db.ts                (SQLite 操作)
-│   ├── git.ts               (Git 操作)
-│   ├── auth.ts              (認証)
-│   ├── handlers/
-│   │   ├── git.ts           (Git HTTP ハンドラー)
-│   │   ├── api.ts           (API ハンドラー)
-│   │   └── ui.ts            (Web UI ハンドラー)
-│   ├── services/
-│   │   ├── repo.ts
-│   │   ├── user.ts
-│   │   └── auth.ts
-│   └── utils/
-│       ├── config.ts
-│       ├── logger.ts
-│       └── crypto.ts
+│   ├── config.ts            (設定)
+│   ├── database/
+│   │   ├── gateway.ts       (Database Gateway)
+│   │   ├── sqlite_cli_driver.ts
+│   │   ├── sql.ts
+│   │   ├── schema.sql
+│   │   └── types.ts
+│   ├── domain/
+│   │   ├── audit.ts
+│   │   ├── auth.ts
+│   │   ├── repository.ts
+│   │   ├── repository_path.ts
+│   │   ├── ssh_key.ts
+│   │   └── user.ts
+│   ├── git/
+│   │   ├── git_service.ts
+│   │   └── http_backend.ts
+│   ├── http/
+│   │   └── responses.ts
+│   ├── repositories/
+│   │   ├── audit_log_repository.ts
+│   │   ├── repository_repository.ts
+│   │   └── user_repository.ts
+│   └── services/
+│   │   ├── audit_service.ts
+│   │   ├── auth_service.ts
+│   │   └── repository_service.ts
 ├── tests/
 │   ├── unit/
 │   ├── integration/
-│   └── e2e/
-├── public/
-│   ├── index.html
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       └── app.js
-└── scripts/
-    └── init-db.ts
+│   └── support/
+└── docs/
+    ├── plans/
+    ├── policies/
+    └── specs/
 ```
 
 ---
@@ -269,7 +310,7 @@ adlaire-git-repository/
 ### 暗号化
 
 - HTTPS only (本番)
-- Password hashing (bcrypt or Deno std)
+- Password hashing（方式は3類マスター仕様書とユーザー承認に基づき、外部ライブラリを使う場合は例外採用として扱う）
 - Token storage (hashed)
 
 ### Audit
@@ -727,18 +768,18 @@ VPS: 2GB × 1（容量に余裕）
 
 ### 採用デザイン
 
-**構成3: Clean Modern + GitHub Style + Dark Mode 統合版**
+**構成3: Clean Modern + 独自ナビゲーション + Dark Mode 統合版**
 
 ```
 基本構造:
   - サイドバー: Clean Modern（プロジェクト・ユーザー管理）
-  - トップナビゲーション: GitHub Style（Repositories/Issues/PR等）
+  - トップナビゲーション: 独自設計（Repositories/Issues/PR等の用語は機能互換に基づく）
   - ダークモード: オプション・ユーザー設定で切り替え
   - カラー: #00a968（Emerald Green）統一
 
 メリット:
   ✅ Clean Modern の実装シンプルさ
-  ✅ GitHub Style の習熟度向上
+  ✅ GitHub の機能用語に近い理解しやすさ
   ✅ Dark Mode の長時間利用対応
   ✅ 複雑な操作と直感的なUIの融合
   ✅ Phase 1-3 全てに対応可能
@@ -1128,6 +1169,7 @@ Optimization:
 
 **調査対象**: Gitea / Forgejo / GitPrep
 **目的**: 実装優先度の決定
+**位置づけ**: サブの機能互換インスパイア対象であり、主たる互換基準ではない
 
 ### 超高優先度（必須・Phase 1）
 
@@ -1854,8 +1896,8 @@ docker-compose で管理開始
 
 ### 準備
 
-- [ ] Deno 2.2+ インストール
-- [ ] Git 2.0+ インストール
+- [ ] Deno インストール（固定バージョンはユーザー承認後に確定）
+- [ ] Git インストール（固定バージョンはユーザー承認後に確定）
 - [ ] Repository 作成
 - [ ] Team onboarding
 - [ ] CI/CD パイプライン
