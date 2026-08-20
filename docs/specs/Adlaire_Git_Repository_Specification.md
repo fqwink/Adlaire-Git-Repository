@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**バージョン**: v.0.1
+**文書バージョン**: v.0.1
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
 
@@ -77,9 +77,9 @@
 | 層 | 技術 |
 |----|------|
 | **言語** | TypeScript |
-| **ランタイム** | Deno 2.2+ |
+| **ランタイム** | Deno |
 | **HTTP** | Deno.serve |
-| **DB** | SQLite (内製 or Deno.Command) |
+| **DB** | SQLite（Database Gateway / SQLite driver 経由） |
 | **Git** | Deno.Command |
 | **認証** | SSH / HTTP Basic |
 | **UI** | HTML + Vanilla JavaScript（内製） |
@@ -109,7 +109,7 @@ libSQL は、SQLite 互換を活かした将来の移行候補として保持す
 
 Turso Cloud 等のクラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングは新しいデータベースエンジンではなく、libSQL の接続先または運用形態の候補として扱う。採用する場合は、外部サービス依存、データ所在、認証トークン管理、バックアップ、障害時の復旧、運用費用を評価し、例外採用としてユーザー承認を得る。
 
-将来移行を容易にするため、DBアクセスは `db.ts` または専用サービス層に集約する。SQL は可能な限り SQLite 標準互換に保ち、libSQL 固有機能へ直接依存する場合はマスター仕様書に明記する。
+将来移行を容易にするため、DBアクセスは Database Gateway と専用 driver 層に集約する。SQL は可能な限り SQLite 標準互換に保ち、libSQL 固有機能へ直接依存する場合はマスター仕様書に明記する。
 
 ### データベースアクセス層仕様
 
@@ -173,7 +173,8 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
   ├─ Git Ops (clone / push / pull)
   ├─ Auth (SSH / Basic)
   ├─ Web UI handler
-  └─ SQLite Query
+  └─ Database Gateway
+      └─ SQLite driver
     ↓
 [Storage]
   ├─ SQLite Database (metadata)
@@ -184,35 +185,24 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
 
 ## deno.json
 
-正式バージョン表記は `v.0.1` とする。`deno.json` に互換性上 `0.1.0` 形式を記載する場合は、正式表記 `v.0.1` に対応する内部表記として扱う。
+正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。たとえば `1.2.0` は正式表記 `v.1.2` に対応する。
 
 ```json
 {
   "name": "adlaire-git-repository",
-  "version": "0.1.0",
+  "version": "1.2.0",
   "license": "CLOSED",
-
-  "imports": {
-    "std/": "jsr:@std/",
-    "std/http": "jsr:@std/http",
-    "std/crypto": "jsr:@std/crypto",
-    "std/fs": "jsr:@std/fs",
-    "std/json": "jsr:@std/json",
-    "std/encoding": "jsr:@std/encoding",
-    "std/path": "jsr:@std/path"
-  },
-
+  "exports": "./src/main.ts",
   "tasks": {
-    "dev": "deno run --allow-all --watch src/main.ts",
-    "test": "deno test --allow-all tests/",
-    "lint": "deno lint src/",
-    "fmt": "deno fmt src/",
-    "compile": "deno compile --allow-all --output=adlaire-git-repo src/main.ts"
+    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run src/main.ts",
+    "fmt": "deno fmt deno.json src/ tests/",
+    "lint": "deno lint",
+    "test": "deno test --allow-read --allow-write --allow-env --allow-run tests/",
+    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=adlaire-git-repo src/main.ts"
   },
-
   "compilerOptions": {
     "strict": true,
-    "lib": ["deno.window", "dom"]
+    "lib": ["deno.ns", "dom", "dom.iterable"]
   }
 }
 ```
@@ -223,40 +213,49 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
 
 ```
 adlaire-git-repository/
+├── AGENTS.md
+├── Dockerfile
+├── README.md
+├── compose.yaml
 ├── deno.json
-├── deno.lock
-├── tsconfig.json
 ├── src/
 │   ├── main.ts              (エントリーポイント)
 │   ├── server.ts            (HTTP サーバー)
-│   ├── types.ts             (型定義)
-│   ├── db.ts                (SQLite 操作)
-│   ├── git.ts               (Git 操作)
-│   ├── auth.ts              (認証)
-│   ├── handlers/
-│   │   ├── git.ts           (Git HTTP ハンドラー)
-│   │   ├── api.ts           (API ハンドラー)
-│   │   └── ui.ts            (Web UI ハンドラー)
-│   ├── services/
-│   │   ├── repo.ts
-│   │   ├── user.ts
-│   │   └── auth.ts
-│   └── utils/
-│       ├── config.ts
-│       ├── logger.ts
-│       └── crypto.ts
+│   ├── config.ts            (設定)
+│   ├── database/
+│   │   ├── gateway.ts       (Database Gateway)
+│   │   ├── sqlite_cli_driver.ts
+│   │   ├── sql.ts
+│   │   ├── schema.sql
+│   │   └── types.ts
+│   ├── domain/
+│   │   ├── audit.ts
+│   │   ├── auth.ts
+│   │   ├── repository.ts
+│   │   ├── repository_path.ts
+│   │   ├── ssh_key.ts
+│   │   └── user.ts
+│   ├── git/
+│   │   ├── git_service.ts
+│   │   └── http_backend.ts
+│   ├── http/
+│   │   └── responses.ts
+│   ├── repositories/
+│   │   ├── audit_log_repository.ts
+│   │   ├── repository_repository.ts
+│   │   └── user_repository.ts
+│   └── services/
+│   │   ├── audit_service.ts
+│   │   ├── auth_service.ts
+│   │   └── repository_service.ts
 ├── tests/
 │   ├── unit/
 │   ├── integration/
-│   └── e2e/
-├── public/
-│   ├── index.html
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       └── app.js
-└── scripts/
-    └── init-db.ts
+│   └── support/
+└── docs/
+    ├── plans/
+    ├── policies/
+    └── specs/
 ```
 
 ---
@@ -272,7 +271,7 @@ adlaire-git-repository/
 ### 暗号化
 
 - HTTPS only (本番)
-- Password hashing (bcrypt or Deno std)
+- Password hashing（方式は3類マスター仕様書とユーザー承認に基づき、外部ライブラリを使う場合は例外採用として扱う）
 - Token storage (hashed)
 
 ### Audit
@@ -1857,8 +1856,8 @@ docker-compose で管理開始
 
 ### 準備
 
-- [ ] Deno 2.2+ インストール
-- [ ] Git 2.0+ インストール
+- [ ] Deno インストール（固定バージョンはユーザー承認後に確定）
+- [ ] Git インストール（固定バージョンはユーザー承認後に確定）
 - [ ] Repository 作成
 - [ ] Team onboarding
 - [ ] CI/CD パイプライン

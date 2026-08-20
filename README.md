@@ -24,4 +24,4 @@
         └── WYSIWYG_Editor_Specification.md
 ```
 
-`docs/specs/Auris_System_Design.md` は、システム全体の最上位マスター仕様書である。ソースコード実装作業は、このマスター仕様書と `docs/plans/DEVELOPMENT_PLAN.md` の承認済みフェーズ計画に基づいて行う。
+`AGENTS.md` は本リポジトリの最上位ルールブックである。`docs/specs/Auris_System_Design.md` は、3類マスター仕様書群におけるシステム全体の最上位マスター仕様書である。ソースコード実装作業は、1類ルールブック、2類ポリシー、このマスター仕様書、`docs/plans/DEVELOPMENT_PLAN.md` の承認済みフェーズ計画に基づいて行う。
