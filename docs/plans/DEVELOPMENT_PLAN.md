@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.1.14
+**計画バージョン**: v.1.15
 **現行フェーズ基準バージョン**: v.1.2
 **ステータス**: Phase 1 実装完了・開発検証段階
 
@@ -32,6 +32,8 @@
 関連する候補整理ドキュメントとして、`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` を参照する。
 
 `docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` はマスター実装機能候補リストであり、優先実装候補、保留候補、候補選定基準を整理する。ただし、同ファイルは実装承認ではない。候補を各フェーズの実装対象へ確定する場合は、3類マスター仕様書、本書の対象フェーズ、検証範囲へ反映し、ユーザー承認を得る。
+
+候補リストは、機能候補と選定理由を管理する。正式な実装対象、対象外、Phase 割り当て、完了条件、検証範囲は、本書と3類マスター仕様書で管理する。
 
 ---
 
@@ -296,7 +298,6 @@ Phase 2 は、Phase 1 の PR が `main` へマージされ、Phase 1 の開発�
 - Issue
 - Wiki
 - Webhook
-- Star / Watch
 - Release 管理
 - REST API 基本機能
 
@@ -305,6 +306,7 @@ Phase 2 は、Phase 1 の PR が `main` へマージされ、Phase 1 の開発�
 - Organizations / Teams の本格運用
 - Projects
 - Discussions
+- Star / Watch
 - 複数インスタンス運用
 - libSQL driver の正式採用
 - クラウドDBホスティング採用
@@ -352,7 +354,7 @@ Phase 2 の実装は、以下の順序を原則とする。
 4. Pull Request / Code Review の最小単位
 5. Issue / Wiki の最小単位
 6. Webhook / REST API 基本機能
-7. Release 管理、Star / Watch
+7. Release 管理
 8. 意味のあるテストと主要検証
 
 順序を変更する場合は、変更理由と影響範囲を本書または対象3類マスター仕様書に記録する。
@@ -572,3 +574,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.1.12 | TypeScript は6系の最新安定版を採用方針とすることを明記 |
 | v.1.13 | TypeScript 以外の採用技術も最新安定版を採用方針とすることを明記 |
 | v.1.14 | 承認済み固定採用バージョンを明記 |
+| v.1.15 | マスター実装機能候補リストとマスター仕様書の役割重複を整理 |

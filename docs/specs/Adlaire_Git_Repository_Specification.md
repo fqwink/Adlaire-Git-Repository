@@ -68,9 +68,11 @@ GitHub 互換を目標とする場合でも、GitHub 固有サービスへの直
 
 実装機能候補、優先実装候補、保留候補は、`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` を参照する。同ファイルは候補整理であり、実装承認ではない。候補を実装対象へ確定する場合は、本書、`docs/specs/Auris_System_Design.md`、`docs/plans/DEVELOPMENT_PLAN.md` へ反映し、ユーザー承認を得る。
 
+候補リストは、機能候補と選定理由を管理する。正式仕様、実装対象、対象外、Phase 割り当て、完了条件、検証範囲は、本書、`docs/specs/Auris_System_Design.md`、`docs/plans/DEVELOPMENT_PLAN.md` で管理する。
+
 ---
 
-## 必須機能
+## 確定済み基本機能
 
 ### Git 操作
 
@@ -91,7 +93,6 @@ GitHub 互換を目標とする場合でも、GitHub 固有サービスへの直
 
 - ✅ Repo CRUD (public / private)
 - ✅ Repository settings
-- ✅ Fork / Star / Watch
 - ✅ Visibility 制御
 
 ### Web UI
@@ -1141,179 +1142,13 @@ Optimization:
 
 ---
 
-## GitHub 機能リスト・優先度
+## 実装機能候補リストとの関係
 
-### 高優先度（実装推奨）
+GitHub 機能、OSS Git ホスティング機能、将来拡張機能の候補分類、優先候補、保留候補、選定理由は `docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` で管理する。
 
-- ✅ Issue tracking（プロジェクト管理に必須）
-- ✅ Pull Request (PR) + Code review（チーム開発に必須）
-- ✅ Webhooks（CI/CD連携に必須）
-- ✅ Organizations / Teams（複数プロジェクト管理）
-- ✅ README 表示（リポジトリ説明）
+本書では、正式仕様として確定した機能の振る舞い、データ、権限、セキュリティ、運用要件を管理する。候補リストに記載された機能であっても、本書、`docs/specs/Auris_System_Design.md`、`docs/plans/DEVELOPMENT_PLAN.md` に反映され、ユーザー承認を得るまでは実装対象ではない。
 
-### 中優先度（あると便利）
-
-- ✅ Wiki（ドキュメント管理）
-- ✅ Projects (Kanban)（タスク管理）
-- ✅ REST API（外部ツール連携）
-- ✅ Discussions（チーム内コミュニケーション）
-
-### 低優先度（将来検討）
-
-- □ GitHub Actions（CI/CD実行・複雑）
-- □ GitHub Pages（内部向けなら不要）
-- □ Code search（小規模なら不要）
-- □ Security scanning（後付けOK）
-- □ Releases & Assets（オプション）
-- □ Gist（内部向けなら不要）
-- □ Dependency tracking（オプション）
-
-### 採用しない
-
-- ❌ GitHub Copilot（AI・不要）
-- ❌ Package registry（内部向けなら不要）
-- ❌ Container registry（内部向けなら不要）
-- ❌ Advanced security features（エンタープライズ向け）
-
----
-
-## OSS Git ホスティング機能リスト（優先度付け）
-
-**調査対象**: Gitea / Forgejo / GitPrep
-**目的**: 実装優先度の決定
-**位置づけ**: サブの機能互換インスパイア対象であり、主たる互換基準ではない
-
-### 超高優先度（必須・Phase 1）
-
-**Git 基本操作**
-- ✅ Repository hosting (public / private)
-- ✅ git clone / push / pull (HTTP Smart Protocol)
-- ✅ SSH key auth
-- ✅ HTTP Basic Auth
-- ✅ User registration / login
-- ✅ Repository CRUD
-- ✅ Branch / Tag 管理
-- ✅ Commit 履歴表示
-- ✅ File browsing（コード閲覧）
-- ✅ README 表示
-
-**ユーザー・アクセス管理**
-- ✅ User management (admin 画面)
-- ✅ User permissions (owner / collaborator)
-- ✅ SSH key 管理
-- ✅ Personal access tokens (PAT)
-
-**ログ・監査**
-- ✅ 操作ログ記録
-
-### 高優先度（推奨・Phase 1-2）
-
-**コラボレーション**
-- ✅ Pull Request (PR) + Code review
-  - Create / Merge / Close
-  - Diff 表示
-  - Inline comments
-  - Approval workflow
-
-- ✅ Issue tracking
-  - Create / Update / Close
-  - Labels / Milestone / Assignment
-  - 検索 / フィルター
-
-**ドキュメント管理**
-- ✅ Wiki（プロジェクトドキュメント）
-
-**その他**
-- ✅ Visibility 制御 (public / private)
-- ✅ Star / Watch（リポジトリフォロー）
-- ✅ Release 管理
-
-### 中優先度（あると良い・Phase 2-3）
-
-**プロジェクト管理**
-- ✅ Projects (Kanban board)
-  - タスク管理 / ステータス表示 / 進捗管理
-
-**開発支援**
-- ✅ Webhooks（CI/CD連携）
-- ✅ REST API（外部ツール連携）
-- ✅ Discussions（プロジェクトコミュニケーション）
-
-**組織管理**
-- ✅ Organizations / Teams
-  - チーム管理 / 権限制御 / メンバー管理
-
-### 低優先度（将来検討・Phase 3+）
-
-**パッケージ管理**
-- □ Package registry (npm / PyPI / Maven / Container)
-  - 理由：内部向けなら不要・後付けOK
-
-**CI/CD**
-- □ GitHub Actions compatible
-  - 理由：複雑性高い・後期実装検討
-
-**その他**
-- □ Mirror repository（GitHub等との同期）
-- □ Code search（大規模リポジトリ向け）
-- □ Dependency tracking（セキュリティスキャン）
-- □ Gist（コードスニペット）
-
-### 採用しない機能
-
-- ❌ GitHub Copilot（AI）
-- ❌ Advanced security scanning（エンタープライズ向け）
-- ❌ GitHub Pages（内部向けなら不要）
-- ❌ Container registry（内部向けなら不要）
-- ❌ Federation（ActivityPub - Forgejo のみ）
-
----
-
-## 実装優先度（Phase別）
-
-### Phase 1: Git基本 + ユーザー管理
-
-```
-✅ Repository hosting (public/private)
-✅ git clone/push/pull (HTTP Smart Protocol)
-✅ SSH + HTTP Basic auth
-✅ User registration/login
-✅ User management (admin画面)
-✅ Branch / Tag 管理
-✅ Commit 履歴 / File browsing
-✅ README 表示
-✅ 操作ログ記録
-✅ Personal access tokens
-
-完成度: 75%
-```
-
-### Phase 2: PR/Issue + Wiki + Webhooks
-
-```
-✅ Pull Request + Code review
-✅ Issue tracking
-✅ Wiki
-✅ Star / Watch
-✅ Release 管理
-✅ Webhooks
-✅ REST API (basic)
-✅ Visibility 制御
-
-完成度: 85%
-```
-
-### Phase 3: Projects + Teams + REST API
-
-```
-✅ Projects (Kanban)
-✅ Organizations / Teams
-✅ Discussions
-✅ REST API (complete)
-✅ Webhooks (complete)
-
-完成度: 95%
-```
+Phase 別の実装対象、対象外、完了条件、検証範囲は `docs/plans/DEVELOPMENT_PLAN.md` を正とする。候補リストと本書またはマスター開発計画に差異がある場合は、本書とマスター開発計画を正とし、候補リストを整理する。
 
 ---
 
