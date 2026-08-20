@@ -22,12 +22,15 @@
 
 本書は3類マスター仕様書であり、1類ルールブックである `AGENTS.md` および2類ポリシーである `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` に従う。
 
+フェーズ単位の実装計画、フェーズ別バージョン、実装対象、対象外、検証範囲、完了条件は、`docs/plans/DEVELOPMENT_PLAN.md` で管理する。
+
 矛盾がある場合は、以下の順に優先する。
 
 1. `AGENTS.md`
 2. `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md`
 3. 本書
 4. 個別マスター仕様書
+5. `docs/plans/DEVELOPMENT_PLAN.md`
 
 ---
 
@@ -118,7 +121,11 @@ Phase 1 では driver 実装は SQLite のみとする。ただし、インタ�
 
 ## 6. 実装フェーズ
 
+各フェーズの基準バージョン、対象外範囲、検証範囲、完了条件は `docs/plans/DEVELOPMENT_PLAN.md` を正規の開発計画として参照する。
+
 ### 6.1 Phase 1
+
+基準バージョン: `v.1.2`
 
 - Git 基本操作
 - ユーザー登録とログイン
@@ -131,6 +138,8 @@ Phase 1 では driver 実装は SQLite のみとする。ただし、インタ�
 
 ### 6.2 Phase 2
 
+基準バージョン: `v.2.3`
+
 - Pull Request
 - Issue
 - Wiki
@@ -141,6 +150,8 @@ Phase 1 では driver 実装は SQLite のみとする。ただし、インタ�
 - WYSIWYG エディター連携
 
 ### 6.3 Phase 3
+
+基準バージョン: `v.3.4`
 
 - Projects
 - Organizations / Teams
