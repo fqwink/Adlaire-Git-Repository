@@ -91,11 +91,13 @@
 
 ### データベース採用方針
 
+採用対象のデータベースエンジンは SQLite と libSQL のみとする。
+
 Phase 1 は SQLite を標準データベースとして実装する。
 
 libSQL は、SQLite 互換を活かした将来の移行候補として保持する。ただし、Phase 1 では libSQL を実装対象に含めない。
 
-Turso Cloud 等のクラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングを採用する場合は、外部サービス依存、データ所在、認証トークン管理、バックアップ、障害時の復旧、運用費用を評価し、例外採用としてユーザー承認を得る。
+Turso Cloud 等のクラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングは新しいデータベースエンジンではなく、libSQL の接続先または運用形態の候補として扱う。採用する場合は、外部サービス依存、データ所在、認証トークン管理、バックアップ、障害時の復旧、運用費用を評価し、例外採用としてユーザー承認を得る。
 
 将来移行を容易にするため、DBアクセスは `db.ts` または専用サービス層に集約する。SQL は可能な限り SQLite 標準互換に保ち、libSQL 固有機能へ直接依存する場合はマスター仕様書に明記する。
 
@@ -134,7 +136,16 @@ SQLite driver（Phase 1）
 - migration をアプリケーション各所に分散させること
 - SQLite 固有機能を Repository 層より上位へ漏らすこと
 
-Phase 1 では `DB_DRIVER=sqlite` を前提値とする。将来 `DB_DRIVER=libsql` または `DB_DRIVER=turso` を追加する場合も、サービス層と HTTP ハンドラーの変更を最小化できる構造にする。
+Phase 1 では `DB_DRIVER=sqlite` を前提値とする。将来追加できる driver は `DB_DRIVER=libsql` のみとする。クラウドDBホスティングを採用する場合も、`DB_DRIVER=libsql` の接続先設定として扱い、`DB_DRIVER=turso` 等のホスティングサービス名を driver 名にしてはならない。
+
+移行計画を立てやすくするため、初期実装時点から以下を固定する。
+
+- `DB_DRIVER` による driver 選択
+- `DB_URL` による接続先指定
+- `DB_AUTH_TOKEN` による認証情報指定
+- SQLite 標準互換 SQL を優先するクエリ方針
+- Repository 層より上位へ driver 固有 API を漏らさない境界
+- SQLite から libSQL への移行検証手順を追加しやすいテスト構成
 
 schema、migration、seed は専用ディレクトリに集約し、Database Gateway からのみ適用する。
 
