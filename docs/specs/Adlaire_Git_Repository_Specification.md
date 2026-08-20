@@ -21,7 +21,7 @@
 **特徴**
 - GitHub 互換の機能体系、用語、主要ワークフローを目標とする
 - Git 基本操作と開発支援機能を段階的に実装する
-- 管理画面は必要最小限から開始し、GitHub 互換の利用体験へ段階的に拡張する
+- UI は GitHub 互換の対象外とし、本プロジェクト独自の利用体験として段階的に拡張する
 - 外部依存ゼロ（Deno std のみ）
 - ワンバイナリで起動
 
@@ -48,6 +48,8 @@ GitHub 互換とは、GitHub の機能概念、用語、主要ワークフロー
 - README、commit、tree、blob、diff、履歴表示
 
 GitHub 互換は、マスター仕様書とマスター開発計画で定義された範囲に限る。GitHub の全機能を無条件に実装対象へ含めるものではない。
+
+UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換の対象外とする。UI は本プロジェクト独自の設計とし、GitHub の画面、デザイン、ブランド表現、商標表現を模倣しない。
 
 GitHub Actions、GitHub Pages、Package registry、Container registry、Copilot、Advanced Security 等は、個別に採用可否、実装時期、必要性、外部依存、セキュリティ、ライセンスを評価し、ユーザー承認を得るまで実装対象に含めない。
 
@@ -753,18 +755,18 @@ VPS: 2GB × 1（容量に余裕）
 
 ### 採用デザイン
 
-**構成3: Clean Modern + GitHub Style + Dark Mode 統合版**
+**構成3: Clean Modern + 独自ナビゲーション + Dark Mode 統合版**
 
 ```
 基本構造:
   - サイドバー: Clean Modern（プロジェクト・ユーザー管理）
-  - トップナビゲーション: GitHub Style（Repositories/Issues/PR等）
+  - トップナビゲーション: 独自設計（Repositories/Issues/PR等の用語は機能互換に基づく）
   - ダークモード: オプション・ユーザー設定で切り替え
   - カラー: #00a968（Emerald Green）統一
 
 メリット:
   ✅ Clean Modern の実装シンプルさ
-  ✅ GitHub Style の習熟度向上
+  ✅ GitHub の機能用語に近い理解しやすさ
   ✅ Dark Mode の長時間利用対応
   ✅ 複雑な操作と直感的なUIの融合
   ✅ Phase 1-3 全てに対応可能

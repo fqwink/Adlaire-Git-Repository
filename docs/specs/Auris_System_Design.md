@@ -42,7 +42,9 @@ Adlaire Git Repository は、Adlaire Group 内部向けのセルフホスト型 
 
 GitHub 互換とは、Repository、Issue、Pull Request、Code Review、Wiki、Release、Webhook、REST API、Personal Access Token、Organization / Team、Projects、Discussions 等について、GitHub 利用経験を前提に理解・移行しやすい振る舞いを目指すことを指す。
 
-ただし、GitHub 互換は本書および個別3類マスター仕様書に定義された範囲に限る。GitHub の全機能、外部サービス依存、商標・ブランド表現、GitHub 固有サービスへの直接依存を無条件に採用してはならない。
+ただし、UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換の対象外とする。UI は本プロジェクト独自の設計とし、GitHub の画面、デザイン、ブランド表現、商標表現を模倣しない。
+
+GitHub 互換は本書および個別3類マスター仕様書に定義された範囲に限る。GitHub の全機能、外部サービス依存、商標・ブランド表現、GitHub 固有サービスへの直接依存を無条件に採用してはならない。
 
 主な提供範囲は以下とする。
 

@@ -129,7 +129,9 @@
 
 機能体系、用語、主要ワークフローは GitHub 互換を目標とする。GitHub 互換とは、Repository、Issue、Pull Request、Code Review、Wiki、Release、Webhook、REST API、Personal Access Token、Organization / Team、Projects、Discussions 等について、GitHub 利用経験を前提に理解・移行しやすい振る舞いを目指すことを指す。
 
-ただし、GitHub 互換はマスター仕様書に定義された範囲に限る。GitHub の全機能、外部サービス依存、商標・ブランド表現、GitHub 固有サービスへの直接依存を無条件に採用してはならない。
+ただし、UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換の対象外とする。UI は本プロジェクト独自の設計とし、GitHub の画面、デザイン、ブランド表現、商標表現を模倣しない。
+
+GitHub 互換はマスター仕様書に定義された範囲に限る。GitHub の全機能、外部サービス依存、商標・ブランド表現、GitHub 固有サービスへの直接依存を無条件に採用してはならない。
 
 - Git clone / push / pull / fetch
 - Branch / Tag / Release 管理
@@ -295,6 +297,7 @@ Phase 5、Phase 9、Phase 15、Phase 19 のような 5系・9系フェーズは�
 - 認証、権限、Git 操作、DB 更新は特に慎重に扱う。
 - ユーザー入力は必ず検証・エスケープする。
 - Web UI は外部フレームワークを使わず、HTML / CSS / Vanilla JavaScript を基本とする。
+- Web UI は GitHub 互換の対象外とし、本プロジェクト独自のUIとして設計する。
 - フレームワークが必要な場合は内製のみとし、外部ライブラリが必要な場合は例外採用としてユーザー承認を得る。
 - Git リポジトリの実データと SQLite メタデータの整合性を壊す変更を行わない。
 
