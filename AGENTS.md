@@ -1,4 +1,4 @@
-# Auris / Adlaire Git Repository - Top-Level Rulebook
+# Auris / Adlaire Git Repository - 最上位ルールブック
 
 このリポジトリで作業するすべてのエージェントは、本ファイルを最初に確認し、ここに定義された開発規約に従うこと。
 

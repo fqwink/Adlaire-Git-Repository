@@ -1,12 +1,12 @@
 # Adlaire Git Repository
 
-## Documents
+## ドキュメント
 
-- Top-level rulebook: [AGENTS.md](./AGENTS.md)
-- Policies: [docs/policies/](./docs/policies/)
-- Master specifications: [docs/specs/](./docs/specs/)
+- 最上位ルールブック: [AGENTS.md](./AGENTS.md)
+- ポリシー群: [docs/policies/](./docs/policies/)
+- マスター仕様書群: [docs/specs/](./docs/specs/)
 
-## Current Document Layout
+## 現在のドキュメント構成
 
 ```text
 /
@@ -16,8 +16,9 @@
     ├── policies/
     │   └── DEVELOPMENT_POLICY_RULEBOOK.md
     └── specs/
+        ├── Auris_System_Design.md
         ├── Adlaire_Git_Repository_Specification.md
         └── WYSIWYG_Editor_Specification.md
 ```
 
-`docs/specs/Auris_System_Design.md` is planned as the top master specification and must be created before implementation work begins.
+`docs/specs/Auris_System_Design.md` は、システム全体の最上位マスター仕様書である。ソースコード実装作業は、このマスター仕様書に基づいて行う。

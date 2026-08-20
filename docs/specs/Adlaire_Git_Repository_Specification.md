@@ -1,8 +1,8 @@
 # Adlaire Git Repository
 
-**バージョン**: 1.0  
-**ベース**: GitPrep（セルフホスト型 Git ホスティング）  
-**技術スタック**: Deno + TypeScript + SQLite + Git  
+**バージョン**: v.0.1
+**ベース**: GitPrep（セルフホスト型 Git ホスティング）
+**技術スタック**: Deno + TypeScript + SQLite + Git
 
 ---
 
@@ -84,7 +84,7 @@
 | **認証** | SSH / HTTP Basic |
 | **UI** | HTML + Vanilla JavaScript（内製） |
 
-**原則**: 
+**原則**:
 - Deno std のみ
 - フレームワーク採用禁止（内製化のみ）
 - 必要最小限の外部ライブラリ
@@ -113,12 +113,14 @@
 
 ## deno.json
 
+正式バージョン表記は `v.0.1` とする。`deno.json` に互換性上 `0.1.0` 形式を記載する場合は、正式表記 `v.0.1` に対応する内部表記として扱う。
+
 ```json
 {
   "name": "adlaire-git-repository",
   "version": "0.1.0",
-  "license": "Apache-2.0",
-  
+  "license": "CLOSED",
+
   "imports": {
     "std/": "jsr:@std/",
     "std/http": "jsr:@std/http",
@@ -146,7 +148,7 @@
 
 ---
 
-## Project Structure
+## プロジェクト構成
 
 ```
 adlaire-git-repository/
@@ -154,16 +156,16 @@ adlaire-git-repository/
 ├── deno.lock
 ├── tsconfig.json
 ├── src/
-│   ├── main.ts              (Entry point)
-│   ├── server.ts            (HTTP server)
-│   ├── types.ts             (Type definitions)
-│   ├── db.ts                (SQLite ops)
-│   ├── git.ts               (Git operations)
-│   ├── auth.ts              (Authentication)
+│   ├── main.ts              (エントリーポイント)
+│   ├── server.ts            (HTTP サーバー)
+│   ├── types.ts             (型定義)
+│   ├── db.ts                (SQLite 操作)
+│   ├── git.ts               (Git 操作)
+│   ├── auth.ts              (認証)
 │   ├── handlers/
-│   │   ├── git.ts           (Git HTTP handler)
-│   │   ├── api.ts           (API handler)
-│   │   └── ui.ts            (Web UI handler)
+│   │   ├── git.ts           (Git HTTP ハンドラー)
+│   │   ├── api.ts           (API ハンドラー)
+│   │   └── ui.ts            (Web UI ハンドラー)
 │   ├── services/
 │   │   ├── repo.ts
 │   │   ├── user.ts
@@ -447,17 +449,17 @@ $ curl http://localhost:8080/health
 for INSTANCE in server1 server2 server3; do
   # 1. ロードバランサーから切離し
   nginx_remove_upstream $INSTANCE
-  
+
   # 2. アップグレード実行（Phase 1-2と同じ手順）
   ssh $INSTANCE
     systemctl stop adlaire-git-repo
     cp ./adlaire-git-repo /opt/adlaire-git-repo/
     systemctl start adlaire-git-repo
     curl http://localhost:8080/health
-  
+
   # 3. ロードバランサーに復帰
   nginx_add_upstream $INSTANCE
-  
+
   # 4. 次のインスタンスへ（5分待機）
   sleep 300
 done
@@ -497,10 +499,10 @@ $ curl http://localhost:8080/health
 **ログ保管**
 ```
 場所: /var/log/adlaire-git-repo/
-内容: 
+内容:
   - HTTP アクセスログ
-  - Git operations ログ
-  - Error ログ
+  - Git 操作ログ
+  - エラーログ
 ```
 
 **ログローテーション**
@@ -855,7 +857,7 @@ Hover:              #1c2128
 ### Typography
 
 ```
-Font Family: 
+Font Family:
   -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif
 
 Font Sizes:
@@ -1056,8 +1058,8 @@ Optimization:
 
 ## OSS Git ホスティング機能リスト（優先度付け）
 
-**調査対象**: Gitea / Forgejo / GitPrep  
-**目的**: 実装優先度の決定  
+**調査対象**: Gitea / Forgejo / GitPrep
+**目的**: 実装優先度の決定
 
 ### 超高優先度（必須・Phase 1）
 
@@ -1327,18 +1329,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
           deno-version: vx.x.x
-      
+
       - name: Run tests
         run: deno task test
-      
+
       - name: Lint
         run: deno lint src/
-      
+
       - name: Format check
         run: deno fmt --check src/
 
@@ -1347,15 +1349,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
           deno-version: vx.x.x
-      
+
       - name: Compile binary
         run: deno task compile
-      
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
@@ -1367,12 +1369,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
           name: adlaire-git-repo
-      
+
       - name: Deploy to VPS
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
@@ -1383,34 +1385,34 @@ jobs:
           echo "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts
-          
+
           # VPS へ転送
           scp -i ~/.ssh/id_ed25519 \
             ./adlaire-git-repo \
             $VPS_USER@$VPS_HOST:/tmp/adlaire-git-repo.new
-          
+
           # VPS 側でデプロイ実行
           ssh -i ~/.ssh/id_ed25519 $VPS_USER@$VPS_HOST << 'EOF'
           set -e
-          
+
           # バックアップ実行
           /opt/adlaire-git-repo/backup.sh
-          
+
           # サービス停止
           systemctl stop adlaire-git-repo
-          
+
           # バイナリ置き換え
           mv /tmp/adlaire-git-repo.new /opt/adlaire-git-repo/adlaire-git-repo
           chmod +x /opt/adlaire-git-repo/adlaire-git-repo
-          
+
           # サービス起動
           systemctl start adlaire-git-repo
-          
+
           # ヘルスチェック
           sleep 2
           curl -f http://localhost:8080/health || exit 1
           EOF
-      
+
       - name: Notify on success
         if: success()
         uses: 8398a7/action-slack@v3
@@ -1418,7 +1420,7 @@ jobs:
           status: ${{ job.status }}
           text: '✅ デプロイ成功'
           webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-      
+
       - name: Notify on failure
         if: failure()
         uses: 8398a7/action-slack@v3
@@ -1549,12 +1551,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    
+
     container_name: adlaire-git-repo
-    
+
     ports:
       - "8080:8080"
-    
+
     volumes:
       # SQLite データベース永続化
       - git-db:/app/db
@@ -1562,17 +1564,17 @@ services:
       - git-repos:/app/repos
       # ログ永続化
       - git-logs:/app/logs
-    
+
     environment:
       # 必要に応じて環境変数設定
       - LOG_LEVEL=info
       - DB_PATH=/app/db/gitrepo.db
-    
+
     restart: unless-stopped
-    
+
     networks:
       - adlaire-network
-    
+
     # リソース制限（Xserver VPS 2GB 想定）
     deploy:
       resources:
@@ -1586,22 +1588,22 @@ services:
   # Nginx リバースプロキシ（オプション）
   nginx:
     image: nginx:alpine
-    
+
     container_name: adlaire-nginx
-    
+
     ports:
       - "80:80"
       - "443:443"
-    
+
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./certs:/etc/nginx/certs:ro
-    
+
     depends_on:
       - adlaire-git-repo
-    
+
     restart: unless-stopped
-    
+
     networks:
       - adlaire-network
 
@@ -1676,24 +1678,24 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
           deno-version: vx.x.x
-      
+
       - name: Run tests
         run: deno task test
-      
+
       - name: Build Docker image
         run: docker build -t adlaire-git-repo:${{ github.sha }} .
-      
+
       - name: Tag latest
         run: docker tag adlaire-git-repo:${{ github.sha }} adlaire-git-repo:latest
-      
+
       - name: Deploy to VPS
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
@@ -1704,25 +1706,25 @@ jobs:
           echo "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts
-          
+
           # Docker イメージを tar で VPS へ転送
           docker save adlaire-git-repo:latest | gzip > image.tar.gz
           scp -i ~/.ssh/id_ed25519 image.tar.gz $VPS_USER@$VPS_HOST:/tmp/
-          
+
           # VPS でロードと再起動
           ssh -i ~/.ssh/id_ed25519 $VPS_USER@$VPS_HOST << 'EOF'
           set -e
-          
+
           # イメージをロード
           docker load < /tmp/image.tar.gz
-          
+
           # バックアップ実行
           docker-compose exec -T adlaire-git-repo /opt/backup.sh || true
-          
+
           # コンテナ再起動
           docker-compose down
           docker-compose up -d
-          
+
           # ヘルスチェック
           sleep 3
           curl -f http://localhost:8080/health || exit 1
@@ -1750,7 +1752,7 @@ docker-compose で管理開始
 【Option A】Single binary × 複数 VPS
   各 VPS で deno compile バイナリ実行
   NAS で共有ストレージ
-  
+
 【Option B】Docker × 複数コンテナ
   各 VPS で docker-compose 実行
   ボリュームで NAS マウント
@@ -1805,7 +1807,7 @@ docker-compose で管理開始
 - [ ] Security audit
 - [ ] Performance test
 - [ ] Binary compile
-- [ ] Release documentation
+- [ ] リリースドキュメント
 
 ---
 
