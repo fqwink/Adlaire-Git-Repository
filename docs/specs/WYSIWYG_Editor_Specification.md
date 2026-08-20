@@ -38,6 +38,7 @@
 - 保存形式は JSON とする。
 - 表示時は JSON から HTML へ変換する。
 - TypeScript で実装する。
+- TypeScript は 6系を採用方針とする。
 - Deno ランタイムのみで検証・実行する。
 - XSS 対策、URL 検証、JSON 検証を必須とする。
 - README や Wiki の表示機能と安全に連携する。
