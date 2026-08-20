@@ -19,11 +19,17 @@
     │   ├── DEVELOPMENT_PLAN.md
     │   └── MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md
     ├── policies/
-    │   └── DEVELOPMENT_POLICY_RULEBOOK.md
+    │   ├── DEVELOPMENT_POLICY_RULEBOOK.md
+    │   ├── DEVELOPMENT_PLANNING_POLICY.md
+    │   ├── TECHNICAL_REQUIREMENTS_POLICY.md
+    │   ├── VERSION_POLICY.md
+    │   ├── RELEASE_POLICY.md
+    │   ├── TEST_POLICY.md
+    │   └── LICENSE_POLICY.md
     └── specs/
         ├── Auris_System_Design.md
         ├── Adlaire_Git_Repository_Specification.md
         └── WYSIWYG_Editor_Specification.md
 ```
 
-`AGENTS.md` は本リポジトリの最上位ルールブックである。`docs/specs/Auris_System_Design.md` は、3類マスター仕様書群におけるシステム全体の最上位マスター仕様書である。`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` は候補整理の正本であり、実装承認ではない。ソースコード実装作業は、1類ルールブック、2類ポリシー、このマスター仕様書、`docs/plans/DEVELOPMENT_PLAN.md` の承認済みフェーズ計画に基づいて行う。
+`AGENTS.md` は本リポジトリの最上位ルールブックである。`docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` は2類ポリシー群の総則であり、責務別ポリシーは `docs/policies/` 配下で管理する。`docs/specs/Auris_System_Design.md` は、3類マスター仕様書群におけるシステム全体の最上位マスター仕様書である。`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` は候補整理の正本であり、実装承認ではない。ソースコード実装作業は、1類ルールブック、2類ポリシー群、3類マスター仕様書、`docs/plans/DEVELOPMENT_PLAN.md` の承認済みフェーズ計画に基づいて行う。

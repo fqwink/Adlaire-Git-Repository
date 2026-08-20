@@ -20,7 +20,9 @@
 
 ## 2. 上位ドキュメントとの関係
 
-本書は3類マスター仕様書であり、1類ルールブックである `AGENTS.md` および2類ポリシーである `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` に従う。
+本書は3類マスター仕様書であり、1類ルールブックである `AGENTS.md` および2類ポリシー群に従う。
+
+2類ポリシー群の総則は `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` とし、技術要件、バージョン、リリース、テスト、ライセンス、開発計画の詳細方針は `docs/policies/` 配下の責務別ポリシーに従う。
 
 フェーズ単位の実装計画、フェーズ別バージョン、実装対象、対象外、検証範囲、完了条件は、マスター開発計画である `docs/plans/DEVELOPMENT_PLAN.md` で管理する。
 
@@ -31,7 +33,7 @@
 矛盾がある場合は、以下の順に優先する。
 
 1. `AGENTS.md`
-2. `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md`
+2. 2類ポリシー群
 3. 本書
 4. 個別マスター仕様書
 5. `docs/plans/DEVELOPMENT_PLAN.md`

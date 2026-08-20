@@ -97,7 +97,7 @@
 
 ### 1.6 実装着手条件
 
-`AGENTS.md`、`docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md`、`docs/specs/Auris_System_Design.md`、`docs/plans/DEVELOPMENT_PLAN.md` が整備されていない場合、エージェントは実装作業に着手してはならない。
+`AGENTS.md`、2類ポリシー群、`docs/specs/Auris_System_Design.md`、`docs/plans/DEVELOPMENT_PLAN.md` が整備されていない場合、エージェントは実装作業に着手してはならない。
 
 この場合に許可される作業は以下に限る。
 
@@ -220,7 +220,7 @@ Node.js ランタイムは、セキュリティ上のリスクによるプロジ
 2. `docs/specs/Auris_System_Design.md` を更新する
 3. 必要に応じて3類マスター仕様書を更新する
 4. `docs/plans/DEVELOPMENT_PLAN.md` の対象フェーズ、対象バージョン、実装対象、対象外、検証範囲を確認または更新する
-5. `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` の規約に照らして作業種別を判定する
+5. 2類ポリシー群のうち、作業責務に対応する責務別ポリシーに照らして作業種別を判定する
 6. ソースコード実装作業についてユーザー承認を得る
 7. 3類マスター仕様書と承認済みフェーズ計画に基づいて実装する
 8. テスト・検証結果を記録する
@@ -256,7 +256,7 @@ Node.js ランタイムは、セキュリティ上のリスクによるプロジ
 
 ### 4.1 バージョン表記
 
-バージョン表記は `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` に定義する `v.{Major}.{Minor}` 形式に従う。
+バージョン表記は `docs/policies/VERSION_POLICY.md` に定義する `v.{Major}.{Minor}` 形式に従う。
 
 フェーズ番号は累積方式とし、安定版リリース後もリセットしてはならない。
 
@@ -370,7 +370,7 @@ Phase 5、Phase 9、Phase 15、Phase 19 のような 5系・9系フェーズは�
 
 テスト構成は、土台に大量の高速なユニットテスト、中間に統合テスト、頂点に少数のエンドツーエンドテストを置くピラミッド構成を原則とする。
 
-詳細なテストポリシーは `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` に従う。
+詳細なテストポリシーは `docs/policies/TEST_POLICY.md` に従う。
 
 ### 6.2 必須検証領域
 
@@ -488,7 +488,7 @@ codex/fix-auth-permission-check
 このリポジトリが理想構成に到達するまで、以下を優先する。
 
 1. `docs/` ディレクトリを作成する
-2. `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` を2類ポリシーとして作成する
+2. `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` と責務別ポリシー群を2類ポリシーとして作成する
 3. `docs/specs/Auris_System_Design.md` を3類マスター仕様書として作成する
 4. `docs/plans/DEVELOPMENT_PLAN.md` をマスター開発計画として作成する
 5. 既存仕様書を3類マスター仕様書として `docs/specs/` 配下へ移行・統合する
