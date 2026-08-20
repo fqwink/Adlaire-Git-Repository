@@ -151,7 +151,8 @@ Phase 1 では driver 実装は SQLite のみとする。ただし、インタ�
 - Star / Watch
 - Release 管理
 - REST API 基本機能
-- WYSIWYG エディター連携
+
+WYSIWYG エディターの実装時期、採用Phase、連携範囲は未定とする。採用する場合は、3類マスター仕様書、マスター開発計画、検証範囲を改訂し、ユーザー承認を得てから実装対象へ含める。
 
 ### 6.3 Phase 3
 
