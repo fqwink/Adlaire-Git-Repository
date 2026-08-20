@@ -23,13 +23,13 @@
 
 ## 2. 上位ルールとの整合
 
-本エディターは、`AGENTS.md` および `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` に従う。
+本エディターは、`AGENTS.md` および2類ドキュメント群に従う。
 
 - Node.js ランタイムは採用しない。
 - npm パッケージ公開を前提にしない。
 - webpack、jest 等の Node.js 前提ツールへ依存しない。
 - 外部フレームワークは採用しない。
-- 外部ライブラリが必要な場合は、例外採用としてユーザー承認を得る。
+- 外部ライブラリが必要な場合は、`docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` に従い、例外採用としてユーザー承認を得る。
 - 保存形式、表示形式、セキュリティ要件は3類マスター仕様書に明記する。
 - 実装時期、採用Phase、連携範囲はマスター開発計画で明記し、ユーザー承認を得るまで未定とする。
 
@@ -41,7 +41,7 @@
 - 保存形式は JSON とする。
 - 表示時は JSON から HTML へ変換する。
 - TypeScript で実装する。
-- TypeScript は 6系を採用方針とする。
+- TypeScript は 6系の最新安定版を採用方針とする。
 - Deno ランタイムのみで検証・実行する。
 - XSS 対策、URL 検証、JSON 検証を必須とする。
 - README や Wiki の表示機能と安全に連携する。
