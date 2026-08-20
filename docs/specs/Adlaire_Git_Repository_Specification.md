@@ -88,6 +88,74 @@
 - Deno std のみ
 - フレームワーク採用禁止（内製化のみ）
 - 必要最小限の外部ライブラリ
+- 外部ライブラリは内製ラッパー、内製driver、または Database Gateway の内部に閉じ込める
+
+### データベース採用方針
+
+採用対象のデータベースエンジン系統は SQLite 互換DBに限定する。
+
+Phase 1 は SQLite を標準データベースとして実装する。
+
+libSQL は、SQLite 互換を活かした将来の移行候補として保持する。libSQL は外部ライブラリまたは外部基盤の例外採用に該当するが、SQLite からの移行容易性、DB抽象化設計との相性、将来の同期・分散構成への拡張余地という採用メリットが高いため、やむを得ない例外採用候補として扱う。
+
+ただし、Phase 1 では libSQL を実装対象に含めない。libSQL driver の実装は、Phase 計画、移行計画、検証計画、ユーザー承認を揃えてから行う。libSQL を採用する場合も、外部ライブラリAPIは内製 `libsql` driver と Database Gateway の内部に閉じ込め、サービス層やRepository層へ直接露出させない。
+
+SQLite 互換DBの内製化検討理由は、libSQL の採用検討理由と同じである。機能面も libSQL と同等の SQLite 互換DBとして扱い、SQLite 互換、移行容易性、DB抽象化設計との相性、将来の同期・分散構成への拡張余地を評価するため、内製SQLite互換DBを長期研究候補として保持する。
+
+ただし、内製SQLite互換DBは Phase 1 の実装対象に含めない。内製化を進める場合は、SQL互換性、ファイル形式、ACID、WAL、ロック制御、クラッシュ復旧、バックアップ、migration、検証コストを別途定義し、ユーザー承認を得る。
+
+Turso Cloud 等のクラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングは新しいデータベースエンジンではなく、libSQL の接続先または運用形態の候補として扱う。採用する場合は、外部サービス依存、データ所在、認証トークン管理、バックアップ、障害時の復旧、運用費用を評価し、例外採用としてユーザー承認を得る。
+
+将来移行を容易にするため、DBアクセスは `db.ts` または専用サービス層に集約する。SQL は可能な限り SQLite 標準互換に保ち、libSQL 固有機能へ直接依存する場合はマスター仕様書に明記する。
+
+### データベースアクセス層仕様
+
+直接 SQLite を触る設計は、libSQL への移行計画の弊害になるため禁止する。
+
+アプリケーションコードは、以下の層を経由してデータベースへアクセスする。
+
+```text
+HTTP ハンドラー / Web UI / Git 操作 / 認証処理
+    ↓
+サービス層
+    ↓
+Repository 層
+    ↓
+Database Gateway
+    ↓
+SQLite driver（Phase 1）
+```
+
+各層の責務は以下とする。
+
+| 層 | 責務 |
+|---|---|
+| サービス層 | ユースケース、権限確認、トランザクション要求 |
+| Repository 層 | エンティティ単位の保存・取得・検索 |
+| Database Gateway | 接続、SQL 実行、トランザクション、driver 差し替え境界 |
+| SQLite driver | Phase 1 の実DBアクセス実装 |
+
+禁止事項:
+
+- HTTP ハンドラーから SQLite 接続を直接生成すること
+- サービス層から生 SQL を直接実行すること
+- Git 操作処理から DB ファイルを直接読み書きすること
+- migration をアプリケーション各所に分散させること
+- SQLite 固有機能を Repository 層より上位へ漏らすこと
+
+Phase 1 では `DB_DRIVER=sqlite` を前提値とする。将来追加できる driver は `DB_DRIVER=libsql` または `DB_DRIVER=internal-sqlite-compatible` に限定する。クラウドDBホスティングを採用する場合も、`DB_DRIVER=libsql` の接続先設定として扱い、`DB_DRIVER=turso` 等のホスティングサービス名を driver 名にしてはならない。
+
+移行計画を立てやすくするため、初期実装時点から以下を固定する。
+
+- `DB_DRIVER` による driver 選択
+- `DB_URL` による接続先指定
+- `DB_AUTH_TOKEN` による認証情報指定
+- SQLite 標準互換 SQL を優先するクエリ方針
+- Repository 層より上位へ driver 固有 API を漏らさない境界
+- 外部ライブラリAPIを Database Gateway より上位へ漏らさない境界
+- SQLite から libSQL への移行検証手順を追加しやすいテスト構成
+
+schema、migration、seed は専用ディレクトリに集約し、Database Gateway からのみ適用する。
 
 ---
 
@@ -1819,6 +1887,6 @@ docker-compose で管理開始
 ✅ ソースコード管理に特化
 ✅ シンプル・軽量（GitPrep ベース）
 ✅ ワンバイナリ起動
-✅ 外部依存なし（Deno std のみ）
+✅ 外部ライブラリは内製境界に閉じ込める
 ✅ フレームワーク採用禁止（内製化）
 ```
