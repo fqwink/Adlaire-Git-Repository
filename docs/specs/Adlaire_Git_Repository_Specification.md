@@ -88,6 +88,7 @@
 - Deno std のみ
 - フレームワーク採用禁止（内製化のみ）
 - 必要最小限の外部ライブラリ
+- 外部ライブラリは内製ラッパー、内製driver、または Database Gateway の内部に閉じ込める
 
 ### データベース採用方針
 
@@ -97,7 +98,7 @@ Phase 1 は SQLite を標準データベースとして実装する。
 
 libSQL は、SQLite 互換を活かした将来の移行候補として保持する。libSQL は外部ライブラリまたは外部基盤の例外採用に該当するが、SQLite からの移行容易性、DB抽象化設計との相性、将来の同期・分散構成への拡張余地という採用メリットが高いため、やむを得ない例外採用候補として扱う。
 
-ただし、Phase 1 では libSQL を実装対象に含めない。libSQL driver の実装は、Phase 計画、移行計画、検証計画、ユーザー承認を揃えてから行う。
+ただし、Phase 1 では libSQL を実装対象に含めない。libSQL driver の実装は、Phase 計画、移行計画、検証計画、ユーザー承認を揃えてから行う。libSQL を採用する場合も、外部ライブラリAPIは内製 `libsql` driver と Database Gateway の内部に閉じ込め、サービス層やRepository層へ直接露出させない。
 
 SQLite 互換DBの内製化検討理由は、libSQL の採用検討理由と同じである。機能面も libSQL と同等の SQLite 互換DBとして扱い、SQLite 互換、移行容易性、DB抽象化設計との相性、将来の同期・分散構成への拡張余地を評価するため、内製SQLite互換DBを長期研究候補として保持する。
 
@@ -151,6 +152,7 @@ Phase 1 では `DB_DRIVER=sqlite` を前提値とする。将来追加できる 
 - `DB_AUTH_TOKEN` による認証情報指定
 - SQLite 標準互換 SQL を優先するクエリ方針
 - Repository 層より上位へ driver 固有 API を漏らさない境界
+- 外部ライブラリAPIを Database Gateway より上位へ漏らさない境界
 - SQLite から libSQL への移行検証手順を追加しやすいテスト構成
 
 schema、migration、seed は専用ディレクトリに集約し、Database Gateway からのみ適用する。
@@ -1885,6 +1887,6 @@ docker-compose で管理開始
 ✅ ソースコード管理に特化
 ✅ シンプル・軽量（GitPrep ベース）
 ✅ ワンバイナリ起動
-✅ 外部依存なし（Deno std のみ）
+✅ 外部ライブラリは内製境界に閉じ込める
 ✅ フレームワーク採用禁止（内製化）
 ```
