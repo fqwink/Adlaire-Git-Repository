@@ -127,6 +127,10 @@
 
 本プロジェクトは、以下を提供するセルフホスト型 Git ホスティング基盤である。
 
+機能体系、用語、主要ワークフローは GitHub 互換を目標とする。GitHub 互換とは、Repository、Issue、Pull Request、Code Review、Wiki、Release、Webhook、REST API、Personal Access Token、Organization / Team、Projects、Discussions 等について、GitHub 利用経験を前提に理解・移行しやすい振る舞いを目指すことを指す。
+
+ただし、GitHub 互換はマスター仕様書に定義された範囲に限る。GitHub の全機能、外部サービス依存、商標・ブランド表現、GitHub 固有サービスへの直接依存を無条件に採用してはならない。
+
 - Git clone / push / pull / fetch
 - Branch / Tag / Release 管理
 - ユーザー登録、ログイン、認証、権限管理

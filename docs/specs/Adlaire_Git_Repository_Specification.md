@@ -19,8 +19,9 @@
 - 内部ツール / ライブラリ管理
 
 **特徴**
-- Git 基本操作に特化
-- 管理画面は必要最小限
+- GitHub 互換の機能体系、用語、主要ワークフローを目標とする
+- Git 基本操作と開発支援機能を段階的に実装する
+- 管理画面は必要最小限から開始し、GitHub 互換の利用体験へ段階的に拡張する
 - 外部依存ゼロ（Deno std のみ）
 - ワンバイナリで起動
 
@@ -28,6 +29,29 @@
 - 開発者（ソースコード push / pull）
 - プロジェクトオーナー（リポジトリ管理）
 - IT 管理者（ユーザー・アクセス管理）
+
+---
+
+## GitHub 互換方針
+
+本プロジェクトの機能は、GitHub 互換を目標とする。
+
+GitHub 互換とは、GitHub の機能概念、用語、主要ワークフロー、権限確認、API の考え方に近い振る舞いを持ち、GitHub 利用経験のある利用者が理解・移行しやすいことを指す。
+
+互換対象の中心は以下とする。
+
+- Repository、Branch、Tag、Release
+- Issue、Pull Request、Code Review
+- Wiki、Projects、Discussions
+- Organization、Team、User、権限管理
+- Webhook、REST API、Personal Access Token、SSH key
+- README、commit、tree、blob、diff、履歴表示
+
+GitHub 互換は、マスター仕様書とマスター開発計画で定義された範囲に限る。GitHub の全機能を無条件に実装対象へ含めるものではない。
+
+GitHub Actions、GitHub Pages、Package registry、Container registry、Copilot、Advanced Security 等は、個別に採用可否、実装時期、必要性、外部依存、セキュリティ、ライセンスを評価し、ユーザー承認を得るまで実装対象に含めない。
+
+GitHub 互換を目標とする場合でも、GitHub 固有サービスへの直接依存、GitHub の商標・ブランド表現の無承認利用、GitHub API の完全再現を前提にした無承認実装は行わない。
 
 ---
 
