@@ -1,6 +1,21 @@
-import { createToken, hashPassword, hashToken, verifyPassword } from "../domain/auth.ts";
-import { type PublicSshKey, toPublicSshKey, validateSshPublicKey } from "../domain/ssh_key.ts";
-import { type Principal, type PublicUser, toPrincipal, toPublicUser, validateUsername } from "../domain/user.ts";
+import {
+  createToken,
+  hashPassword,
+  hashToken,
+  verifyPassword,
+} from "../domain/auth.ts";
+import {
+  type PublicSshKey,
+  toPublicSshKey,
+  validateSshPublicKey,
+} from "../domain/ssh_key.ts";
+import {
+  type Principal,
+  type PublicUser,
+  toPrincipal,
+  toPublicUser,
+  validateUsername,
+} from "../domain/user.ts";
 import type { AuditSink } from "./audit_service.ts";
 
 export interface UserStore {
@@ -17,20 +32,24 @@ export interface UserStore {
     readonly role: "admin" | "developer";
     readonly createdAt: string;
   }>;
-  findByUsername(username: string): Promise<{
-    readonly id: string;
-    readonly username: string;
-    readonly passwordHash: string;
-    readonly role: "admin" | "developer";
-    readonly createdAt: string;
-  } | null>;
-  findById(id: string): Promise<{
-    readonly id: string;
-    readonly username: string;
-    readonly passwordHash: string;
-    readonly role: "admin" | "developer";
-    readonly createdAt: string;
-  } | null>;
+  findByUsername(username: string): Promise<
+    {
+      readonly id: string;
+      readonly username: string;
+      readonly passwordHash: string;
+      readonly role: "admin" | "developer";
+      readonly createdAt: string;
+    } | null
+  >;
+  findById(id: string): Promise<
+    {
+      readonly id: string;
+      readonly username: string;
+      readonly passwordHash: string;
+      readonly role: "admin" | "developer";
+      readonly createdAt: string;
+    } | null
+  >;
   createApiToken(input: {
     readonly id: string;
     readonly userId: string;
@@ -66,7 +85,7 @@ export interface UserStore {
 export class AuthService {
   constructor(
     private readonly users: UserStore,
-    private readonly audit: AuditSink
+    private readonly audit: AuditSink,
   ) {}
 
   async register(input: {
@@ -81,20 +100,23 @@ export class AuthService {
       username,
       passwordHash: await hashPassword(input.password),
       role: input.role ?? "developer",
-      createdAt: now
+      createdAt: now,
     });
 
     await this.audit.record({
       actor: username,
       action: "user.register",
       targetType: "user",
-      targetId: user.id
+      targetId: user.id,
     });
 
     return toPublicUser(user);
   }
 
-  async authenticateBasic(username: string, password: string): Promise<Principal | null> {
+  async authenticateBasic(
+    username: string,
+    password: string,
+  ): Promise<Principal | null> {
     const user = await this.users.findByUsername(validateUsername(username));
     if (user === null || !(await verifyPassword(password, user.passwordHash))) {
       return null;
@@ -118,7 +140,10 @@ export class AuthService {
     readonly password: string;
     readonly label: string;
   }): Promise<{ readonly token: string }> {
-    const principal = await this.authenticateBasic(input.username, input.password);
+    const principal = await this.authenticateBasic(
+      input.username,
+      input.password,
+    );
     if (principal === null) {
       throw new Response("invalid credentials.", { status: 401 });
     }
@@ -134,14 +159,14 @@ export class AuthService {
       userId: principal.id,
       label,
       tokenHash: await hashToken(token),
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     });
 
     await this.audit.record({
       actor: principal.username,
       action: "token.create",
       targetType: "user",
-      targetId: principal.id
+      targetId: principal.id,
     });
 
     return { token };
@@ -162,14 +187,14 @@ export class AuthService {
       userId: input.principal.id,
       label,
       publicKey: validateSshPublicKey(input.publicKey),
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     });
 
     await this.audit.record({
       actor: input.principal.username,
       action: "ssh_key.add",
       targetType: "user",
-      targetId: input.principal.id
+      targetId: input.principal.id,
     });
 
     return toPublicSshKey(key);
@@ -185,7 +210,7 @@ export class AuthService {
       actor: principal.username,
       action: "ssh_key.delete",
       targetType: "user",
-      targetId: principal.id
+      targetId: principal.id,
     });
   }
 }

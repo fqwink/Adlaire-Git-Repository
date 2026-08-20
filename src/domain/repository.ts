@@ -21,11 +21,16 @@ export interface RepositoryDetail extends RepositoryRecord {
 
 const NAME_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,62}$/;
 
-export function validateRepositoryName(value: string, field: "owner" | "name"): string {
+export function validateRepositoryName(
+  value: string,
+  field: "owner" | "name",
+): string {
   const name = value.trim();
 
   if (!NAME_PATTERN.test(name)) {
-    throw new Error(`${field} must start with an alphanumeric character and contain only alphanumeric characters, dots, underscores, or hyphens.`);
+    throw new Error(
+      `${field} must start with an alphanumeric character and contain only alphanumeric characters, dots, underscores, or hyphens.`,
+    );
   }
 
   if (name.includes("..") || name.includes("/") || name.includes("\\")) {

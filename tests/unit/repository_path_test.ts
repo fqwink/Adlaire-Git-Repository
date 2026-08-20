@@ -1,4 +1,7 @@
-import { validateGitRef, validateRepositoryPath } from "../../src/domain/repository_path.ts";
+import {
+  validateGitRef,
+  validateRepositoryPath,
+} from "../../src/domain/repository_path.ts";
 import { assertEquals, assertRejects } from "../support/assert.ts";
 
 Deno.test("repository paths allow nested file paths used by code browsing", () => {

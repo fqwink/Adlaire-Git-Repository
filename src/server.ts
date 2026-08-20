@@ -3,7 +3,12 @@ import { DatabaseGateway } from "./database/gateway.ts";
 import { SqliteCliDriver } from "./database/sqlite_cli_driver.ts";
 import { GitHttpBackend, isGitWriteRequest } from "./git/http_backend.ts";
 import { GitService } from "./git/git_service.ts";
-import { jsonResponse, notFound, readJson, textResponse } from "./http/responses.ts";
+import {
+  jsonResponse,
+  notFound,
+  readJson,
+  textResponse,
+} from "./http/responses.ts";
 import { AuditLogRepository } from "./repositories/audit_log_repository.ts";
 import { RepositoryRepository } from "./repositories/repository_repository.ts";
 import { UserRepository } from "./repositories/user_repository.ts";
@@ -20,21 +25,27 @@ export async function createApp(config: AppConfig): Promise<App> {
   await Deno.mkdir(config.dataDir, { recursive: true });
   await Deno.mkdir(config.repositoryRoot, { recursive: true });
 
-  const database = new DatabaseGateway(new SqliteCliDriver(config.database.url));
+  const database = new DatabaseGateway(
+    new SqliteCliDriver(config.database.url),
+  );
   await database.initialize();
 
   const auditService = new AuditService(new AuditLogRepository(database));
-  const authService = new AuthService(new UserRepository(database), auditService);
+  const authService = new AuthService(
+    new UserRepository(database),
+    auditService,
+  );
   const repositoryRepository = new RepositoryRepository(database);
   const gitHttp = new GitHttpBackend(config.repositoryRoot);
   const repositoryService = new RepositoryService(
     repositoryRepository,
     new GitService(config.repositoryRoot),
-    auditService
+    auditService,
   );
 
   return {
-    fetch: (request: Request) => handle(request, authService, repositoryService, gitHttp)
+    fetch: (request: Request) =>
+      handle(request, authService, repositoryService, gitHttp),
   };
 }
 
@@ -42,7 +53,7 @@ async function handle(
   request: Request,
   auth: AuthService,
   repositories: RepositoryService,
-  gitHttp: GitHttpBackend
+  gitHttp: GitHttpBackend,
 ): Promise<Response> {
   try {
     return await route(request, auth, repositories, gitHttp);
@@ -59,7 +70,7 @@ async function route(
   request: Request,
   auth: AuthService,
   repositories: RepositoryService,
-  gitHttp: GitHttpBackend
+  gitHttp: GitHttpBackend,
 ): Promise<Response> {
   const url = new URL(request.url);
   const actor = await authenticateRequest(request, auth);
@@ -75,9 +86,17 @@ async function route(
   const gitRoute = matchGitRoute(url.pathname);
   if (gitRoute !== null) {
     if (isGitWriteRequest(request, gitRoute.gitPath)) {
-      await repositories.requireWritableRepository(gitRoute.owner, gitRoute.name, requireAuthenticated(actor));
+      await repositories.requireWritableRepository(
+        gitRoute.owner,
+        gitRoute.name,
+        requireAuthenticated(actor),
+      );
     } else {
-      await repositories.requireVisibleRepository(gitRoute.owner, gitRoute.name, actor);
+      await repositories.requireVisibleRepository(
+        gitRoute.owner,
+        gitRoute.name,
+        actor,
+      );
     }
 
     return await gitHttp.handle({
@@ -85,7 +104,7 @@ async function route(
       owner: gitRoute.owner,
       name: gitRoute.name,
       gitPath: gitRoute.gitPath,
-      actor
+      actor,
     });
   }
 
@@ -94,7 +113,7 @@ async function route(
     const user = await auth.register({
       username: readRequiredString(body, "username"),
       password: readRequiredString(body, "password"),
-      role: readRole(body["role"])
+      role: readRole(body["role"]),
     });
     return jsonResponse({ user }, 201);
   }
@@ -104,13 +123,15 @@ async function route(
     const token = await auth.createApiToken({
       username: readRequiredString(body, "username"),
       password: readRequiredString(body, "password"),
-      label: readRequiredString(body, "label")
+      label: readRequiredString(body, "label"),
     });
     return jsonResponse(token, 201);
   }
 
   if (request.method === "GET" && url.pathname === "/api/ssh-keys") {
-    return jsonResponse({ sshKeys: await auth.listSshKeys(requireAuthenticated(actor)) });
+    return jsonResponse({
+      sshKeys: await auth.listSshKeys(requireAuthenticated(actor)),
+    });
   }
 
   if (request.method === "POST" && url.pathname === "/api/ssh-keys") {
@@ -118,7 +139,7 @@ async function route(
     const sshKey = await auth.addSshKey({
       principal: requireAuthenticated(actor),
       label: readRequiredString(body, "label"),
-      publicKey: readRequiredString(body, "publicKey")
+      publicKey: readRequiredString(body, "publicKey"),
     });
     return jsonResponse({ sshKey }, 201);
   }
@@ -130,7 +151,9 @@ async function route(
   }
 
   if (request.method === "GET" && url.pathname === "/api/repositories") {
-    return jsonResponse({ repositories: await repositories.listRepositories(actor) });
+    return jsonResponse({
+      repositories: await repositories.listRepositories(actor),
+    });
   }
 
   if (request.method === "POST" && url.pathname === "/api/repositories") {
@@ -139,7 +162,7 @@ async function route(
     const created = await repositories.createRepository({
       owner: readRequiredString(body, "owner"),
       name: readRequiredString(body, "name"),
-      visibility: readVisibility(body["visibility"])
+      visibility: readVisibility(body["visibility"]),
     }, principal);
     return jsonResponse({ repository: created }, 201);
   }
@@ -147,7 +170,11 @@ async function route(
   const repositoryRoute = matchRepositoryRoute(url.pathname);
   if (repositoryRoute !== null) {
     if (request.method === "GET" && repositoryRoute.suffix === "") {
-      const repository = await repositories.getRepository(repositoryRoute.owner, repositoryRoute.name, actor);
+      const repository = await repositories.getRepository(
+        repositoryRoute.owner,
+        repositoryRoute.name,
+        actor,
+      );
       return jsonResponse({ repository });
     }
 
@@ -157,28 +184,44 @@ async function route(
         repositoryRoute.owner,
         repositoryRoute.name,
         readVisibility(body["visibility"]),
-        requireAuthenticated(actor)
+        requireAuthenticated(actor),
       );
       return jsonResponse({ repository });
     }
 
     if (request.method === "DELETE" && repositoryRoute.suffix === "") {
-      await repositories.deleteRepository(repositoryRoute.owner, repositoryRoute.name, requireAuthenticated(actor));
+      await repositories.deleteRepository(
+        repositoryRoute.owner,
+        repositoryRoute.name,
+        requireAuthenticated(actor),
+      );
       return jsonResponse({ deleted: true });
     }
 
     if (request.method === "GET" && repositoryRoute.suffix === "branches") {
-      const repository = await repositories.getRepository(repositoryRoute.owner, repositoryRoute.name, actor);
+      const repository = await repositories.getRepository(
+        repositoryRoute.owner,
+        repositoryRoute.name,
+        actor,
+      );
       return jsonResponse({ branches: repository.branches });
     }
 
     if (request.method === "GET" && repositoryRoute.suffix === "tags") {
-      const repository = await repositories.getRepository(repositoryRoute.owner, repositoryRoute.name, actor);
+      const repository = await repositories.getRepository(
+        repositoryRoute.owner,
+        repositoryRoute.name,
+        actor,
+      );
       return jsonResponse({ tags: repository.tags });
     }
 
     if (request.method === "GET" && repositoryRoute.suffix === "readme") {
-      const repository = await repositories.getRepository(repositoryRoute.owner, repositoryRoute.name, actor);
+      const repository = await repositories.getRepository(
+        repositoryRoute.owner,
+        repositoryRoute.name,
+        actor,
+      );
       if (repository.readme === null) {
         return notFound();
       }
@@ -190,7 +233,7 @@ async function route(
         repositoryRoute.owner,
         repositoryRoute.name,
         actor,
-        url.searchParams.get("ref") ?? undefined
+        url.searchParams.get("ref") ?? undefined,
       );
       return jsonResponse({ commits });
     }
@@ -201,7 +244,7 @@ async function route(
         repositoryRoute.name,
         actor,
         url.searchParams.get("ref") ?? undefined,
-        url.searchParams.get("path") ?? undefined
+        url.searchParams.get("path") ?? undefined,
       );
       return jsonResponse({ tree });
     }
@@ -216,7 +259,7 @@ async function route(
         repositoryRoute.name,
         actor,
         url.searchParams.get("ref") ?? undefined,
-        path
+        path,
       );
       if (content === null) {
         return notFound();
@@ -228,7 +271,10 @@ async function route(
   return notFound();
 }
 
-function readRequiredString(body: Record<string, unknown>, key: string): string {
+function readRequiredString(
+  body: Record<string, unknown>,
+  key: string,
+): string {
   const value = body[key];
   if (typeof value !== "string" || value.trim() === "") {
     throw new Response(`${key} is required.`, { status: 400 });
@@ -256,7 +302,10 @@ function readRole(value: unknown): "admin" | "developer" | undefined {
   throw new Response("role must be admin or developer.", { status: 400 });
 }
 
-async function authenticateRequest(request: Request, auth: AuthService): Promise<Principal | null> {
+async function authenticateRequest(
+  request: Request,
+  auth: AuthService,
+): Promise<Principal | null> {
   const authorization = request.headers.get("authorization");
   if (authorization === null || authorization.trim() === "") {
     return null;
@@ -275,12 +324,17 @@ async function authenticateRequest(request: Request, auth: AuthService): Promise
   }
 
   if (authorization.startsWith("Basic ")) {
-    const decoded = decodeBasicAuthorization(authorization.slice("Basic ".length));
+    const decoded = decodeBasicAuthorization(
+      authorization.slice("Basic ".length),
+    );
     const separator = decoded.indexOf(":");
     if (separator < 0) {
       throw new Response("invalid basic authorization.", { status: 401 });
     }
-    const principal = await auth.authenticateBasic(decoded.slice(0, separator), decoded.slice(separator + 1));
+    const principal = await auth.authenticateBasic(
+      decoded.slice(0, separator),
+      decoded.slice(separator + 1),
+    );
     if (principal === null) {
       throw new Response("invalid basic credentials.", { status: 401 });
     }
@@ -305,19 +359,25 @@ function requireAuthenticated(actor: Principal | null): Principal {
   return actor;
 }
 
-function matchRepositoryRoute(pathname: string): { owner: string; name: string; suffix: string } | null {
-  const match = pathname.match(/^\/api\/repositories\/([^/]+)\/([^/]+)(?:\/([^/]+))?$/);
+function matchRepositoryRoute(
+  pathname: string,
+): { owner: string; name: string; suffix: string } | null {
+  const match = pathname.match(
+    /^\/api\/repositories\/([^/]+)\/([^/]+)(?:\/([^/]+))?$/,
+  );
   if (match === null) {
     return null;
   }
   return {
     owner: decodeURIComponent(match[1]),
     name: decodeURIComponent(match[2]),
-    suffix: match[3] === undefined ? "" : decodeURIComponent(match[3])
+    suffix: match[3] === undefined ? "" : decodeURIComponent(match[3]),
   };
 }
 
-function matchGitRoute(pathname: string): { owner: string; name: string; gitPath: string } | null {
+function matchGitRoute(
+  pathname: string,
+): { owner: string; name: string; gitPath: string } | null {
   const match = pathname.match(/^\/git\/([^/]+)\/([^/]+)\.git(\/.*)?$/);
   if (match === null) {
     return null;
@@ -325,7 +385,7 @@ function matchGitRoute(pathname: string): { owner: string; name: string; gitPath
   return {
     owner: decodeURIComponent(match[1]),
     name: decodeURIComponent(match[2]),
-    gitPath: match[3] ?? ""
+    gitPath: match[3] ?? "",
   };
 }
 

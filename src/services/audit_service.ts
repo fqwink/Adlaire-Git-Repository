@@ -24,7 +24,7 @@ export class AuditService implements AuditSink {
       action: input.action,
       targetType: input.targetType,
       targetId: input.targetId,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     });
   }
 }

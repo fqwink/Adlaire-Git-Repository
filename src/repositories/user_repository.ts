@@ -138,7 +138,7 @@ function toUserRecord(row: UserRow): UserRecord {
     username: row.username,
     passwordHash: row.password_hash,
     role: row.role,
-    createdAt: row.created_at
+    createdAt: row.created_at,
   };
 }
 
@@ -148,6 +148,6 @@ function toSshKeyRecord(row: SshKeyRow): SshKeyRecord {
     userId: row.user_id,
     label: row.label,
     publicKey: row.public_key,
-    createdAt: row.created_at
+    createdAt: row.created_at,
   };
 }

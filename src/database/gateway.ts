@@ -13,7 +13,7 @@ export class DatabaseGateway {
     return this.driver.execute(statement);
   }
 
-  query<T extends Record<string, unknown>>(statement: string): Promise<T[]> {
+  query<T>(statement: string): Promise<T[]> {
     return this.driver.query<T>(statement);
   }
 }

@@ -23,10 +23,12 @@ export class GitHttpBackend {
         GIT_HTTP_EXPORT_ALL: "1",
         PATH_INFO: pathInfo,
         REQUEST_METHOD: input.request.method,
-        QUERY_STRING: url.search.startsWith("?") ? url.search.slice(1) : url.search,
+        QUERY_STRING: url.search.startsWith("?")
+          ? url.search.slice(1)
+          : url.search,
         CONTENT_TYPE: input.request.headers.get("content-type") ?? "",
-        REMOTE_USER: input.actor?.username ?? ""
-      }
+        REMOTE_USER: input.actor?.username ?? "",
+      },
     });
 
     const process = command.spawn();
@@ -38,7 +40,9 @@ export class GitHttpBackend {
     const stderr = new TextDecoder().decode(output.stderr);
 
     if (!output.success) {
-      return new Response(stderr.trim() || "git http-backend failed.", { status: 500 });
+      return new Response(stderr.trim() || "git http-backend failed.", {
+        status: 500,
+      });
     }
 
     return toResponse(output.stdout);
@@ -47,17 +51,20 @@ export class GitHttpBackend {
 
 export function isGitWriteRequest(request: Request, gitPath: string): boolean {
   const url = new URL(request.url);
-  return gitPath.includes("git-receive-pack") || url.searchParams.get("service") === "git-receive-pack";
+  return gitPath.includes("git-receive-pack") ||
+    url.searchParams.get("service") === "git-receive-pack";
 }
 
 function toResponse(cgiOutput: Uint8Array): Response {
   const separator = findHeaderSeparator(cgiOutput);
   const normalizedSeparator = separator.index;
   if (normalizedSeparator < 0) {
-    return new Response(cgiOutput, { status: 200 });
+    return new Response(toBlob(cgiOutput), { status: 200 });
   }
 
-  const headerText = new TextDecoder().decode(cgiOutput.slice(0, normalizedSeparator));
+  const headerText = new TextDecoder().decode(
+    cgiOutput.slice(0, normalizedSeparator),
+  );
   const bodyOffset = normalizedSeparator + separator.length;
   const body = cgiOutput.slice(bodyOffset);
   const headers = new Headers();
@@ -77,12 +84,23 @@ function toResponse(cgiOutput: Uint8Array): Response {
     }
   }
 
-  return new Response(body, { status, headers });
+  return new Response(toBlob(body), { status, headers });
 }
 
-function findHeaderSeparator(output: Uint8Array): { readonly index: number; readonly length: number } {
+function toBlob(bytes: Uint8Array): Blob {
+  const buffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(buffer).set(bytes);
+  return new Blob([buffer]);
+}
+
+function findHeaderSeparator(
+  output: Uint8Array,
+): { readonly index: number; readonly length: number } {
   for (let index = 0; index < output.length - 3; index++) {
-    if (output[index] === 13 && output[index + 1] === 10 && output[index + 2] === 13 && output[index + 3] === 10) {
+    if (
+      output[index] === 13 && output[index + 1] === 10 &&
+      output[index + 2] === 13 && output[index + 3] === 10
+    ) {
       return { index, length: 4 };
     }
   }

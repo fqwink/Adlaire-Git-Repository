@@ -12,7 +12,15 @@ interface MemoryUser {
 class MemoryUsers {
   users: MemoryUser[] = [];
   tokens = new Map<string, string>();
-  sshKeys: Array<{ id: string; userId: string; label: string; publicKey: string; createdAt: string }> = [];
+  sshKeys: Array<
+    {
+      id: string;
+      userId: string;
+      label: string;
+      publicKey: string;
+      createdAt: string;
+    }
+  > = [];
 
   create(user: MemoryUser): Promise<MemoryUser> {
     this.users.push(user);
@@ -20,14 +28,18 @@ class MemoryUsers {
   }
 
   findByUsername(username: string): Promise<MemoryUser | null> {
-    return Promise.resolve(this.users.find((user) => user.username === username) ?? null);
+    return Promise.resolve(
+      this.users.find((user) => user.username === username) ?? null,
+    );
   }
 
   findById(id: string): Promise<MemoryUser | null> {
     return Promise.resolve(this.users.find((user) => user.id === id) ?? null);
   }
 
-  createApiToken(input: { readonly userId: string; readonly tokenHash: string }): Promise<void> {
+  createApiToken(
+    input: { readonly userId: string; readonly tokenHash: string },
+  ): Promise<void> {
     this.tokens.set(input.tokenHash, input.userId);
     return Promise.resolve();
   }
@@ -40,7 +52,15 @@ class MemoryUsers {
     return Promise.resolve();
   }
 
-  addSshKey(input: { readonly id: string; readonly userId: string; readonly label: string; readonly publicKey: string; readonly createdAt: string }) {
+  addSshKey(
+    input: {
+      readonly id: string;
+      readonly userId: string;
+      readonly label: string;
+      readonly publicKey: string;
+      readonly createdAt: string;
+    },
+  ) {
     this.sshKeys.push(input);
     return Promise.resolve(input);
   }
@@ -50,7 +70,9 @@ class MemoryUsers {
   }
 
   deleteSshKey(userId: string, keyId: string): Promise<void> {
-    this.sshKeys = this.sshKeys.filter((key) => key.userId !== userId || key.id !== keyId);
+    this.sshKeys = this.sshKeys.filter((key) =>
+      key.userId !== userId || key.id !== keyId
+    );
     return Promise.resolve();
   }
 }
@@ -66,16 +88,25 @@ Deno.test("registered users can authenticate with Basic credentials without expo
 
   const user = await service.register({
     username: "alice",
-    password: "correct horse battery staple"
+    password: "correct horse battery staple",
   });
 
   assertEquals(user.username, "alice");
-  assert(!("passwordHash" in user), "public user must not expose password hashes.");
+  assert(
+    !("passwordHash" in user),
+    "public user must not expose password hashes.",
+  );
 
-  const principal = await service.authenticateBasic("alice", "correct horse battery staple");
+  const principal = await service.authenticateBasic(
+    "alice",
+    "correct horse battery staple",
+  );
   assertEquals(principal?.username, "alice");
 
-  const rejected = await service.authenticateBasic("alice", "incorrect horse battery staple");
+  const rejected = await service.authenticateBasic(
+    "alice",
+    "incorrect horse battery staple",
+  );
   assertEquals(rejected, null);
 });
 
@@ -84,12 +115,12 @@ Deno.test("created API tokens authenticate the owning user", async () => {
 
   await service.register({
     username: "alice",
-    password: "correct horse battery staple"
+    password: "correct horse battery staple",
   });
   const { token } = await service.createApiToken({
     username: "alice",
     password: "correct horse battery staple",
-    label: "local"
+    label: "local",
   });
 
   const principal = await service.authenticateToken(token);
@@ -102,22 +133,29 @@ Deno.test("authenticated users can manage their SSH public keys without exposing
 
   await service.register({
     username: "alice",
-    password: "correct horse battery staple"
+    password: "correct horse battery staple",
   });
   await service.register({
     username: "bob",
-    password: "correct horse battery staple"
+    password: "correct horse battery staple",
   });
 
-  const alice = await service.authenticateBasic("alice", "correct horse battery staple");
-  const bob = await service.authenticateBasic("bob", "correct horse battery staple");
+  const alice = await service.authenticateBasic(
+    "alice",
+    "correct horse battery staple",
+  );
+  const bob = await service.authenticateBasic(
+    "bob",
+    "correct horse battery staple",
+  );
   assert(alice !== null);
   assert(bob !== null);
 
   const key = await service.addSshKey({
     principal: alice,
     label: "laptop",
-    publicKey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM alice"
+    publicKey:
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM alice",
   });
 
   assertEquals((await service.listSshKeys(alice)).length, 1);

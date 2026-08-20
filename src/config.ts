@@ -20,12 +20,13 @@ export function loadConfig(env: Deno.Env = Deno.env): AppConfig {
     host: env.get("ADLAIRE_HOST") ?? "127.0.0.1",
     port: readPort(env.get("ADLAIRE_PORT")),
     dataDir,
-    repositoryRoot: env.get("ADLAIRE_REPOSITORY_ROOT") ?? `${dataDir}/repositories`,
+    repositoryRoot: env.get("ADLAIRE_REPOSITORY_ROOT") ??
+      `${dataDir}/repositories`,
     database: {
       driver: readDatabaseDriver(env.get("DB_DRIVER")),
       url: databaseUrl,
-      authToken: env.get("DB_AUTH_TOKEN") ?? undefined
-    }
+      authToken: env.get("DB_AUTH_TOKEN") ?? undefined,
+    },
   };
 }
 

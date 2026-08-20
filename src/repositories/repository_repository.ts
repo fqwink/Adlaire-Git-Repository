@@ -1,6 +1,9 @@
 import { quoteSqlText } from "../database/sql.ts";
 import type { DatabaseGateway } from "../database/gateway.ts";
-import type { RepositoryRecord, RepositoryVisibility } from "../domain/repository.ts";
+import type {
+  RepositoryRecord,
+  RepositoryVisibility,
+} from "../domain/repository.ts";
 
 interface RepositoryRow {
   id: string;
@@ -41,7 +44,10 @@ export class RepositoryRepository {
     return rows.map(toRepositoryRecord);
   }
 
-  async listVisibleTo(username: string | null, isAdmin: boolean): Promise<RepositoryRecord[]> {
+  async listVisibleTo(
+    username: string | null,
+    isAdmin: boolean,
+  ): Promise<RepositoryRecord[]> {
     const visibilityFilter = isAdmin
       ? "1 = 1"
       : username === null
@@ -68,7 +74,12 @@ export class RepositoryRepository {
     return rows[0] === undefined ? null : toRepositoryRecord(rows[0]);
   }
 
-  async updateVisibility(owner: string, name: string, visibility: RepositoryVisibility, updatedAt: string): Promise<RepositoryRecord | null> {
+  async updateVisibility(
+    owner: string,
+    name: string,
+    visibility: RepositoryVisibility,
+    updatedAt: string,
+  ): Promise<RepositoryRecord | null> {
     await this.database.execute(`
       UPDATE repositories
       SET visibility = ${quoteSqlText(visibility)},
@@ -97,6 +108,6 @@ function toRepositoryRecord(row: RepositoryRow): RepositoryRecord {
     visibility: row.visibility,
     barePath: row.bare_path,
     createdAt: row.created_at,
-    updatedAt: row.updated_at
+    updatedAt: row.updated_at,
   };
 }

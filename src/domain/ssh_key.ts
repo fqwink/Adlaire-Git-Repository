@@ -19,7 +19,10 @@ export function validateSshPublicKey(value: string): string {
   const key = value.trim();
   const [prefix, body] = key.split(/\s+/, 2);
 
-  if (!SUPPORTED_PREFIXES.includes(prefix) || body === undefined || body.length < 32) {
+  if (
+    !SUPPORTED_PREFIXES.includes(prefix) || body === undefined ||
+    body.length < 32
+  ) {
     throw new Error("ssh public key must be an OpenSSH public key.");
   }
 
@@ -31,6 +34,6 @@ export function toPublicSshKey(record: SshKeyRecord): PublicSshKey {
     id: record.id,
     label: record.label,
     publicKey: record.publicKey,
-    createdAt: record.createdAt
+    createdAt: record.createdAt,
   };
 }

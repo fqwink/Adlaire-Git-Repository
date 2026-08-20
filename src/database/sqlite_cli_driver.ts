@@ -9,8 +9,13 @@ export class SqliteCliDriver implements DatabaseDriver {
     await this.run(["-batch", this.databasePath, statement]);
   }
 
-  async query<T extends Record<string, unknown>>(statement: string): Promise<T[]> {
-    const output = await this.run(["-batch", "-json", this.databasePath, statement]);
+  async query<T>(statement: string): Promise<T[]> {
+    const output = await this.run([
+      "-batch",
+      "-json",
+      this.databasePath,
+      statement,
+    ]);
     const trimmed = output.trim();
     if (trimmed === "") {
       return [];
@@ -22,7 +27,7 @@ export class SqliteCliDriver implements DatabaseDriver {
     const command = new Deno.Command("sqlite3", {
       args,
       stdout: "piped",
-      stderr: "piped"
+      stderr: "piped",
     });
     const output = await command.output();
     const decoder = new TextDecoder();
