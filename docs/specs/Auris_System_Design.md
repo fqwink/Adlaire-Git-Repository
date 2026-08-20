@@ -22,7 +22,7 @@
 
 本書は3類マスター仕様書であり、1類ルールブックである `AGENTS.md` および2類ポリシーである `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` に従う。
 
-フェーズ単位の実装計画、フェーズ別バージョン、実装対象、対象外、検証範囲、完了条件は、`docs/plans/DEVELOPMENT_PLAN.md` で管理する。
+フェーズ単位の実装計画、フェーズ別バージョン、実装対象、対象外、検証範囲、完了条件は、マスター開発計画である `docs/plans/DEVELOPMENT_PLAN.md` で管理する。
 
 矛盾がある場合は、以下の順に優先する。
 
@@ -121,7 +121,7 @@ Phase 1 では driver 実装は SQLite のみとする。ただし、インタ�
 
 ## 6. 実装フェーズ
 
-各フェーズの基準バージョン、対象外範囲、検証範囲、完了条件は `docs/plans/DEVELOPMENT_PLAN.md` を正規の開発計画として参照する。
+各フェーズの基準バージョン、対象外範囲、検証範囲、完了条件は `docs/plans/DEVELOPMENT_PLAN.md` をマスター開発計画として参照する。
 
 ### 6.1 Phase 1
 

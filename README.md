@@ -4,7 +4,7 @@
 
 - 最上位ルールブック: [AGENTS.md](./AGENTS.md)
 - ポリシー群: [docs/policies/](./docs/policies/)
-- 開発計画: [docs/plans/DEVELOPMENT_PLAN.md](./docs/plans/DEVELOPMENT_PLAN.md)
+- マスター開発計画: [docs/plans/DEVELOPMENT_PLAN.md](./docs/plans/DEVELOPMENT_PLAN.md)
 - マスター仕様書群: [docs/specs/](./docs/specs/)
 
 ## 現在のドキュメント構成
