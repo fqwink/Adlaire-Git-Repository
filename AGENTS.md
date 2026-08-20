@@ -127,13 +127,13 @@
 
 本プロジェクトは、以下を提供するセルフホスト型 Git ホスティング基盤である。
 
-機能互換は GitHub 互換方針とする。GitHub 互換とは、Repository、Issue、Pull Request、Code Review、Wiki、Release、Webhook、REST API、Personal Access Token、Organization / Team、Projects、Discussions 等の機能体系、用語、主要ワークフローについて、GitHub 利用経験を前提に理解・移行しやすい振る舞いを目指すことを指す。
+基本的な機能互換は GitHub 互換基準とする。GitHub 互換とは、Repository、Issue、Pull Request、Code Review、Wiki、Release、Webhook、REST API、Personal Access Token、Organization / Team、Projects、Discussions 等の機能体系、用語、主要ワークフローについて、GitHub 利用経験を前提に理解・移行しやすい振る舞いを目指すことを指す。
 
 ただし、UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換の対象外とする。UI は本プロジェクト独自の設計とし、GitHub の画面、デザイン、ブランド表現、商標表現を模倣しない。
 
-GitHub 互換はマスター仕様書に定義された範囲に限る。GitHub の全機能、外部サービス依存、商標・ブランド表現、GitHub 固有サービスへの直接依存を無条件に採用してはならない。
+GitHub 互換はマスター仕様書に定義された範囲に限る。GitHub の全機能、外部サービス依存、商標・ブランド表現、GitHub 固有サービスへの直接依存を無条件に採用してはならない。現時点で不要な機能は、GitHub に存在する機能であっても実装対象から除外する。
 
-オープンソースの Git プロバイダーやセルフホスト型 Git ホスティング製品は、機能面で有用なものを調査し、インスパイア対象として扱ってよい。ただし、これらは互換方針の対象ではない。Gitea、Forgejo、GitLab、GitPrep 等の機能、画面、API、運用モデルを互換対象として扱ってはならず、採用する場合は本プロジェクトのマスター仕様書に再定義し、ユーザー承認を得る。
+オープンソースの Git プロバイダーやセルフホスト型 Git ホスティング製品は、サブの機能互換インスパイア対象として扱ってよい。ただし、これらは主たる互換基準ではない。Gitea、Forgejo、GitLab、GitPrep 等の機能、画面、API、運用モデルをそのまま互換対象として扱ってはならず、採用する場合は本プロジェクトのマスター仕様書に再定義し、必要性を確認し、ユーザー承認を得る。
 
 - Git clone / push / pull / fetch
 - Branch / Tag / Release 管理
