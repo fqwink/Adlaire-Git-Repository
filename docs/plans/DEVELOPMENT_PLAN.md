@@ -2,8 +2,8 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**基準バージョン**: v.0.1
-**ステータス**: 初期策定
+**基準バージョン**: v.1.2
+**ステータス**: Phase 1 実装完了・安定版候補
 
 ---
 
@@ -43,12 +43,12 @@
 
 フェーズは、安定版リリース世代である `Major` と対応させる。
 
-| フェーズ | 基準バージョン | 扱い |
-|---|---:|---|
-| Phase 0 | v.0.1 | 実装前の文書整備、設計整理、計画策定 |
-| Phase 1 | v.1.2 | Git 基本機能、認証、Repository CRUD、SQLite 基盤の最小安定版候補 |
-| Phase 2 | v.2.3 | Pull Request、Issue、Wiki、Webhook、開発支援機能の安定版候補 |
-| Phase 3 | v.3.4 | Organizations、Teams、Projects、運用拡張の安定版候補 |
+| フェーズ | 基準バージョン | ステータス | 扱い |
+|---|---:|---|---|
+| Phase 0 | v.0.1 | 完了 | 実装前の文書整備、設計整理、計画策定 |
+| Phase 1 | v.1.2 | 実装完了・安定版候補 | Git 基本機能、認証、Repository CRUD、SQLite 基盤、Docker/Deno 実行環境の最小安定版候補 |
+| Phase 2 | v.2.3 | 未着手 | Pull Request、Issue、Wiki、Webhook、開発支援機能の安定版候補 |
+| Phase 3 | v.3.4 | 未着手 | Organizations、Teams、Projects、運用拡張の安定版候補 |
 
 上記は各フェーズの基準バージョンである。フェーズ内でドキュメント更新、バグ修正、検証追加、仕様整理が発生する場合は、`Minor` を累積で進める。
 
@@ -98,6 +98,12 @@ v.0.1 -> v.0.2 -> v.1.3 -> v.2.4 -> v.3.5
 
 Phase 1 の基準バージョンは `v.1.2` とする。
 
+### 6.1.1 ステータス
+
+Phase 1 は、承認済み実装範囲について実装完了とする。
+
+ただし、正式な安定版リリースは、Pull Request のレビュー、マージ、リリース判定を完了した後に行う。PR が `main` にマージされるまでは、Phase 1 は **安定版候補** として扱う。
+
 ### 6.2 目的
 
 セルフホスト型 Git ホスティング基盤として、最小限の Git 操作、認証、リポジトリ管理、SQLite 永続化、Web UI を成立させる。
@@ -118,6 +124,8 @@ Phase 1 の基準バージョンは `v.1.2` とする。
 - SQLite driver
 - Database Gateway
 - SQLite から libSQL へ移行しやすい永続化境界
+- Deno ランタイムによる実行環境
+- Dockerfile / compose による Docker 上の Deno 実行環境
 - 基本テスト
 
 ### 6.4 対象外
@@ -130,6 +138,7 @@ Phase 1 の基準バージョンは `v.1.2` とする。
 - Webhook
 - Organizations / Teams
 - 複数インスタンス運用
+- Docker 前提の本番運用固定化
 
 ### 6.5 必須検証
 
@@ -142,6 +151,8 @@ Phase 1 の基準バージョンは `v.1.2` とする。
 - XSS 対策
 - Node.js ランタイム非依存
 - 外部フレームワーク非採用
+- Deno ランタイム上での `fmt` / `lint` / `test` / `compile`
+- Docker 上の Deno ランタイム起動と `/health`
 
 ### 6.6 完了条件
 
@@ -151,6 +162,48 @@ Phase 1 の基準バージョンは `v.1.2` とする。
 - 主要検証が完了している。
 - 既知バグが残っていない。
 - 安定版リリース判定を行える状態である。
+
+### 6.7 実装結果
+
+Phase 1 では、以下を実装済みとする。
+
+- Deno / TypeScript / `Deno.serve` による HTTP アプリケーション基盤
+- SQLite CLI driver と Database Gateway
+- ユーザー登録、HTTP Basic 認証、Personal Access Token 認証
+- SSH 公開鍵管理 API
+- Repository CRUD、Visibility 制御、private repository アクセス制御
+- Git Smart HTTP による clone / push / pull / fetch
+- Branch / Tag / README / commit / tree / blob 参照 API
+- 最小 Web UI
+- 監査ログ記録
+- Docker 上の Deno ランタイム環境、永続データ volume、healthcheck
+- 意味のある単体テスト、統合テスト、E2E 検証
+
+### 6.8 検証結果
+
+Phase 1 の完了判定では、以下の検証を必須結果として扱う。
+
+- `deno task fmt --check`
+- `deno task lint`
+- `deno task test`
+- `deno task compile`
+- Docker build
+- Docker コンテナ内の Deno / Git / SQLite / Git Smart HTTP backend 確認
+- Docker コンテナ起動後の `/health` 確認
+- Personal Access Token 認証付き Git `push` / `clone` / `fetch` / `pull`
+- private repository の匿名 API / Git アクセス拒否
+- HTTP Basic 認証による API アクセス
+
+### 6.9 リリース判定
+
+Phase 1 は安定版候補として成立している。
+
+正式リリース可否は、以下を満たした時点で判定する。
+
+- PR がレビューされ、`main` へマージされている。
+- `main` 上で Phase 1 必須検証が再実行されている。
+- 既知バグが残っていない。
+- リリース対象が安定版として扱えることを確認している。
 
 ---
 
@@ -163,6 +216,8 @@ Phase 2 の基準バージョンは `v.2.3` とする。
 ### 7.2 目的
 
 チーム開発に必要なレビュー、課題管理、文書管理、通知連携を追加する。
+
+Phase 2 は、Phase 1 の PR が `main` へマージされ、安定版リリース判定が完了してから着手する。
 
 ### 7.3 実装対象
 
@@ -184,6 +239,16 @@ Phase 2 の基準バージョンは `v.2.3` とする。
 - 複数インスタンス運用
 - libSQL driver の正式採用
 - クラウドDBホスティング採用
+
+### 7.4.1 着手条件
+
+Phase 2 に着手する前に、以下を満たすこと。
+
+- Phase 1 の作業ブランチが PR 経由で `main` にマージされている。
+- Phase 1 の作業ブランチがルールに従って閉じられている。
+- Phase 1 の安定版リリース判定が完了している。
+- Phase 2 の実装対象、対象外、検証範囲についてユーザー承認を得ている。
+- Pull Request / Issue / Wiki / Webhook / WYSIWYG 連携の仕様差分が3類マスター仕様書に反映されている。
 
 ### 7.5 完了条件
 
@@ -261,3 +326,12 @@ Phase 3 の基準バージョンは `v.3.4` とする。
 6. 承認済み範囲のみ変更する。
 7. コミットする。
 8. PR 経由で `main` に取り込む。
+
+---
+
+## 11. 改訂履歴
+
+| バージョン | 内容 |
+|---:|---|
+| v.0.1 | マスター開発計画の初期策定 |
+| v.1.2 | Phase 1 実装完了、Docker 上の Deno ランタイム環境、主要検証結果、Phase 2 着手条件を反映 |
