@@ -92,17 +92,13 @@
 
 ### データベース採用方針
 
-採用対象のデータベースエンジン系統は SQLite 互換DBに限定する。
+採用対象のデータベースエンジンは SQLite と libSQL のみに限定する。
 
 Phase 1 は SQLite を標準データベースとして実装する。
 
 libSQL は、SQLite 互換を活かした将来の移行候補として保持する。libSQL は外部ライブラリまたは外部基盤の例外採用に該当するが、SQLite からの移行容易性、DB抽象化設計との相性、将来の同期・分散構成への拡張余地という採用メリットが高いため、やむを得ない例外採用候補として扱う。
 
 ただし、Phase 1 では libSQL を実装対象に含めない。libSQL driver の実装は、Phase 計画、移行計画、検証計画、ユーザー承認を揃えてから行う。libSQL を採用する場合も、外部ライブラリAPIは内製 `libsql` driver と Database Gateway の内部に閉じ込め、サービス層やRepository層へ直接露出させない。
-
-SQLite 互換DBの内製化検討理由は、libSQL の採用検討理由と同じである。機能面も libSQL と同等の SQLite 互換DBとして扱い、SQLite 互換、移行容易性、DB抽象化設計との相性、将来の同期・分散構成への拡張余地を評価するため、内製SQLite互換DBを長期研究候補として保持する。
-
-ただし、内製SQLite互換DBは Phase 1 の実装対象に含めない。内製化を進める場合は、SQL互換性、ファイル形式、ACID、WAL、ロック制御、クラッシュ復旧、バックアップ、migration、検証コストを別途定義し、ユーザー承認を得る。
 
 Turso Cloud 等のクラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングは新しいデータベースエンジンではなく、libSQL の接続先または運用形態の候補として扱う。採用する場合は、外部サービス依存、データ所在、認証トークン管理、バックアップ、障害時の復旧、運用費用を評価し、例外採用としてユーザー承認を得る。
 
@@ -143,7 +139,7 @@ SQLite driver（Phase 1）
 - migration をアプリケーション各所に分散させること
 - SQLite 固有機能を Repository 層より上位へ漏らすこと
 
-Phase 1 では `DB_DRIVER=sqlite` を前提値とする。将来追加できる driver は `DB_DRIVER=libsql` または `DB_DRIVER=internal-sqlite-compatible` に限定する。クラウドDBホスティングを採用する場合も、`DB_DRIVER=libsql` の接続先設定として扱い、`DB_DRIVER=turso` 等のホスティングサービス名を driver 名にしてはならない。
+Phase 1 では `DB_DRIVER=sqlite` を前提値とする。将来追加できる driver は `DB_DRIVER=libsql` のみに限定する。クラウドDBホスティングを採用する場合も、`DB_DRIVER=libsql` の接続先設定として扱い、`DB_DRIVER=turso` 等のホスティングサービス名を driver 名にしてはならない。
 
 移行計画を立てやすくするため、初期実装時点から以下を固定する。
 
