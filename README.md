@@ -20,7 +20,7 @@
     │   └── MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md
     ├── policies/
     │   ├── DEVELOPMENT_POLICY_RULEBOOK.md
-    │   ├── DEVELOPMENT_PLANNING_POLICY.md
+    │   ├── DOCUMENT_CHARTER.md
     │   ├── TECHNICAL_REQUIREMENTS_POLICY.md
     │   ├── VERSION_POLICY.md
     │   ├── RELEASE_POLICY.md

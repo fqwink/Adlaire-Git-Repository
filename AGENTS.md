@@ -39,7 +39,7 @@
 | 優先順位 | ドキュメント | 役割 |
 |---:|---|---|
 | 1 | `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` | 2類ポリシー群の総則。責務別ポリシーの参照順序、共通原則、変更手順を定義する |
-| 2 | `docs/policies/DEVELOPMENT_PLANNING_POLICY.md` | 開発計画、フェーズ計画、実装着手条件、フェーズ変更の方針 |
+| 2 | `docs/policies/DOCUMENT_CHARTER.md` | ドキュメント憲章。ドキュメント体系、責務境界、開発計画、フェーズ単位の改訂方針 |
 | 3 | `docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` | 採用技術、ランタイム、依存関係、固定採用バージョン、技術承認の方針 |
 | 4 | `docs/policies/VERSION_POLICY.md` | バージョン表記、累積方式、Major / Minor 更新条件の方針 |
 | 5 | `docs/policies/RELEASE_POLICY.md` | 安定版リリース、リリース対象、リリース禁止条件の方針 |
