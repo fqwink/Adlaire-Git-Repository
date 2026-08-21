@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.0.2
+**文書バージョン**: v.0.3
 **ステータス**: Phase 2 完了・開発継続
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
@@ -53,9 +53,29 @@ GitHub 互換は、マスター仕様書とマスター開発計画で定義さ�
 
 UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換の対象外とする。UI は本プロジェクト独自の設計とし、GitHub の画面、デザイン、ブランド表現、商標表現を模倣しない。
 
-GitHub Actions、GitHub Pages、Package registry、Container registry、Copilot、Advanced Security 等は、個別に採用可否、実装時期、必要性、外部依存、セキュリティ、ライセンスを評価し、ユーザー承認を得るまで実装対象に含めない。
+GitHub Actions、GitHub Pages、汎用 Package registry、Container registry、Copilot、Advanced Security 等は、個別に採用可否、実装時期、必要性、外部依存、セキュリティ、ライセンスを評価し、ユーザー承認を得るまで実装対象に含めない。
+
+Adlaire 内製 Deno Module Registry は、汎用 Package registry とは分離して扱う。Adlaire 内製 Deno Module Registry は、クローズドな Adlaire 内製 Deno package を Adlaire Git Repository 本体から配布するための中長期計画であり、早期フェーズで本体実装に着手する方針とする。
 
 GitHub 互換を目標とする場合でも、GitHub 固有サービスへの直接依存、GitHub の商標・ブランド表現の無承認利用、GitHub API の完全再現を前提にした無承認実装は行わない。
+
+## Adlaire 内製 Deno Module Registry 方針
+
+Adlaire 内製 Deno Module Registry は、Adlaire Group 内部向けの Deno / TypeScript / ESM module 配布基盤とする。
+
+本機能は、Adlaire Git Repository 本体へ早期実装する中長期計画対象である。初期実装では、以下を候補範囲とする。
+
+- package metadata 管理
+- version 管理
+- module artifact または module source の登録
+- checksum 管理
+- Deno native import / download endpoint
+- repository、organization、team、user に基づく認証・認可
+- publish / update / delete / download の監査ログ
+
+Adlaire 内製 Deno Module Registry は npm registry 互換レジストリではない。`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提にしてはならない。
+
+汎用 Package registry、npm registry 互換、Container registry は、本仕様の Adlaire 内製 Deno Module Registry とは別機能として扱い、ユーザー承認を得るまで実装対象に含めない。
 
 ## Phase 2 開発支援機能最小仕様
 
@@ -289,7 +309,8 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 - JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする
 - JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする
 - クローズドライセンス、内部専用、非公開資産は JSR へ公開しない
-- クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を目標とする
+- クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする
+- Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する
 - npm registry 互換レジストリは標準採用しない
 - 必要最小限の外部ライブラリ
 - 外部ライブラリは内製ラッパー、内製driver、または Database Gateway の内部に閉じ込める

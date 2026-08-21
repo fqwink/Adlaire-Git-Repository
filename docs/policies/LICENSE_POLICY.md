@@ -41,4 +41,4 @@ JSR レジストリへ公開する package は、公開可能なオープンソ�
 
 WYSIWYG エディターを含む Adlaire 内製 package の公開方針は未確定とする。JSR 公開を検討する場合は、オープンソース化の可否、ライセンス、公開範囲、保守責任、Adlaire 付随プロジェクトへの影響を整理し、ユーザー承認を得る。
 
-クローズドな Adlaire 内製 Deno package の配布は、JSR ではなく Private Git + Deno import、Deno workspace、vendor 管理、または将来の Adlaire 内製 Deno Module Registry を候補とする。
+クローズドな Adlaire 内製 Deno package の配布は、JSR ではなく Private Git + Deno import、Deno workspace、vendor 管理、または Adlaire Git Repository 本体へ早期実装する Adlaire 内製 Deno Module Registry を候補とする。

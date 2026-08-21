@@ -32,7 +32,7 @@
 - 開発言語、ランタイム、データベース、Git、Docker、外部コマンド、外部ライブラリ、フレームワーク、採用バージョン、固定バージョン、更新方針は、ユーザーが決定する。
 - エージェントは候補提示、比較、調査、リスク整理、推奨案の提示にとどめ、ユーザー承認なしに採用決定、バージョン固定、方針確定、実装反映をしてはならない。
 - Deno 標準ライブラリを最優先候補とし、JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認なしに採用してはならない。
-- クローズド資産は JSR へ公開してはならず、クローズドな Adlaire 内製 Deno package の中長期配布基盤は Adlaire 内製 Deno Module Registry を目標とする。
+- クローズド資産は JSR へ公開してはならず、クローズドな Adlaire 内製 Deno package の中長期配布基盤は Adlaire 内製 Deno Module Registry とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
 - npm registry 互換レジストリは Node.js / npm ecosystem リスクと衝突するため標準採用しない。
 - 変更した場合は、承認済みの変更範囲だけを stage し、必ずコミットまで行う。
 - `main` への直接 push は禁止し、必ず Pull Request 経由で取り込む。

@@ -6,7 +6,7 @@
 **ランタイム方針**: Deno のみ
 **出力形式**: JSON
 **ライセンス**: クローズドライセンス
-**文書バージョン**: v.0.1
+**文書バージョン**: v.0.2
 **ステータス**: 設計整理中・実装時期未定
 
 ---
@@ -33,7 +33,7 @@
 - JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用しない。
 - JSR へ公開する場合は、WYSIWYG エディターを公開可能なオープンソースコードとして扱うことを前提とする。
 - WYSIWYG エディターがクローズドライセンス、内部専用、非公開資産である場合は、JSR へ公開しない。
-- クローズド配布が必要な場合は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を目標とする。
+- クローズド配布が必要な場合は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire Git Repository 本体へ早期実装する Adlaire 内製 Deno Module Registry を標準目標とする。
 - 外部ライブラリが必要な場合は、`docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` に従い、例外採用としてユーザー承認を得る。
 - 保存形式、表示形式、セキュリティ要件は3類マスター仕様書に明記する。
 - 実装時期、採用Phase、連携範囲はマスター開発計画で明記し、ユーザー承認を得るまで未定とする。

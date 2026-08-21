@@ -23,7 +23,7 @@
 - JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする。
 - JSR は公開可能なオープンソース package の公開候補に限る。クローズドライセンス、内部専用、非公開資産は JSR へ公開しない。
 - npm registry 互換レジストリは、Node.js / npm ecosystem リスクと衝突するため標準採用しない。
-- クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を目標とする。
+- クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
 - 外部ライブラリは必要最小限とし、採用する場合は例外採用としてユーザー承認を得る。
 - 例外採用した外部ライブラリは、内製ラッパー、内製 driver、または内製 Gateway の内部に閉じ込める。
 
@@ -56,7 +56,11 @@ JSR レジストリの公開 package は採用可能であり、Deno / TypeScrip
 
 JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする。クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
 
-クローズドな Adlaire 内製 Deno package は、JSR へ公開しない。短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を目標とする。
+クローズドな Adlaire 内製 Deno package は、JSR へ公開しない。短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする。
+
+Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体の早期実装対象として扱う。初期実装では、Deno / TypeScript / ESM 前提の module 配布、package metadata、version 管理、checksum、認証・認可、監査ログ、Deno native import / download endpoint を対象候補とする。
+
+Adlaire 内製 Deno Module Registry は、npm registry 互換レジストリではない。`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提にしてはならない。
 
 npm registry 互換レジストリ、`npm:` specifier、`package.json` 前提運用、`node_modules` 前提運用は、Node.js / npm ecosystem リスクと衝突するため標準採用しない。採用検討が必要な場合は、例外採用ではなく方針変更候補として扱い、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
