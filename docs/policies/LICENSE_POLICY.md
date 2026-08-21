@@ -33,3 +33,12 @@
 
 ライセンス変更時は、ユーザー承認、1類ルールブックとの整合確認、2類ポリシー更新、3類マスター仕様書更新を必須とする。
 
+## 5. JSR 公開とクローズド資産
+
+JSR レジストリへ公開する package は、公開可能なオープンソースコードであることを前提とする。
+
+クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
+
+WYSIWYG エディターを含む Adlaire 内製 package の公開方針は未確定とする。JSR 公開を検討する場合は、オープンソース化の可否、ライセンス、公開範囲、保守責任、Adlaire 付随プロジェクトへの影響を整理し、ユーザー承認を得る。
+
+クローズドな Adlaire 内製 Deno package の配布は、JSR ではなく Private Git + Deno import、Deno workspace、vendor 管理、または Adlaire Git Repository 本体へ早期実装する Adlaire 内製 Deno Module Registry を候補とする。

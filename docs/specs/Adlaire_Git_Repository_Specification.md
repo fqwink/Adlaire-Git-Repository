@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.0.2
+**文書バージョン**: v.0.5
 **ステータス**: Phase 2 完了・開発継続
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
@@ -53,9 +53,31 @@ GitHub 互換は、マスター仕様書とマスター開発計画で定義さ�
 
 UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換の対象外とする。UI は本プロジェクト独自の設計とし、GitHub の画面、デザイン、ブランド表現、商標表現を模倣しない。
 
-GitHub Actions、GitHub Pages、Package registry、Container registry、Copilot、Advanced Security 等は、個別に採用可否、実装時期、必要性、外部依存、セキュリティ、ライセンスを評価し、ユーザー承認を得るまで実装対象に含めない。
+GitHub Actions、GitHub Pages、汎用 Package registry、Container registry、Copilot、Advanced Security 等は、個別に採用可否、実装時期、必要性、外部依存、セキュリティ、ライセンスを評価し、ユーザー承認を得るまで実装対象に含めない。
+
+汎用 Package registry は、今後の計画として検討する。ただし、現時点では保留方針とし、実装対象、推奨候補フェーズ、実装予定として扱わない。
+
+Adlaire 内製 Deno Module Registry は、汎用 Package registry とは分離して扱う。Adlaire 内製 Deno Module Registry は、クローズドな Adlaire 内製 Deno package を Adlaire Git Repository 本体から配布するための中長期計画であり、早期フェーズで本体実装に着手する方針とする。
 
 GitHub 互換を目標とする場合でも、GitHub 固有サービスへの直接依存、GitHub の商標・ブランド表現の無承認利用、GitHub API の完全再現を前提にした無承認実装は行わない。
+
+## Adlaire 内製 Deno Module Registry 方針
+
+Adlaire 内製 Deno Module Registry は、Adlaire Group 内部向けの Deno / TypeScript / ESM module 配布基盤とする。
+
+本機能は、Adlaire Git Repository 本体へ早期実装する中長期計画対象である。初期実装では、以下を候補範囲とする。
+
+- package metadata 管理
+- version 管理
+- module artifact または module source の登録
+- checksum 管理
+- Deno native import / download endpoint
+- repository、organization、team、user に基づく認証・認可
+- publish / update / delete / download の監査ログ
+
+Adlaire 内製 Deno Module Registry は npm registry 互換レジストリではない。`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提にしてはならない。
+
+汎用 Package registry、npm registry 互換、Container registry は、本仕様の Adlaire 内製 Deno Module Registry とは別機能として扱う。汎用 Package registry は今後の計画として検討するが、保留解除とユーザー承認を得るまで実装対象に含めない。
 
 ## Phase 2 開発支援機能最小仕様
 
@@ -285,6 +307,14 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 **原則**:
 - Deno std のみ
 - フレームワーク採用禁止（内製化のみ）
+- Deno 標準ライブラリを最優先候補とする。ただし、個別モジュールの採用はユーザー承認を必須とする
+- JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする
+- JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする
+- JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする
+- クローズドライセンス、内部専用、非公開資産は JSR へ公開しない
+- クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする
+- Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する
+- npm registry 互換レジストリは標準採用しない
 - 必要最小限の外部ライブラリ
 - 外部ライブラリは内製ラッパー、内製driver、または Database Gateway の内部に閉じ込める
 - Deno、SQLite、libSQL、Git、Docker、Docker Compose、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリは、各技術の最新の安定版を採用方針とする
@@ -410,7 +440,7 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
     "fmt": "deno fmt deno.json src/ tests/",
     "lint": "deno lint",
     "test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/",
-    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=adlaire-git-repo src/main.ts"
+    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo src/main.ts"
   },
   "compilerOptions": {
     "strict": true,
@@ -430,6 +460,10 @@ adlaire-git-repository/
 ├── README.md
 ├── compose.yaml
 ├── deno.json
+├── dist/                  (生成物)
+│   └── adlaire-git-repo   (single binary)
+├── tools/
+│   └── check-adlaire-git-repository.sh
 ├── src/
 │   ├── main.ts              (エントリーポイント)
 │   ├── server.ts            (HTTP サーバー)
@@ -510,10 +544,10 @@ deno task dev
 
 ```bash
 deno task compile
-# ./adlaire-git-repo が生成される
+# ./dist/adlaire-git-repo が生成される
 
 # VPS/オンプレで実行
-./adlaire-git-repo --port 8080
+./dist/adlaire-git-repo --port 8080
 ```
 
 ---
@@ -707,7 +741,7 @@ $ /opt/adlaire-git-repo/backup.sh
 $ systemctl stop adlaire-git-repo
 
 # 4. 新バイナリへ置き換え
-$ cp ./adlaire-git-repo /opt/adlaire-git-repo/adlaire-git-repo
+$ cp ./dist/adlaire-git-repo /opt/adlaire-git-repo/adlaire-git-repo
 
 # 5. SQLite マイグレーション（必要な場合のみ）
 # ドキュメントで指定あれば実行
@@ -735,7 +769,7 @@ for INSTANCE in server1 server2 server3; do
   # 2. アップグレード実行（Phase 1-2と同じ手順）
   ssh $INSTANCE
     systemctl stop adlaire-git-repo
-    cp ./adlaire-git-repo /opt/adlaire-git-repo/
+    cp ./dist/adlaire-git-repo /opt/adlaire-git-repo/
     systemctl start adlaire-git-repo
     curl http://localhost:8080/health
 
@@ -938,6 +972,12 @@ VPS: 2GB × 1（容量に余裕）
 ---
 
 ## Web UI デザイン仕様
+
+Phase 5 では、補助的リリース判定に合わせて、Web UI のデザイン関連改良・改修方針を整理する。
+
+Phase 5 のデザイン関連改良・改修は、情報設計、画面レイアウト、視覚表現、操作導線、アクセシビリティ、可読性の改善を対象とする。UI は GitHub 互換の対象外であり、本プロジェクト独自 UI として改良・改修する。
+
+Phase 5 のデザイン関連改良・改修では、外部フレームワークを採用してはならない。外部ライブラリまたは外部ツールが必要な場合は、2類ポリシーに従い、例外採用としてユーザー承認を得る。
 
 ### 採用デザイン
 
@@ -1479,7 +1519,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: adlaire-git-repo
-          path: ./adlaire-git-repo
+          path: ./dist/adlaire-git-repo
 
   deploy:
     needs: build
@@ -1505,7 +1545,7 @@ jobs:
 
           # VPS へ転送
           scp -i ~/.ssh/id_ed25519 \
-            ./adlaire-git-repo \
+            ./dist/adlaire-git-repo \
             $VPS_USER@$VPS_HOST:/tmp/adlaire-git-repo.new
 
           # VPS 側でデプロイ実行
@@ -1625,7 +1665,7 @@ COPY . .
 # Deno permissions: allow all (本番では制限推奨)
 RUN deno compile \
   --allow-all \
-  --output=adlaire-git-repo \
+  --output=dist/adlaire-git-repo \
   src/main.ts
 
 # Stage 2: Runtime
@@ -1639,7 +1679,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Builder stage から バイナリをコピー
-COPY --from=builder /app/adlaire-git-repo .
+COPY --from=builder /app/dist/adlaire-git-repo .
 
 # SQLite データベース・Git リポジトリ用ディレクトリ
 RUN mkdir -p /app/db /app/repos /app/logs

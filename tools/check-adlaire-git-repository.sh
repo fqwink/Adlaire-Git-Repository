@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$ROOT_DIR"
 
 TMP_REL=".check-work/adlaire-git-repository-check-$$"
@@ -81,6 +81,8 @@ check_required_paths() {
     deno.json \
     Dockerfile \
     compose.yaml \
+    tools/check-adlaire-git-repository.sh \
+    dist/.gitkeep \
     docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md \
     docs/policies/DOCUMENT_CHARTER.md \
     docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md \
@@ -165,6 +167,13 @@ check_forbidden_node_files() {
   fi
 }
 
+check_forbidden_unapproved_registries() {
+  if grep -R -n -E '["'\''](jsr|npm):' "$ROOT_DIR/src" "$ROOT_DIR/tests" "$ROOT_DIR/deno.json" >/dev/null 2>&1; then
+    echo "JSR/npm registry dependencies are not allowed without explicit approval and policy updates." >&2
+    exit 1
+  fi
+}
+
 check_deno_tasks() {
   if ! grep -F '"fmt": "deno fmt deno.json src/ tests/"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the fmt task." >&2
@@ -181,7 +190,7 @@ check_deno_tasks() {
     exit 1
   fi
 
-  if ! grep -F '"compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=adlaire-git-repo src/main.ts"' deno.json >/dev/null 2>&1; then
+  if ! grep -F '"compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo src/main.ts"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the compile task." >&2
     exit 1
   fi
@@ -192,6 +201,7 @@ trap cleanup EXIT INT HUP TERM
 run_step "required path check" check_required_paths
 run_step "version policy check" check_version_policy
 run_step "forbidden Node.js project file check" check_forbidden_node_files
+run_step "forbidden unapproved registry dependency check" check_forbidden_unapproved_registries
 run_step "deno task definition check" check_deno_tasks
 
 prepare_runtime

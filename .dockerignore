@@ -1,6 +1,6 @@
 .git
 .check-work
 data
-adlaire-git-repo
+dist/adlaire-git-repo
 *.sqlite3
 *.sqlite3-*

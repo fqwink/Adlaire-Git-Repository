@@ -19,6 +19,12 @@
 - TypeScript は 6系の最新安定版を採用方針とする。
 - Node.js ランタイムは採用禁止とする。
 - フレームワークは、内製したもの以外の採用を禁止する。
+- Deno 標準ライブラリを最優先候補とする。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
+- JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする。
+- JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。
+- JSR は公開可能なオープンソース package の公開候補に限る。クローズドライセンス、内部専用、非公開資産は JSR へ公開しない。
+- npm registry 互換レジストリは、Node.js / npm ecosystem リスクと衝突するため標準採用しない。
+- クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
 - 外部ライブラリは必要最小限とし、採用する場合は例外採用としてユーザー承認を得る。
 - 例外採用した外部ライブラリは、内製ラッパー、内製 driver、または内製 Gateway の内部に閉じ込める。
 
@@ -36,6 +42,31 @@
 
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
+## 3.1 レジストリ方針
+
+Deno ランタイムにおける外部依存は、以下の優先順位で検討する。
+
+1. Deno 標準ライブラリ
+2. 内製実装
+3. 承認済みの JSR レジストリ package
+4. その他の外部依存
+
+Deno 標準ライブラリは最優先候補である。ただし、個別モジュールの採用は自動承認ではない。採用する場合は、対象モジュール、固定バージョン、利用範囲、検証方法、ライセンス影響を整理し、ユーザー承認を得る。
+
+JSR レジストリの公開 package は採用可能であり、Deno / TypeScript / ESM と相性がよい。ただし、ユーザー承認なしに採用してはならない。JSR package を採用する場合は、必要最小限の例外採用として扱い、3類マスター仕様書とマスター開発計画に利用範囲を反映する。
+
+JSR レジストリの公開 package であっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。JSR で公開されていることは、npm 互換依存の採用許可を意味しない。
+
+JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする。クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
+
+クローズドな Adlaire 内製 Deno package は、JSR へ公開しない。短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする。
+
+Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体の早期実装対象として扱う。初期実装では、Deno / TypeScript / ESM 前提の module 配布、package metadata、version 管理、checksum、認証・認可、監査ログ、Deno native import / download endpoint を対象候補とする。
+
+Adlaire 内製 Deno Module Registry は、npm registry 互換レジストリではない。`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提にしてはならない。
+
+npm registry 互換レジストリ、`npm:` specifier、`package.json` 前提運用、`node_modules` 前提運用は、Node.js / npm ecosystem リスクと衝突するため標準採用しない。採用検討が必要な場合は、例外採用ではなく方針変更候補として扱い、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
+
 ## 4. データベース方針
 
 採用対象のデータベースエンジンは SQLite と libSQL のみに限定する。
@@ -45,4 +76,3 @@ Phase 1 は SQLite を標準データベースとして進める。libSQL は SQ
 SQLite を直接触る設計は、将来の libSQL 移行計画の弊害になるため禁止する。アプリケーションコードは、必ず Database Gateway と専用 driver 層を経由して永続化処理を行う。
 
 クラウドDBホスティングを採用するかどうかは未定とする。採用する場合は、libSQL の接続先または運用形態の候補として扱い、ユーザー承認を得る。
-
