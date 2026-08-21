@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.0.12
-**ステータス**: Phase 7 着手
+**文書バージョン**: v.1.8
+**ステータス**: Phase 7 初回安定版リリース
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
 
@@ -599,12 +599,12 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
 
 正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。
 
-初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。たとえば `0.8.0` は正式表記 `v.0.8` に対応する。
+初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。安定版リリース系列では正式表記を `v.{Major}.{Minor}` とし、`deno.json` 側では `{Major}.{Minor}.0` に対応させる。たとえば `1.8.0` は正式表記 `v.1.8` に対応する。
 
 ```json
 {
   "name": "adlaire-git-repository",
-  "version": "0.8.0",
+  "version": "1.8.0",
   "license": "CLOSED",
   "exports": "./src/main.ts",
   "tasks": {
@@ -1184,7 +1184,9 @@ Phase 7 の基準バージョンは、安定版リリース判定前は `v.0.8` 
 
 Phase 7 では、既存 API、既存ドメイン機能、database schema、Database Gateway、Repository 層、Service 層の責務境界を維持する。安定版リリース判定では、既知バグ、主要 workflow、リリースノート、既知制約、対象外機能、backup / restore 手順、リポジトリ全体の整合性を確認する。
 
-Phase 7 はデフォルト安定版リリース判定フェーズであるが、自動的な公開フェーズではない。tag 作成、GitHub Releases 作成、成果物配置、release notes 公開、`v.1.8` への移行は、リリース提案と別途ユーザー承認を得るまで行わない。
+Phase 7 はデフォルト安定版リリース判定フェーズであるが、自動的な公開フェーズではない。Phase 7 着手時点では、tag 作成、GitHub Releases 作成、成果物配置、release notes 公開、`v.1.8` への移行は、リリース提案と別途ユーザー承認を得るまで行わない。
+
+ユーザー承認に基づき、Phase 7 は初回安定版リリース `v.1.8` として確定する。リリース成果物は Deno single binary を主対象とし、GitHub Releases に release notes、manifest、checksum とともに配置する。
 
 ### 採用デザイン
 

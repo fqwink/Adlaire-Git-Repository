@@ -132,24 +132,22 @@ check_version_policy() {
     exit 1
   fi
 
-  case "$version" in
-    0.*.0) ;;
-    *)
-      echo "pre-stable deno.json version must use 0.<minor>.0: $version" >&2
-      exit 1
-      ;;
-  esac
-
-  minor_version=${version#0.}
-  minor_version=${minor_version%.0}
-  case "$minor_version" in
+  major_version=${version%%.*}
+  remainder=${version#*.}
+  minor_version=${remainder%%.*}
+  patch_version=${version##*.}
+  case "$major_version$minor_version$patch_version" in
     ''|*[!0-9]*)
-      echo "pre-stable deno.json minor version must be numeric: $version" >&2
+      echo "deno.json version must use numeric Major.Minor.Patch: $version" >&2
       exit 1
       ;;
   esac
+  if [ "$patch_version" != "0" ]; then
+    echo "deno.json patch version must remain 0 for formal v.<major>.<minor> mapping: $version" >&2
+    exit 1
+  fi
 
-  formal_version="v.0.$minor_version"
+  formal_version="v.$major_version.$minor_version"
   if ! grep -F "**現行フェーズ基準バージョン**: $formal_version" docs/plans/DEVELOPMENT_PLAN.md >/dev/null 2>&1; then
     echo "deno.json version must match current phase baseline in DEVELOPMENT_PLAN.md: $formal_version" >&2
     exit 1
