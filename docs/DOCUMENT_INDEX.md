@@ -85,9 +85,36 @@
 
 ## 8. AdlaireGroup 共通テンプレート
 
-| ディレクトリ | 役割 |
+| パス | 役割 |
 |---|---|
 | `docs/tpl-governance/` | AdlaireGroup 関連プロジェクト、プロダクトへ展開する最上位ドキュメント体系の共通雛形置き場 |
+| `docs/tpl-governance/core/` | 共通コア。最上位ルールブック、ドキュメント索引、ドキュメント憲章、2類ポリシー総則の雛形 |
+| `docs/tpl-governance/policy-slots/` | 個別具体化用 policy slots。技術要件、バージョン、リリース、テスト、ライセンス、セキュリティ、データ、依存関係、デプロイの必須枠 |
+
+`docs/tpl-governance/` 配下は、現行プロジェクトの正本ではなく、AdlaireGroup 関連プロジェクト、プロダクトへ共通展開するための雛形である。
+
+### 8.1 共通コア
+
+| ドキュメント | 役割 |
+|---|---|
+| `docs/tpl-governance/core/AGENTS_TEMPLATE.md` | 最上位ルールブックの共通雛形 |
+| `docs/tpl-governance/core/DOCUMENT_INDEX_TEMPLATE.md` | ドキュメント索引の共通雛形 |
+| `docs/tpl-governance/core/DOCUMENT_CHARTER_TEMPLATE.md` | ドキュメント憲章の共通雛形 |
+| `docs/tpl-governance/core/DEVELOPMENT_POLICY_RULEBOOK_TEMPLATE.md` | 2類ポリシー総則の共通雛形 |
+
+### 8.2 policy slots
+
+| ドキュメント | 役割 |
+|---|---|
+| `docs/tpl-governance/policy-slots/TECHNICAL_REQUIREMENTS_POLICY_TEMPLATE.md` | 技術要件ポリシーの個別具体化枠 |
+| `docs/tpl-governance/policy-slots/VERSION_POLICY_TEMPLATE.md` | バージョンポリシーの個別具体化枠 |
+| `docs/tpl-governance/policy-slots/RELEASE_POLICY_TEMPLATE.md` | リリースポリシーの個別具体化枠 |
+| `docs/tpl-governance/policy-slots/TEST_POLICY_TEMPLATE.md` | テストポリシーの個別具体化枠 |
+| `docs/tpl-governance/policy-slots/LICENSE_POLICY_TEMPLATE.md` | ライセンスポリシーの個別具体化枠 |
+| `docs/tpl-governance/policy-slots/SECURITY_POLICY_TEMPLATE.md` | セキュリティポリシーの個別具体化枠 |
+| `docs/tpl-governance/policy-slots/DATA_POLICY_TEMPLATE.md` | データポリシーの個別具体化枠 |
+| `docs/tpl-governance/policy-slots/DEPENDENCY_POLICY_TEMPLATE.md` | 依存関係ポリシーの個別具体化枠 |
+| `docs/tpl-governance/policy-slots/DEPLOYMENT_POLICY_TEMPLATE.md` | デプロイポリシーの個別具体化枠 |
 
 ---
 
