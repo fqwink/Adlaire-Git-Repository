@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.0.11
+**文書バージョン**: v.0.12
 **ステータス**: Phase 6 完了・開発継続
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
@@ -465,7 +465,7 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 | **UI** | HTML + Vanilla JavaScript（内製） |
 
 **原則**:
-- Deno std のみ
+- Deno 標準機能と承認済みの最小外部依存のみ
 - フレームワーク採用禁止（内製化のみ）
 - Deno 標準ライブラリを最優先候補とする。ただし、個別モジュールの採用はユーザー承認を必須とする
 - JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする
@@ -642,17 +642,22 @@ adlaire-git-repository/
 │   ├── config.ts            (設定)
 │   ├── database/
 │   │   ├── gateway.ts       (Database Gateway)
-│   │   ├── sqlite_cli_driver.ts
-│   │   ├── sql.ts
 │   │   ├── schema.sql
+│   │   ├── sql.ts
+│   │   ├── sqlite_cli_driver.ts
 │   │   └── types.ts
 │   ├── domain/
 │   │   ├── audit.ts
 │   │   ├── auth.ts
+│   │   ├── issue.ts
+│   │   ├── organization.ts
+│   │   ├── phase2.ts
+│   │   ├── phase3.ts
 │   │   ├── repository.ts
 │   │   ├── repository_path.ts
 │   │   ├── ssh_key.ts
-│   │   └── user.ts
+│   │   ├── user.ts
+│   │   └── validation_error.ts
 │   ├── git/
 │   │   ├── git_service.ts
 │   │   └── http_backend.ts
@@ -660,20 +665,30 @@ adlaire-git-repository/
 │   │   └── responses.ts
 │   ├── repositories/
 │   │   ├── audit_log_repository.ts
+│   │   ├── issue_repository.ts
+│   │   ├── organization_repository.ts
+│   │   ├── phase2_repository.ts
+│   │   ├── phase3_repository.ts
 │   │   ├── repository_repository.ts
 │   │   └── user_repository.ts
 │   └── services/
 │   │   ├── audit_service.ts
 │   │   ├── auth_service.ts
+│   │   ├── issue_service.ts
+│   │   ├── organization_service.ts
+│   │   ├── phase2_service.ts
+│   │   ├── phase3_service.ts
 │   │   └── repository_service.ts
 ├── tests/
-│   ├── unit/
 │   ├── integration/
-│   └── support/
+│   ├── support/
+│   └── unit/
 └── docs/
+    ├── DOCUMENT_INDEX.md
     ├── plans/
     ├── policies/
-    └── specs/
+    ├── specs/
+    └── tpl-governance/
 ```
 
 ---
@@ -1157,7 +1172,7 @@ Phase 5 では、トップページの Web UI を対象に、ヘッダー、ス�
 
 Phase 6 は、Phase 7 のデフォルト安定版リリース判定へ進むための準備フェーズである。Phase 6 自体は安定版リリース対象ではない。
 
-Phase 6 では、database schema、Database Gateway、Repository 層、Service 層の責務境界を維持する。既存 API と既存ドメイン機能は維持しつつ、認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧制御等の既知バグ修正、ドキュメント整合性向上、移行・ロールバック前提整理、主要 workflow 検証を行う。
+Phase 6 では、database schema、Database Gateway、Repository 層、Service 層の責務境界を維持する。既存 API と既存ドメイン機能は維持しつつ、認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧制御、HTTP Authorization scheme の大小文字処理、Webhook secret API 非露出、Team member の Organization member 境界等の既知バグ修正、ドキュメント整合性向上、移行・ロールバック前提整理、主要 workflow 検証を行う。
 
 Phase 6 から Phase 5 相当へ戻す場合、データ構造の migration は不要である。ロールバックは、SQLite database、bare repository、設定、配布 binary のバックアップを前提に行う。
 
