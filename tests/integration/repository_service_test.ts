@@ -118,11 +118,31 @@ class MemoryAudit {
   }
 }
 
+class MemoryOwnerAccess {
+  canReadOwner(
+    owner: string,
+    actor: Principal | null,
+  ): Promise<boolean> {
+    return Promise.resolve(
+      actor?.role === "admin" || actor?.username === owner,
+    );
+  }
+
+  canWriteOwner(owner: string, actor: Principal): Promise<boolean> {
+    return Promise.resolve(actor.role === "admin" || actor.username === owner);
+  }
+}
+
 Deno.test("repository creation initializes Git storage and records visible repository state", async () => {
   const repository = new MemoryRepository();
   const git = new MemoryGit();
   const audit = new MemoryAudit();
-  const service = new RepositoryService(repository, git, audit);
+  const service = new RepositoryService(
+    repository,
+    new MemoryOwnerAccess(),
+    git,
+    audit,
+  );
   const actor: Principal = {
     id: "u1",
     username: "platform",
@@ -149,6 +169,7 @@ Deno.test("private repository access is denied anonymously and allowed for the o
   const repository = new MemoryRepository();
   const service = new RepositoryService(
     repository,
+    new MemoryOwnerAccess(),
     new MemoryGit(),
     new MemoryAudit(),
   );
@@ -178,6 +199,7 @@ Deno.test("visible repository exposes commit and tree views through repository s
   const repository = new MemoryRepository();
   const service = new RepositoryService(
     repository,
+    new MemoryOwnerAccess(),
     new MemoryGit(),
     new MemoryAudit(),
   );

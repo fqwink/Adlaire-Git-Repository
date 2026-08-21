@@ -11,12 +11,14 @@ import {
 } from "./http/responses.ts";
 import { AuditLogRepository } from "./repositories/audit_log_repository.ts";
 import { IssueRepository } from "./repositories/issue_repository.ts";
+import { OrganizationRepository } from "./repositories/organization_repository.ts";
 import { Phase2Repository } from "./repositories/phase2_repository.ts";
 import { RepositoryRepository } from "./repositories/repository_repository.ts";
 import { UserRepository } from "./repositories/user_repository.ts";
 import { AuditService } from "./services/audit_service.ts";
 import { AuthService } from "./services/auth_service.ts";
 import { IssueService } from "./services/issue_service.ts";
+import { OrganizationService } from "./services/organization_service.ts";
 import { Phase2Service } from "./services/phase2_service.ts";
 import { RepositoryService } from "./services/repository_service.ts";
 import {
@@ -24,6 +26,10 @@ import {
   parseIssueNumber,
   validateIssueState,
 } from "./domain/issue.ts";
+import {
+  validateOrganizationMemberRole,
+  validateOrganizationSlug,
+} from "./domain/organization.ts";
 import {
   parseBoolean,
   parsePositiveNumber,
@@ -53,10 +59,16 @@ export async function createApp(config: AppConfig): Promise<App> {
     auditService,
   );
   const repositoryRepository = new RepositoryRepository(database);
+  const organizationRepository = new OrganizationRepository(database);
   const gitHttp = new GitHttpBackend(config.repositoryRoot);
   const repositoryService = new RepositoryService(
     repositoryRepository,
+    organizationRepository,
     new GitService(config.repositoryRoot),
+    auditService,
+  );
+  const organizationService = new OrganizationService(
+    organizationRepository,
     auditService,
   );
   const issueService = new IssueService(
@@ -77,6 +89,7 @@ export async function createApp(config: AppConfig): Promise<App> {
         authService,
         repositoryService,
         issueService,
+        organizationService,
         phase2Service,
         gitHttp,
       ),
@@ -88,11 +101,20 @@ async function handle(
   auth: AuthService,
   repositories: RepositoryService,
   issues: IssueService,
+  organizations: OrganizationService,
   phase2: Phase2Service,
   gitHttp: GitHttpBackend,
 ): Promise<Response> {
   try {
-    return await route(request, auth, repositories, issues, phase2, gitHttp);
+    return await route(
+      request,
+      auth,
+      repositories,
+      issues,
+      organizations,
+      phase2,
+      gitHttp,
+    );
   } catch (error) {
     if (error instanceof Response) {
       return error;
@@ -107,6 +129,7 @@ async function route(
   auth: AuthService,
   repositories: RepositoryService,
   issues: IssueService,
+  organizations: OrganizationService,
   phase2: Phase2Service,
   gitHttp: GitHttpBackend,
 ): Promise<Response> {
@@ -164,6 +187,47 @@ async function route(
       label: readRequiredString(body, "label"),
     });
     return jsonResponse(token, 201);
+  }
+
+  if (url.pathname === "/api/organizations") {
+    const principal = requireAuthenticated(actor);
+    if (request.method === "GET") {
+      return jsonResponse({
+        organizations: await organizations.listOrganizations(principal),
+      });
+    }
+    if (request.method === "POST") {
+      const body = await readJson(request);
+      const organization = await organizations.createOrganization({
+        slug: readRequiredString(body, "slug"),
+        name: readRequiredString(body, "name"),
+      }, principal);
+      return jsonResponse({ organization }, 201);
+    }
+  }
+
+  const organizationRoute = matchOrganizationRoute(url.pathname);
+  if (organizationRoute !== null && request.method === "GET") {
+    return jsonResponse(
+      await organizations.getOrganization(
+        organizationRoute.slug,
+        requireAuthenticated(actor),
+      ),
+    );
+  }
+
+  const organizationMembersRoute = matchOrganizationMembersRoute(url.pathname);
+  if (organizationMembersRoute !== null && request.method === "POST") {
+    const body = await readJson(request);
+    const member = await organizations.addMember(
+      organizationMembersRoute.slug,
+      {
+        username: readRequiredString(body, "username"),
+        role: validateOrganizationMemberRole(body["role"]),
+      },
+      requireAuthenticated(actor),
+    );
+    return jsonResponse({ member }, 201);
   }
 
   if (request.method === "GET" && url.pathname === "/api/ssh-keys") {
@@ -858,6 +922,24 @@ function matchGitRoute(
 function matchSshKeyRoute(pathname: string): { id: string } | null {
   const match = pathname.match(/^\/api\/ssh-keys\/([^/]+)$/);
   return match === null ? null : { id: decodeURIComponent(match[1]) };
+}
+
+function matchOrganizationRoute(pathname: string): { slug: string } | null {
+  const match = pathname.match(/^\/api\/organizations\/([^/]+)$/);
+  if (match === null) {
+    return null;
+  }
+  return { slug: validateOrganizationSlug(decodeURIComponent(match[1])) };
+}
+
+function matchOrganizationMembersRoute(
+  pathname: string,
+): { slug: string } | null {
+  const match = pathname.match(/^\/api\/organizations\/([^/]+)\/members$/);
+  if (match === null) {
+    return null;
+  }
+  return { slug: validateOrganizationSlug(decodeURIComponent(match[1])) };
 }
 
 function renderHome(): string {

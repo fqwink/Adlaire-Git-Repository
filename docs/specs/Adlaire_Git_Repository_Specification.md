@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.0.6
+**文書バージョン**: v.0.7
 **ステータス**: Phase 2 完了・開発継続
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
@@ -78,6 +78,50 @@ Adlaire 内製 Deno Module Registry は、Adlaire Group 内部向けの Deno / T
 Adlaire 内製 Deno Module Registry は npm registry 互換レジストリではない。`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提にしてはならない。
 
 汎用 Package registry、npm registry 互換、Container registry は、本仕様の Adlaire 内製 Deno Module Registry とは別機能として扱う。汎用 Package registry は今後の計画として検討するが、保留解除とユーザー承認を得るまで実装対象に含めない。
+
+## Phase 3 Organizations 最小運用仕様
+
+Organizations は、リポジトリ所有者をユーザー単位だけでなく組織単位へ拡張するための Phase 3 最小運用機能とする。
+
+Phase 3 の Organizations 最小運用では、以下を実装対象とする。
+
+- Organization の作成
+- Organization の一覧
+- Organization の詳細取得
+- Organization member の追加
+- `owner` / `member` の最小 role 管理
+- Organization owner による Organization 所有 repository の作成
+- Organization member による Organization 所有 private repository の参照
+- Organization owner または admin による Organization 所有 repository の更新
+- 操作ログへの `organization.create` / `organization.member.add` 記録
+
+Organizations の API は、Organization 単位の REST API として提供する。
+
+```text
+GET    /api/organizations
+POST   /api/organizations
+GET    /api/organizations/{slug}
+POST   /api/organizations/{slug}/members
+```
+
+Organization 作成時の必須項目は `slug` と `name` とする。作成者は自動的に `owner` member として登録する。
+
+Organization member 追加時の必須項目は `username` とする。`role` は `owner` または `member` とし、未指定の場合は `member` とする。
+
+Phase 3 の Organizations 最小運用では、以下を対象外とする。
+
+- Teams
+- Projects
+- Organization 設定画面
+- Organization 削除
+- Organization member 削除
+- Organization member role 更新
+- Organization の公開プロフィール
+- Organization 単位の詳細な権限プリセット
+- Organization invite flow
+- 請求、プラン、外部ID連携
+
+Organization owner は Organization 所有 repository に対して書込権限を持つ。Organization member は Organization 所有 private repository を参照できるが、repository 更新、visibility 変更、削除はできない。
 
 ## Phase 2 開発支援機能最小仕様
 

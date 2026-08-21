@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.31
+**計画バージョン**: v.0.32
 **現行フェーズ基準バージョン**: v.0.3
 **ステータス**: Phase 2 完了
 
@@ -87,7 +87,7 @@
 | Phase 0 | v.0.1 | 完了 | 実装前の文書整備、設計整理、計画策定 |
 | Phase 1 | v.0.2 | 実装完了・開発検証段階 | Git 基本機能、認証、Repository CRUD、SQLite 基盤、Docker/Deno 実行環境 |
 | Phase 2 | v.0.3 | 完了 | GitHub 互換の Pull Request、Code Review、Issue、Wiki、Webhook、Release、REST API 基本機能。WYSIWYG エディター実装時期は未定 |
-| Phase 3 | v.0.4 | 未着手 | Organizations 最小運用、Teams 最小運用、Projects 最小運用、Adlaire 内製 Deno Module Registry 最小実装、運用基盤拡張 |
+| Phase 3 | v.0.4 | 実装中 | Organizations 最小運用、Teams 最小運用、Projects 最小運用、Adlaire 内製 Deno Module Registry 最小実装、運用基盤拡張 |
 | Phase 4 | v.0.5 | 未着手 | Phase 1 から Phase 3 までの統合、仕様整合、移行準備、検証導線整理 |
 | Phase 5 | v.0.6 | 未着手 | 補助的リリース判定、デザイン関連の改良・改修。安定版リリース対象外 |
 | Phase 6 | v.0.7 | 未着手 | 大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズ |
@@ -512,6 +512,22 @@ Phase 3 の基準バージョンは `v.0.4` とする。
 
 Adlaire 内製 Deno Module Registry 最小実装では、Deno / TypeScript / ESM 前提の package metadata、version 管理、module 登録、checksum、認証・認可、監査ログ、Deno native import / download endpoint を候補範囲とする。
 
+### 8.3.1 Organizations 最小運用の実装済み範囲
+
+Phase 3 の最初の実装単位として、Organizations 最小運用のうち以下を実装済み範囲とする。
+
+- Organization の作成、一覧、詳細取得
+- Organization member の追加
+- `owner` / `member` の最小 role 管理
+- 作成者を Organization owner member として登録する処理
+- Organization owner による Organization 所有 repository の作成
+- Organization member による Organization 所有 private repository の参照
+- Organization owner または admin による Organization 所有 repository の更新
+- `organization.create` / `organization.member.add` の監査ログ記録
+- Organizations 最小運用 API の統合テスト
+
+本実装単位では、Teams、Projects、Adlaire 内製 Deno Module Registry、Webhook 対象イベント拡張、高度な監査ログ、運用自動化、libSQL driver 採用可否の再評価は未実装のままとする。
+
 ### 8.4 対象外
 
 - SQLite / libSQL 以外のデータベースエンジン採用
@@ -771,3 +787,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.29 | Phase 5 / Phase 6 | v.0.6 / v.0.7 | 5系フェーズを安定版リリース対象外とし、6系フェーズを大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズとして定義 |
 | v.0.30 | Phase 3 / Phase 4 / Phase 8 | v.0.4 / v.0.5 / v.0.9 | マスター実装機能候補リストに合わせ、Phase 3 を最小運用と内製 Deno Module Registry、Phase 4 を統合・仕様整合・移行準備、Phase 8 を長期運用準備と保留解除候補再評価へ再編 |
 | v.0.31 | 全フェーズ共通 | - | Adlaire Git Repository 本体は self-host、Docker、VPS、専用サーバーを標準運用基盤とし、Deno Deploy、Turso Cloud、libSQL 系クラウドDBサービスは将来候補として保留する方針を反映 |
+| v.0.32 | Phase 3 | v.0.4 | Phase 3 を実装中へ更新し、Organizations 最小運用の実装済み範囲、未実装範囲、検証範囲を反映 |
