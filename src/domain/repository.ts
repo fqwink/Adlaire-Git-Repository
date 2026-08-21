@@ -1,3 +1,5 @@
+import { ValidationError } from "./validation_error.ts";
+
 export type RepositoryVisibility = "public" | "private";
 
 export interface RepositoryInput {
@@ -28,17 +30,19 @@ export function validateRepositoryName(
   const name = value.trim();
 
   if (!NAME_PATTERN.test(name)) {
-    throw new Error(
+    throw new ValidationError(
       `${field} must start with an alphanumeric character and contain only alphanumeric characters, dots, underscores, or hyphens.`,
     );
   }
 
   if (name.includes("..") || name.includes("/") || name.includes("\\")) {
-    throw new Error(`${field} must not contain path traversal characters.`);
+    throw new ValidationError(
+      `${field} must not contain path traversal characters.`,
+    );
   }
 
   if (name.endsWith(".git")) {
-    throw new Error(`${field} must not include the .git suffix.`);
+    throw new ValidationError(`${field} must not include the .git suffix.`);
   }
 
   return name;

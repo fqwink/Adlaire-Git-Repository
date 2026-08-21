@@ -6,7 +6,7 @@ export class SqliteCliDriver implements DatabaseDriver {
   constructor(private readonly databasePath: string) {}
 
   async execute(statement: string): Promise<void> {
-    await this.run(["-batch", this.databasePath, statement]);
+    await this.run(["-batch", this.databasePath, withPragmas(statement)]);
   }
 
   async query<T>(statement: string): Promise<T[]> {
@@ -14,7 +14,7 @@ export class SqliteCliDriver implements DatabaseDriver {
       "-batch",
       "-json",
       this.databasePath,
-      statement,
+      withPragmas(statement),
     ]);
     const trimmed = output.trim();
     if (trimmed === "") {
@@ -39,4 +39,8 @@ export class SqliteCliDriver implements DatabaseDriver {
     }
     return stdout;
   }
+}
+
+function withPragmas(statement: string): string {
+  return `PRAGMA foreign_keys = ON;\n${statement}`;
 }

@@ -36,7 +36,12 @@ export async function readJson(
     });
   }
 
-  const value = await request.json();
+  let value: unknown;
+  try {
+    value = await request.json();
+  } catch {
+    throw new Response("request body must be valid JSON.", { status: 400 });
+  }
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     throw new Response("request body must be a JSON object.", { status: 400 });
   }

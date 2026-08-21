@@ -50,6 +50,7 @@ export interface UserStore {
       readonly createdAt: string;
     } | null
   >;
+  hasAnyUser(): Promise<boolean>;
   createApiToken(input: {
     readonly id: string;
     readonly userId: string;
@@ -94,6 +95,11 @@ export class AuthService {
     readonly role?: "admin" | "developer";
   }): Promise<PublicUser> {
     const username = validateUsername(input.username);
+    if (input.role === "admin" && await this.users.hasAnyUser()) {
+      throw new Response("admin registration requires an existing admin.", {
+        status: 403,
+      });
+    }
     const now = new Date().toISOString();
     const user = await this.users.create({
       id: crypto.randomUUID(),
@@ -115,13 +121,23 @@ export class AuthService {
 
   async authenticateBasic(
     username: string,
-    password: string,
+    secret: string,
   ): Promise<Principal | null> {
-    const user = await this.users.findByUsername(validateUsername(username));
-    if (user === null || !(await verifyPassword(password, user.passwordHash))) {
+    const safeUsername = validateUsername(username);
+    const user = await this.users.findByUsername(safeUsername);
+    if (user !== null && await verifyPassword(secret, user.passwordHash)) {
+      return toPrincipal(user);
+    }
+
+    const tokenPrincipal = await this.authenticateToken(secret);
+    if (tokenPrincipal?.username === safeUsername) {
+      return tokenPrincipal;
+    }
+
+    if (user === null) {
       return null;
     }
-    return toPrincipal(user);
+    return null;
   }
 
   async authenticateToken(token: string): Promise<Principal | null> {

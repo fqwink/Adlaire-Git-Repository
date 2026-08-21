@@ -45,6 +45,16 @@ export class GitService {
       throw new Error(stderr.trim() || "git init --bare failed.");
     }
 
+    const headOutput = await new Deno.Command("git", {
+      args: ["--git-dir", path, "symbolic-ref", "HEAD", "refs/heads/main"],
+      stdout: "piped",
+      stderr: "piped",
+    }).output();
+    if (!headOutput.success) {
+      const stderr = new TextDecoder().decode(headOutput.stderr);
+      throw new Error(stderr.trim() || "git symbolic-ref HEAD failed.");
+    }
+
     return path;
   }
 

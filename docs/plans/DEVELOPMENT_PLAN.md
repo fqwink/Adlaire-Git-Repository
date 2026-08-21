@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.40
+**計画バージョン**: v.0.41
 **現行フェーズ基準バージョン**: v.0.7
 **ステータス**: Phase 6 完了
 
@@ -768,12 +768,13 @@ Phase 6 では、Phase 7 のデフォルト安定版リリース判定へ進む�
 - 1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、README、実装、テスト、検証導線、バージョン表記の整合性を確認した。
 - `docs/DOCUMENT_INDEX.md` を参照索引として新設し、最上位ドキュメント、2類ポリシー、3類マスター仕様書、計画文書、README の参照導線を整理した。
 - AdlaireGroup 関連プロジェクト、プロダクトへ共通展開する最上位ドキュメント雛形として `docs/tpl-governance/` を整備し、共通コアと個別具体化用 policy slots を分離した。
+- Phase 6 バグ精査で確認した認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧漏えいを修正し、再発防止テストを追加した。
 - 既知バグは標準検証と主要 workflow test の範囲では確認されていない。
 - Phase 6 は安定版リリースフェーズではなく、リリース対象外であることを確認した。
 
 ### 11.7 移行・ロールバック前提
 
-Phase 6 では database schema、SQLite driver、Database Gateway、Repository 層、Service 層の責務境界を変更しない。
+Phase 6 では database schema、Database Gateway、Repository 層、Service 層の責務境界を維持する。SQLite driver は Database Gateway 内部の責務として、各 SQLite CLI 実行で外部キー制約を有効化する。
 
 Phase 6 から Phase 5 相当へ戻す場合、データ構造の migration は不要である。ロールバックは以下を前提とする。
 
@@ -801,7 +802,7 @@ Phase 6 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` �
 検証結果は以下とする。
 
 ```text
-24 passed | 0 failed
+30 passed | 0 failed
 adlaire-git-repository-check-ok
 ```
 
@@ -815,7 +816,8 @@ Phase 6 の安定版準備 baseline は `tests/integration/phase6_release_prepar
 
 - `src/` と `tests/` に未処理の `TODO`、`FIXME`、`BUG` 表記は確認されていない。
 - 標準検証 `tools/check-adlaire-git-repository.sh` は成功した。
-- 検証結果は `24 passed | 0 failed` および `adlaire-git-repository-check-ok` である。
+- 検証結果は `30 passed | 0 failed` および `adlaire-git-repository-check-ok` である。
+- Phase 6 バグ精査で確認した既知バグについて、`tests/integration/phase6_bug_audit_test.ts` に再発防止の統合テストを追加した。
 - Phase 6 は安定版リリースフェーズではなく、引き続きリリース対象外である。
 - Phase 7 は未着手のままとし、安定版リリース判定へ進む場合は別途ユーザー承認を得る。
 
@@ -953,3 +955,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.38 | 全フェーズ共通 | - | リリース提案、GitHub Releases を主配置とするリリース配置、承認後のリリース自動化方針への参照を反映 |
 | v.0.39 | Phase 6 | v.0.7 | Document Index と AdlaireGroup 共通 `tpl-governance` 雛形を Phase 6 のドキュメント整合性向上として整理 |
 | v.0.40 | Phase 6 | v.0.7 | 本来の Phase 6 作業として、既知バグ確認、主要 workflow 検証、標準検証結果を再確認 |
+| v.0.41 | Phase 6 | v.0.7 | Phase 6 バグ精査で確認した認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧漏えいを修正し、再発防止テストと標準検証結果を反映 |

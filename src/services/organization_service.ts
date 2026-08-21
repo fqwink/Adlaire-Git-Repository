@@ -42,6 +42,11 @@ export class OrganizationService {
     actor: Principal,
   ): Promise<OrganizationRecord> {
     const slug = validateOrganizationSlug(input.slug);
+    if ((await this.organizations.findUserIdByUsername(slug)) !== null) {
+      throw new Response("organization slug conflicts with an existing user.", {
+        status: 409,
+      });
+    }
     const name = validateOrganizationName(input.name);
     const now = new Date().toISOString();
     const organizationId = crypto.randomUUID();
@@ -75,6 +80,13 @@ export class OrganizationService {
 
   listOrganizations(actor: Principal): Promise<OrganizationRecord[]> {
     return this.organizations.listForActor(actor);
+  }
+
+  async organizationExists(slug: string): Promise<boolean> {
+    return (await this.organizations.findBySlug(
+      validateOrganizationSlug(slug),
+    )) !==
+      null;
   }
 
   async getOrganization(

@@ -1,3 +1,5 @@
+import { ValidationError } from "./validation_error.ts";
+
 export interface SshKeyRecord {
   readonly id: string;
   readonly userId: string;
@@ -23,7 +25,9 @@ export function validateSshPublicKey(value: string): string {
     !SUPPORTED_PREFIXES.includes(prefix) || body === undefined ||
     body.length < 32
   ) {
-    throw new Error("ssh public key must be an OpenSSH public key.");
+    throw new ValidationError(
+      "ssh public key must be an OpenSSH public key.",
+    );
   }
 
   return key;

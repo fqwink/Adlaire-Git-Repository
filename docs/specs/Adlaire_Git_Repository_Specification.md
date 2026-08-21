@@ -1156,7 +1156,7 @@ Phase 5 では、トップページの Web UI を対象に、ヘッダー、ス�
 
 Phase 6 は、Phase 7 のデフォルト安定版リリース判定へ進むための準備フェーズである。Phase 6 自体は安定版リリース対象ではない。
 
-Phase 6 では、database schema、SQLite driver、Database Gateway、Repository 層、Service 層の責務境界を変更しない。既存 API と既存ドメイン機能は維持し、既知バグ確認、ドキュメント整合性向上、移行・ロールバック前提整理、主要 workflow 検証を行う。
+Phase 6 では、database schema、Database Gateway、Repository 層、Service 層の責務境界を維持する。既存 API と既存ドメイン機能は維持しつつ、認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧制御等の既知バグ修正、ドキュメント整合性向上、移行・ロールバック前提整理、主要 workflow 検証を行う。
 
 Phase 6 から Phase 5 相当へ戻す場合、データ構造の migration は不要である。ロールバックは、SQLite database、bare repository、設定、配布 binary のバックアップを前提に行う。
 

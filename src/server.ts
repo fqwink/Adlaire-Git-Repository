@@ -42,7 +42,8 @@ import {
   validateWebhookEvents,
 } from "./domain/phase2.ts";
 import { validateProjectState } from "./domain/phase3.ts";
-import type { Principal } from "./domain/user.ts";
+import { type Principal, validateUsername } from "./domain/user.ts";
+import { ValidationError } from "./domain/validation_error.ts";
 
 export interface App {
   readonly fetch: (request: Request) => Promise<Response>;
@@ -135,6 +136,15 @@ async function handle(
     if (error instanceof Response) {
       return error;
     }
+    if (error instanceof ValidationError) {
+      return jsonResponse(
+        { error: "bad_request", message: error.message },
+        400,
+      );
+    }
+    if (isSqliteUniqueConstraintError(error)) {
+      return jsonResponse({ error: "conflict" }, 409);
+    }
     console.error(error);
     return jsonResponse({ error: "internal_server_error" }, 500);
   }
@@ -164,18 +174,27 @@ async function route(
 
   const gitRoute = matchGitRoute(url.pathname);
   if (gitRoute !== null) {
-    if (isGitWriteRequest(request, gitRoute.gitPath)) {
-      await repositories.requireWritableRepository(
-        gitRoute.owner,
-        gitRoute.name,
-        requireAuthenticated(actor),
-      );
-    } else {
-      await repositories.requireVisibleRepository(
-        gitRoute.owner,
-        gitRoute.name,
-        actor,
-      );
+    try {
+      if (isGitWriteRequest(request, gitRoute.gitPath)) {
+        await repositories.requireWritableRepository(
+          gitRoute.owner,
+          gitRoute.name,
+          requireAuthenticated(actor),
+        );
+      } else {
+        await repositories.requireVisibleRepository(
+          gitRoute.owner,
+          gitRoute.name,
+          actor,
+        );
+      }
+    } catch (error) {
+      if (actor === null && error instanceof Response) {
+        if (error.status === 401 || error.status === 403) {
+          return gitAuthenticationRequired();
+        }
+      }
+      throw error;
     }
 
     return await gitHttp.handle({
@@ -189,8 +208,14 @@ async function route(
 
   if (request.method === "POST" && url.pathname === "/api/users") {
     const body = await readJson(request);
+    const username = validateUsername(readRequiredString(body, "username"));
+    if (await organizations.organizationExists(username)) {
+      throw new Response("username conflicts with an existing organization.", {
+        status: 409,
+      });
+    }
     const user = await auth.register({
-      username: readRequiredString(body, "username"),
+      username,
       password: readRequiredString(body, "password"),
       role: readRole(body["role"]),
     });
@@ -1008,6 +1033,21 @@ function requireAuthenticated(actor: Principal | null): Principal {
   return actor;
 }
 
+function gitAuthenticationRequired(): Response {
+  return new Response("authentication required.", {
+    status: 401,
+    headers: {
+      "www-authenticate": 'Basic realm="Adlaire Git Repository"',
+      "cache-control": "no-store",
+    },
+  });
+}
+
+function isSqliteUniqueConstraintError(error: unknown): boolean {
+  return error instanceof Error &&
+    error.message.includes("UNIQUE constraint failed");
+}
+
 function matchRepositoryRoute(
   pathname: string,
 ): { owner: string; name: string; suffix: string } | null {
@@ -1018,9 +1058,9 @@ function matchRepositoryRoute(
     return null;
   }
   return {
-    owner: decodeURIComponent(match[1]),
-    name: decodeURIComponent(match[2]),
-    suffix: match[3] === undefined ? "" : decodeURIComponent(match[3]),
+    owner: safeDecodeURIComponent(match[1]),
+    name: safeDecodeURIComponent(match[2]),
+    suffix: match[3] === undefined ? "" : safeDecodeURIComponent(match[3]),
   };
 }
 
@@ -1034,8 +1074,8 @@ function matchIssueCollectionRoute(
     return null;
   }
   return {
-    owner: decodeURIComponent(match[1]),
-    name: decodeURIComponent(match[2]),
+    owner: safeDecodeURIComponent(match[1]),
+    name: safeDecodeURIComponent(match[2]),
   };
 }
 
@@ -1049,9 +1089,9 @@ function matchIssueRoute(
     return null;
   }
   return {
-    owner: decodeURIComponent(match[1]),
-    name: decodeURIComponent(match[2]),
-    number: decodeURIComponent(match[3]),
+    owner: safeDecodeURIComponent(match[1]),
+    name: safeDecodeURIComponent(match[2]),
+    number: safeDecodeURIComponent(match[3]),
   };
 }
 
@@ -1066,8 +1106,8 @@ function matchRepositoryChildRoute(
     return null;
   }
   return {
-    owner: decodeURIComponent(match[1]),
-    name: decodeURIComponent(match[2]),
+    owner: safeDecodeURIComponent(match[1]),
+    name: safeDecodeURIComponent(match[2]),
   };
 }
 
@@ -1082,9 +1122,9 @@ function matchRepositoryNumberRoute(
     return null;
   }
   return {
-    owner: decodeURIComponent(match[1]),
-    name: decodeURIComponent(match[2]),
-    number: decodeURIComponent(match[3]),
+    owner: safeDecodeURIComponent(match[1]),
+    name: safeDecodeURIComponent(match[2]),
+    number: safeDecodeURIComponent(match[3]),
   };
 }
 
@@ -1099,9 +1139,9 @@ function matchRepositoryTextRoute(
     return null;
   }
   return {
-    owner: decodeURIComponent(match[1]),
-    name: decodeURIComponent(match[2]),
-    value: decodeURIComponent(match[3]),
+    owner: safeDecodeURIComponent(match[1]),
+    name: safeDecodeURIComponent(match[2]),
+    value: safeDecodeURIComponent(match[3]),
   };
 }
 
@@ -1115,15 +1155,15 @@ function matchReviewRoute(
     return null;
   }
   return {
-    owner: decodeURIComponent(match[1]),
-    name: decodeURIComponent(match[2]),
-    number: decodeURIComponent(match[3]),
+    owner: safeDecodeURIComponent(match[1]),
+    name: safeDecodeURIComponent(match[2]),
+    number: safeDecodeURIComponent(match[3]),
   };
 }
 
 function matchWebhookPingRoute(pathname: string): { id: string } | null {
   const match = pathname.match(/^\/api\/webhooks\/([^/]+)\/ping$/);
-  return match === null ? null : { id: decodeURIComponent(match[1]) };
+  return match === null ? null : { id: safeDecodeURIComponent(match[1]) };
 }
 
 function matchGitRoute(
@@ -1134,15 +1174,15 @@ function matchGitRoute(
     return null;
   }
   return {
-    owner: decodeURIComponent(match[1]),
-    name: decodeURIComponent(match[2]),
+    owner: safeDecodeURIComponent(match[1]),
+    name: safeDecodeURIComponent(match[2]),
     gitPath: match[3] ?? "",
   };
 }
 
 function matchSshKeyRoute(pathname: string): { id: string } | null {
   const match = pathname.match(/^\/api\/ssh-keys\/([^/]+)$/);
-  return match === null ? null : { id: decodeURIComponent(match[1]) };
+  return match === null ? null : { id: safeDecodeURIComponent(match[1]) };
 }
 
 function matchOrganizationRoute(pathname: string): { slug: string } | null {
@@ -1150,7 +1190,7 @@ function matchOrganizationRoute(pathname: string): { slug: string } | null {
   if (match === null) {
     return null;
   }
-  return { slug: validateOrganizationSlug(decodeURIComponent(match[1])) };
+  return { slug: validateOrganizationSlug(safeDecodeURIComponent(match[1])) };
 }
 
 function matchOrganizationMembersRoute(
@@ -1160,7 +1200,7 @@ function matchOrganizationMembersRoute(
   if (match === null) {
     return null;
   }
-  return { slug: validateOrganizationSlug(decodeURIComponent(match[1])) };
+  return { slug: validateOrganizationSlug(safeDecodeURIComponent(match[1])) };
 }
 
 function matchOrganizationTeamsRoute(
@@ -1170,7 +1210,7 @@ function matchOrganizationTeamsRoute(
   if (match === null) {
     return null;
   }
-  return { slug: validateOrganizationSlug(decodeURIComponent(match[1])) };
+  return { slug: validateOrganizationSlug(safeDecodeURIComponent(match[1])) };
 }
 
 function matchTeamMembersRoute(
@@ -1183,8 +1223,10 @@ function matchTeamMembersRoute(
     return null;
   }
   return {
-    organizationSlug: validateOrganizationSlug(decodeURIComponent(match[1])),
-    teamSlug: decodeURIComponent(match[2]),
+    organizationSlug: validateOrganizationSlug(
+      safeDecodeURIComponent(match[1]),
+    ),
+    teamSlug: safeDecodeURIComponent(match[2]),
   };
 }
 
@@ -1198,8 +1240,8 @@ function matchRegistryVersionsRoute(
     return null;
   }
   return {
-    scope: decodeURIComponent(match[1]),
-    name: decodeURIComponent(match[2]),
+    scope: safeDecodeURIComponent(match[1]),
+    name: safeDecodeURIComponent(match[2]),
   };
 }
 
@@ -1213,10 +1255,20 @@ function matchRegistryDownloadRoute(
     return null;
   }
   return {
-    scope: decodeURIComponent(match[1]),
-    name: decodeURIComponent(match[2]),
-    version: decodeURIComponent(match[3]),
+    scope: safeDecodeURIComponent(match[1]),
+    name: safeDecodeURIComponent(match[2]),
+    version: safeDecodeURIComponent(match[3]),
   };
+}
+
+function safeDecodeURIComponent(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    throw new Response("url path contains malformed percent encoding.", {
+      status: 400,
+    });
+  }
 }
 
 function renderHome(): string {

@@ -272,7 +272,7 @@ Phase 5 は安定版リリースフェーズとして扱わない。
 
 Phase 6 は、大規模なバグ修正とドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズである。Phase 6 自体は安定版リリースフェーズとして扱わない。
 
-Phase 6 では、database schema、SQLite driver、Database Gateway、Repository 層、Service 層の責務境界を変更しない。Phase 7 の安定版リリース判定へ進む前に、既知バグ確認、ドキュメント整合性向上、移行・ロールバック前提整理、主要 workflow 検証を完了する。
+Phase 6 では、database schema、Database Gateway、Repository 層、Service 層の責務境界を維持する。Phase 7 の安定版リリース判定へ進む前に、認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧制御等の既知バグ修正、ドキュメント整合性向上、移行・ロールバック前提整理、主要 workflow 検証を完了する。
 
 すべてのフェーズでは、フェーズ完了前にドキュメント等の整合性向上を必ず行う。リポジトリ整合性が取れていない状態で、次のフェーズに進んではならない。
 

@@ -23,6 +23,10 @@ interface SshKeyRow {
   created_at: string;
 }
 
+interface CountRow {
+  count: number;
+}
+
 export class UserRepository {
   constructor(private readonly database: DatabaseGateway) {}
 
@@ -59,6 +63,14 @@ export class UserRepository {
       LIMIT 1;
     `);
     return rows[0] === undefined ? null : toUserRecord(rows[0]);
+  }
+
+  async hasAnyUser(): Promise<boolean> {
+    const rows = await this.database.query<CountRow>(`
+      SELECT COUNT(*) AS count
+      FROM users;
+    `);
+    return (rows[0]?.count ?? 0) > 0;
   }
 
   async createApiToken(input: {
