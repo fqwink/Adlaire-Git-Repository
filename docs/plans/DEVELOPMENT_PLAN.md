@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.20
+**計画バージョン**: v.0.21
 **現行フェーズ基準バージョン**: v.0.3
-**ステータス**: Phase 2 Issue 最小実装中
+**ステータス**: Phase 2 最小実装完了・開発検証段階
 
 ---
 
@@ -78,7 +78,7 @@
 |---|---:|---|---|
 | Phase 0 | v.0.1 | 完了 | 実装前の文書整備、設計整理、計画策定 |
 | Phase 1 | v.0.2 | 実装完了・開発検証段階 | Git 基本機能、認証、Repository CRUD、SQLite 基盤、Docker/Deno 実行環境 |
-| Phase 2 | v.0.3 | Issue 最小実装中 | GitHub 互換の Pull Request、Issue、Wiki、Webhook、開発支援機能。WYSIWYG エディター実装時期は未定 |
+| Phase 2 | v.0.3 | 最小実装完了・開発検証段階 | GitHub 互換の Pull Request、Issue、Wiki、Webhook、Release、REST API 基本機能。WYSIWYG エディター実装時期は未定 |
 | Phase 3 | v.0.4 | 未着手 | Organizations、Teams、Projects、運用拡張 |
 | Phase 4 | v.0.5 | 未着手 | 補助的リリース判定前の統合、修正、仕様整合、移行準備 |
 | Phase 5 | v.0.6 | 未着手 | 補助的リリース判定フェーズ。ケースバイケースで安定版対象。安定版承認時のみ `v.1.6` へ進める |
@@ -320,6 +320,8 @@ Phase 2 は、Phase 1 の PR が `main` へマージされ、Phase 1 の開発�
 
 Phase 2 の初回実装対象は、ユーザー承認に基づき Issue 最小実装とする。
 
+Phase 2 は、ユーザー承認に基づき、Pull Request、Code Review、Issue、Wiki、Webhook、Release、REST API 基本機能の最小実装までを完了対象とする。
+
 ### 7.3 実装対象
 
 - Pull Request
@@ -345,6 +347,21 @@ Issue 最小実装では、以下を対象とする。
 
 Label、Assignee、Milestone、Comment、Attachment、Mention、Issue template、Project 連携、Pull Request との自動リンク、Webhook イベント送信は対象外とする。
 
+### 7.3.2 Phase 2 最小完了対象
+
+Phase 2 最小完了では、以下を対象とする。
+
+- Pull Request の作成、一覧、詳細取得、更新、`open` / `closed` / `merged` 状態管理
+- Code Review の作成、一覧、`commented` / `approved` / `changes_requested` 状態管理
+- Issue の作成、一覧、詳細取得、更新、`open` / `closed` 状態管理
+- Wiki page の作成または更新、一覧、詳細取得、version 加算
+- Webhook の作成、一覧、`ping` event の署名付き HTTP POST、delivery 成功・失敗記録
+- Release の作成、一覧、詳細取得、draft 状態保存
+- Repository 権限に基づく参照・更新制御
+- Database Gateway 経由の SQLite 永続化
+- 操作ログへの主要 action 記録
+- REST API による主要ワークフロー提供
+
 ### 7.4 対象外
 
 - Organizations / Teams の本格運用
@@ -356,6 +373,10 @@ Label、Assignee、Milestone、Comment、Attachment、Mention、Issue template�
 - クラウドDBホスティング採用
 - WYSIWYG エディター本体の実装
 - WYSIWYG エディター連携の正式採用
+- Pull Request の実 Git 差分計算、自動マージ、競合検出、CI 連携
+- Wiki page の過去本文履歴、添付ファイル、Markdown レンダリング
+- Webhook の任意 event 自動発火、配送キュー、再送管理、更新・削除
+- Release の Git tag 実在確認、成果物アップロード、更新・削除
 
 ### 7.4.1 着手条件
 
@@ -374,12 +395,12 @@ Phase 2 に着手する前に、以下を満たすこと。
 
 Phase 2 に着手する前に、最低限以下の仕様を3類マスター仕様書へ反映する。
 
-- Pull Request の作成、更新、一覧、差分表示、レビュー、マージ判定
+- Pull Request の作成、更新、一覧、詳細取得、レビュー、マージ状態管理
 - Code Review のコメント、承認、変更要求、権限確認
 - Issue の作成、更新、状態管理、担当者、ラベル
-- Wiki の保存形式、編集権限、履歴管理
-- Webhook のイベント種別、署名、再送、失敗時の扱い
-- Release 管理のタグ連携、成果物、公開範囲
+- Wiki の保存形式、編集権限、version 管理
+- Webhook のイベント種別、署名付き `ping` 送信、失敗時の記録
+- Release 管理のタグ名メタデータ、draft 状態、参照範囲
 - REST API 基本機能の認証、認可、エラー形式
 - GitHub 互換として扱う用語、URL、API の考え方、権限確認
 - GitHub 互換対象外として扱うUI、画面デザイン、画面レイアウト、視覚表現
@@ -407,11 +428,11 @@ Phase 2 の実装は、以下の順序を原則とする。
 
 Phase 2 の完了判定では、以下を必須検証として扱う。
 
-- Pull Request の作成、レビュー、マージ判定、権限確認
+- Pull Request の作成、レビュー、マージ状態管理、権限確認
 - Code Review コメントと承認状態の永続化
 - Issue の作成、更新、検索、権限確認
-- Wiki の編集、履歴、XSS 対策
-- Webhook の署名検証、イベント送信、失敗時の記録
+- Wiki の編集、version 加算、JSON API としての本文返却
+- Webhook の署名付き `ping` 送信、成功時と失敗時の delivery 記録
 - REST API 基本機能の認証、認可、エラー応答
 - GitHub 互換として定義した用語、主要ワークフロー、権限確認が3類マスター仕様書どおりに成立していること
 - Database Gateway を経由した永続化が維持されていること
@@ -420,7 +441,7 @@ Phase 2 の完了判定では、以下を必須検証として扱う。
 
 ### 7.5 完了条件
 
-- Pull Request、Issue、Wiki が3類マスター仕様書に基づいて動作する。
+- Pull Request、Code Review、Issue、Wiki、Webhook、Release が3類マスター仕様書に基づいて最小ワークフローとして動作する。
 - GitHub 互換として定義した主要ワークフローを説明できる。
 - Webhook と REST API 基本機能の権限確認が成立している。
 - Phase 2 必須検証が完了している。
@@ -624,3 +645,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.18 | 全フェーズ共通 | - | ドキュメント憲章と2類ドキュメント群の表記整合を反映 |
 | v.0.19 | 全フェーズ共通 | - | 安定版未リリース中は `v.0.x` 系を維持するバージョン整合を反映 |
 | v.0.20 | Phase 2 | v.0.3 | Phase 2 の Issue 最小実装開始、対象範囲、対象外、検証範囲を反映 |
+| v.0.21 | Phase 2 | v.0.3 | Phase 2 の Pull Request、Code Review、Issue、Wiki、Webhook、Release、REST API 基本機能の最小実装完了範囲と検証結果を反映 |
