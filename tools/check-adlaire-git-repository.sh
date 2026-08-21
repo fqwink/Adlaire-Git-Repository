@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$ROOT_DIR"
 
 TMP_REL=".check-work/adlaire-git-repository-check-$$"
@@ -81,6 +81,8 @@ check_required_paths() {
     deno.json \
     Dockerfile \
     compose.yaml \
+    tools/check-adlaire-git-repository.sh \
+    dist/.gitkeep \
     docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md \
     docs/policies/DOCUMENT_CHARTER.md \
     docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md \
@@ -188,7 +190,7 @@ check_deno_tasks() {
     exit 1
   fi
 
-  if ! grep -F '"compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=adlaire-git-repo src/main.ts"' deno.json >/dev/null 2>&1; then
+  if ! grep -F '"compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo src/main.ts"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the compile task." >&2
     exit 1
   fi

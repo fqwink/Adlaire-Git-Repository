@@ -440,7 +440,7 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
     "fmt": "deno fmt deno.json src/ tests/",
     "lint": "deno lint",
     "test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/",
-    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=adlaire-git-repo src/main.ts"
+    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo src/main.ts"
   },
   "compilerOptions": {
     "strict": true,
@@ -460,6 +460,10 @@ adlaire-git-repository/
 ├── README.md
 ├── compose.yaml
 ├── deno.json
+├── dist/                  (生成物)
+│   └── adlaire-git-repo   (single binary)
+├── tools/
+│   └── check-adlaire-git-repository.sh
 ├── src/
 │   ├── main.ts              (エントリーポイント)
 │   ├── server.ts            (HTTP サーバー)
@@ -540,10 +544,10 @@ deno task dev
 
 ```bash
 deno task compile
-# ./adlaire-git-repo が生成される
+# ./dist/adlaire-git-repo が生成される
 
 # VPS/オンプレで実行
-./adlaire-git-repo --port 8080
+./dist/adlaire-git-repo --port 8080
 ```
 
 ---
@@ -737,7 +741,7 @@ $ /opt/adlaire-git-repo/backup.sh
 $ systemctl stop adlaire-git-repo
 
 # 4. 新バイナリへ置き換え
-$ cp ./adlaire-git-repo /opt/adlaire-git-repo/adlaire-git-repo
+$ cp ./dist/adlaire-git-repo /opt/adlaire-git-repo/adlaire-git-repo
 
 # 5. SQLite マイグレーション（必要な場合のみ）
 # ドキュメントで指定あれば実行
@@ -765,7 +769,7 @@ for INSTANCE in server1 server2 server3; do
   # 2. アップグレード実行（Phase 1-2と同じ手順）
   ssh $INSTANCE
     systemctl stop adlaire-git-repo
-    cp ./adlaire-git-repo /opt/adlaire-git-repo/
+    cp ./dist/adlaire-git-repo /opt/adlaire-git-repo/
     systemctl start adlaire-git-repo
     curl http://localhost:8080/health
 
@@ -1515,7 +1519,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: adlaire-git-repo
-          path: ./adlaire-git-repo
+          path: ./dist/adlaire-git-repo
 
   deploy:
     needs: build
@@ -1541,7 +1545,7 @@ jobs:
 
           # VPS へ転送
           scp -i ~/.ssh/id_ed25519 \
-            ./adlaire-git-repo \
+            ./dist/adlaire-git-repo \
             $VPS_USER@$VPS_HOST:/tmp/adlaire-git-repo.new
 
           # VPS 側でデプロイ実行
@@ -1661,7 +1665,7 @@ COPY . .
 # Deno permissions: allow all (本番では制限推奨)
 RUN deno compile \
   --allow-all \
-  --output=adlaire-git-repo \
+  --output=dist/adlaire-git-repo \
   src/main.ts
 
 # Stage 2: Runtime
@@ -1675,7 +1679,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Builder stage から バイナリをコピー
-COPY --from=builder /app/adlaire-git-repo .
+COPY --from=builder /app/dist/adlaire-git-repo .
 
 # SQLite データベース・Git リポジトリ用ディレクトリ
 RUN mkdir -p /app/db /app/repos /app/logs
