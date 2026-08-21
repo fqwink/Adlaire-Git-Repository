@@ -24,8 +24,8 @@ Deno.test("phase 7 home UI exposes release-judgment baseline and workflow layout
 
     const html = await response.text();
     assert(
-      html.includes("Phase 7 / v.0.8"),
-      "Home UI must expose the Phase 7 release-judgment baseline before stable release approval.",
+      html.includes("Phase 7 / v.1.8"),
+      "Home UI must expose the Phase 7 stable release baseline.",
     );
     assert(html.includes('id="register-form"'));
     assert(html.includes('id="token-form"'));
