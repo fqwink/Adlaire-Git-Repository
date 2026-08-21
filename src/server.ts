@@ -10,11 +10,28 @@ import {
   textResponse,
 } from "./http/responses.ts";
 import { AuditLogRepository } from "./repositories/audit_log_repository.ts";
+import { IssueRepository } from "./repositories/issue_repository.ts";
+import { Phase2Repository } from "./repositories/phase2_repository.ts";
 import { RepositoryRepository } from "./repositories/repository_repository.ts";
 import { UserRepository } from "./repositories/user_repository.ts";
 import { AuditService } from "./services/audit_service.ts";
 import { AuthService } from "./services/auth_service.ts";
+import { IssueService } from "./services/issue_service.ts";
+import { Phase2Service } from "./services/phase2_service.ts";
 import { RepositoryService } from "./services/repository_service.ts";
+import {
+  type IssueState,
+  parseIssueNumber,
+  validateIssueState,
+} from "./domain/issue.ts";
+import {
+  parseBoolean,
+  parsePositiveNumber,
+  type PullRequestState,
+  type ReviewState,
+  validatePullRequestState,
+  validateReviewState,
+} from "./domain/phase2.ts";
 import type { Principal } from "./domain/user.ts";
 
 export interface App {
@@ -42,10 +59,27 @@ export async function createApp(config: AppConfig): Promise<App> {
     new GitService(config.repositoryRoot),
     auditService,
   );
+  const issueService = new IssueService(
+    repositoryRepository,
+    new IssueRepository(database),
+    auditService,
+  );
+  const phase2Service = new Phase2Service(
+    repositoryRepository,
+    new Phase2Repository(database),
+    auditService,
+  );
 
   return {
     fetch: (request: Request) =>
-      handle(request, authService, repositoryService, gitHttp),
+      handle(
+        request,
+        authService,
+        repositoryService,
+        issueService,
+        phase2Service,
+        gitHttp,
+      ),
   };
 }
 
@@ -53,10 +87,12 @@ async function handle(
   request: Request,
   auth: AuthService,
   repositories: RepositoryService,
+  issues: IssueService,
+  phase2: Phase2Service,
   gitHttp: GitHttpBackend,
 ): Promise<Response> {
   try {
-    return await route(request, auth, repositories, gitHttp);
+    return await route(request, auth, repositories, issues, phase2, gitHttp);
   } catch (error) {
     if (error instanceof Response) {
       return error;
@@ -70,6 +106,8 @@ async function route(
   request: Request,
   auth: AuthService,
   repositories: RepositoryService,
+  issues: IssueService,
+  phase2: Phase2Service,
   gitHttp: GitHttpBackend,
 ): Promise<Response> {
   const url = new URL(request.url);
@@ -165,6 +203,289 @@ async function route(
       visibility: readVisibility(body["visibility"]),
     }, principal);
     return jsonResponse({ repository: created }, 201);
+  }
+
+  const issueCollectionRoute = matchIssueCollectionRoute(url.pathname);
+  if (issueCollectionRoute !== null) {
+    if (request.method === "GET") {
+      return jsonResponse({
+        issues: await issues.listIssues(
+          issueCollectionRoute.owner,
+          issueCollectionRoute.name,
+          actor,
+          readIssueStateQuery(url.searchParams.get("state")),
+        ),
+      });
+    }
+
+    if (request.method === "POST") {
+      const body = await readJson(request);
+      const issue = await issues.createIssue(
+        issueCollectionRoute.owner,
+        issueCollectionRoute.name,
+        {
+          title: readRequiredString(body, "title"),
+          body: readOptionalString(body["body"], "body"),
+        },
+        requireAuthenticated(actor),
+      );
+      return jsonResponse({ issue }, 201);
+    }
+  }
+
+  const issueRoute = matchIssueRoute(url.pathname);
+  if (issueRoute !== null) {
+    const number = parseIssueNumber(issueRoute.number);
+
+    if (request.method === "GET") {
+      return jsonResponse({
+        issue: await issues.getIssue(
+          issueRoute.owner,
+          issueRoute.name,
+          number,
+          actor,
+        ),
+      });
+    }
+
+    if (request.method === "PATCH") {
+      const body = await readJson(request);
+      const issue = await issues.updateIssue(
+        issueRoute.owner,
+        issueRoute.name,
+        number,
+        {
+          title: readOptionalString(body["title"], "title"),
+          body: readOptionalString(body["body"], "body"),
+          state: body["state"] === undefined
+            ? undefined
+            : validateIssueState(body["state"]),
+        },
+        requireAuthenticated(actor),
+      );
+      return jsonResponse({ issue });
+    }
+  }
+
+  const pullCollectionRoute = matchRepositoryChildRoute(url.pathname, "pulls");
+  if (pullCollectionRoute !== null) {
+    if (request.method === "GET") {
+      return jsonResponse({
+        pullRequests: await phase2.listPullRequests(
+          pullCollectionRoute.owner,
+          pullCollectionRoute.name,
+          actor,
+          readPullRequestStateQuery(url.searchParams.get("state")),
+        ),
+      });
+    }
+    if (request.method === "POST") {
+      const body = await readJson(request);
+      const pullRequest = await phase2.createPullRequest(
+        pullCollectionRoute.owner,
+        pullCollectionRoute.name,
+        {
+          title: readRequiredString(body, "title"),
+          body: readOptionalString(body["body"], "body"),
+          sourceBranch: readRequiredString(body, "sourceBranch"),
+          targetBranch: readRequiredString(body, "targetBranch"),
+        },
+        requireAuthenticated(actor),
+      );
+      return jsonResponse({ pullRequest }, 201);
+    }
+  }
+
+  const pullRoute = matchRepositoryNumberRoute(url.pathname, "pulls");
+  if (pullRoute !== null) {
+    const number = parsePositiveNumber(pullRoute.number, "pull request number");
+    if (request.method === "GET") {
+      return jsonResponse({
+        pullRequest: await phase2.getPullRequest(
+          pullRoute.owner,
+          pullRoute.name,
+          number,
+          actor,
+        ),
+      });
+    }
+    if (request.method === "PATCH") {
+      const body = await readJson(request);
+      const pullRequest = await phase2.updatePullRequest(
+        pullRoute.owner,
+        pullRoute.name,
+        number,
+        {
+          title: readOptionalString(body["title"], "title"),
+          body: readOptionalString(body["body"], "body"),
+          state: body["state"] === undefined
+            ? undefined
+            : validatePullRequestState(body["state"]),
+          mergeCommitSha: body["mergeCommitSha"] === undefined
+            ? undefined
+            : readNullableString(body["mergeCommitSha"], "mergeCommitSha"),
+        },
+        requireAuthenticated(actor),
+      );
+      return jsonResponse({ pullRequest });
+    }
+  }
+
+  const reviewRoute = matchReviewRoute(url.pathname);
+  if (reviewRoute !== null) {
+    const number = parsePositiveNumber(
+      reviewRoute.number,
+      "pull request number",
+    );
+    if (request.method === "GET") {
+      return jsonResponse({
+        reviews: await phase2.listReviews(
+          reviewRoute.owner,
+          reviewRoute.name,
+          number,
+          actor,
+        ),
+      });
+    }
+    if (request.method === "POST") {
+      const body = await readJson(request);
+      const review = await phase2.createReview(
+        reviewRoute.owner,
+        reviewRoute.name,
+        number,
+        {
+          state: readReviewState(body["state"]),
+          body: readOptionalString(body["body"], "body"),
+        },
+        requireAuthenticated(actor),
+      );
+      return jsonResponse({ review }, 201);
+    }
+  }
+
+  const wikiCollectionRoute = matchRepositoryChildRoute(url.pathname, "wiki");
+  if (wikiCollectionRoute !== null) {
+    if (request.method === "GET") {
+      return jsonResponse({
+        pages: await phase2.listWikiPages(
+          wikiCollectionRoute.owner,
+          wikiCollectionRoute.name,
+          actor,
+        ),
+      });
+    }
+    if (request.method === "POST") {
+      const body = await readJson(request);
+      const page = await phase2.upsertWikiPage(
+        wikiCollectionRoute.owner,
+        wikiCollectionRoute.name,
+        {
+          slug: readRequiredString(body, "slug"),
+          title: readRequiredString(body, "title"),
+          body: readRequiredString(body, "body"),
+        },
+        requireAuthenticated(actor),
+      );
+      return jsonResponse({ page }, 201);
+    }
+  }
+
+  const wikiRoute = matchRepositoryTextRoute(url.pathname, "wiki");
+  if (wikiRoute !== null && request.method === "GET") {
+    return jsonResponse({
+      page: await phase2.getWikiPage(
+        wikiRoute.owner,
+        wikiRoute.name,
+        wikiRoute.value,
+        actor,
+      ),
+    });
+  }
+
+  const webhookCollectionRoute = matchRepositoryChildRoute(
+    url.pathname,
+    "webhooks",
+  );
+  if (webhookCollectionRoute !== null) {
+    if (request.method === "GET") {
+      return jsonResponse({
+        webhooks: await phase2.listWebhooks(
+          webhookCollectionRoute.owner,
+          webhookCollectionRoute.name,
+          requireAuthenticated(actor),
+        ),
+      });
+    }
+    if (request.method === "POST") {
+      const body = await readJson(request);
+      const webhook = await phase2.createWebhook(
+        webhookCollectionRoute.owner,
+        webhookCollectionRoute.name,
+        {
+          url: readRequiredString(body, "url"),
+          secret: readOptionalString(body["secret"], "secret"),
+          events: body["events"],
+          active: body["active"],
+        },
+        requireAuthenticated(actor),
+      );
+      return jsonResponse({ webhook }, 201);
+    }
+  }
+
+  const webhookPingRoute = matchWebhookPingRoute(url.pathname);
+  if (webhookPingRoute !== null && request.method === "POST") {
+    return jsonResponse({
+      delivery: await phase2.recordWebhookPing(
+        webhookPingRoute.id,
+        requireAuthenticated(actor),
+      ),
+    }, 202);
+  }
+
+  const releaseCollectionRoute = matchRepositoryChildRoute(
+    url.pathname,
+    "releases",
+  );
+  if (releaseCollectionRoute !== null) {
+    if (request.method === "GET") {
+      return jsonResponse({
+        releases: await phase2.listReleases(
+          releaseCollectionRoute.owner,
+          releaseCollectionRoute.name,
+          actor,
+        ),
+      });
+    }
+    if (request.method === "POST") {
+      const body = await readJson(request);
+      const release = await phase2.createRelease(
+        releaseCollectionRoute.owner,
+        releaseCollectionRoute.name,
+        {
+          tagName: readRequiredString(body, "tagName"),
+          title: readRequiredString(body, "title"),
+          notes: readOptionalString(body["notes"], "notes"),
+          draft: body["draft"] === undefined
+            ? undefined
+            : parseBoolean(body["draft"], false),
+        },
+        requireAuthenticated(actor),
+      );
+      return jsonResponse({ release }, 201);
+    }
+  }
+
+  const releaseRoute = matchRepositoryTextRoute(url.pathname, "releases");
+  if (releaseRoute !== null && request.method === "GET") {
+    return jsonResponse({
+      release: await phase2.getRelease(
+        releaseRoute.owner,
+        releaseRoute.name,
+        releaseRoute.value,
+        actor,
+      ),
+    });
   }
 
   const repositoryRoute = matchRepositoryRoute(url.pathname);
@@ -282,6 +603,26 @@ function readRequiredString(
   return value;
 }
 
+function readOptionalString(value: unknown, key: string): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (typeof value !== "string") {
+    throw new Response(`${key} must be a string.`, { status: 400 });
+  }
+  return value;
+}
+
+function readNullableString(value: unknown, key: string): string | null {
+  if (value === null) {
+    return null;
+  }
+  if (typeof value !== "string") {
+    throw new Response(`${key} must be a string or null.`, { status: 400 });
+  }
+  return value;
+}
+
 function readVisibility(value: unknown): "public" | "private" {
   if (value === undefined) {
     return "private";
@@ -300,6 +641,29 @@ function readRole(value: unknown): "admin" | "developer" | undefined {
     return value;
   }
   throw new Response("role must be admin or developer.", { status: 400 });
+}
+
+function readIssueStateQuery(value: string | null): IssueState | undefined {
+  if (value === null || value === "") {
+    return undefined;
+  }
+  return validateIssueState(value);
+}
+
+function readPullRequestStateQuery(
+  value: string | null,
+): PullRequestState | undefined {
+  if (value === null || value === "") {
+    return undefined;
+  }
+  return validatePullRequestState(value);
+}
+
+function readReviewState(value: unknown): ReviewState {
+  if (value === undefined) {
+    return "commented";
+  }
+  return validateReviewState(value);
 }
 
 async function authenticateRequest(
@@ -373,6 +737,108 @@ function matchRepositoryRoute(
     name: decodeURIComponent(match[2]),
     suffix: match[3] === undefined ? "" : decodeURIComponent(match[3]),
   };
+}
+
+function matchIssueCollectionRoute(
+  pathname: string,
+): { owner: string; name: string } | null {
+  const match = pathname.match(
+    /^\/api\/repositories\/([^/]+)\/([^/]+)\/issues$/,
+  );
+  if (match === null) {
+    return null;
+  }
+  return {
+    owner: decodeURIComponent(match[1]),
+    name: decodeURIComponent(match[2]),
+  };
+}
+
+function matchIssueRoute(
+  pathname: string,
+): { owner: string; name: string; number: string } | null {
+  const match = pathname.match(
+    /^\/api\/repositories\/([^/]+)\/([^/]+)\/issues\/([^/]+)$/,
+  );
+  if (match === null) {
+    return null;
+  }
+  return {
+    owner: decodeURIComponent(match[1]),
+    name: decodeURIComponent(match[2]),
+    number: decodeURIComponent(match[3]),
+  };
+}
+
+function matchRepositoryChildRoute(
+  pathname: string,
+  child: string,
+): { owner: string; name: string } | null {
+  const match = pathname.match(
+    new RegExp(`^/api/repositories/([^/]+)/([^/]+)/${child}$`),
+  );
+  if (match === null) {
+    return null;
+  }
+  return {
+    owner: decodeURIComponent(match[1]),
+    name: decodeURIComponent(match[2]),
+  };
+}
+
+function matchRepositoryNumberRoute(
+  pathname: string,
+  child: string,
+): { owner: string; name: string; number: string } | null {
+  const match = pathname.match(
+    new RegExp(`^/api/repositories/([^/]+)/([^/]+)/${child}/([^/]+)$`),
+  );
+  if (match === null) {
+    return null;
+  }
+  return {
+    owner: decodeURIComponent(match[1]),
+    name: decodeURIComponent(match[2]),
+    number: decodeURIComponent(match[3]),
+  };
+}
+
+function matchRepositoryTextRoute(
+  pathname: string,
+  child: string,
+): { owner: string; name: string; value: string } | null {
+  const match = pathname.match(
+    new RegExp(`^/api/repositories/([^/]+)/([^/]+)/${child}/([^/]+)$`),
+  );
+  if (match === null) {
+    return null;
+  }
+  return {
+    owner: decodeURIComponent(match[1]),
+    name: decodeURIComponent(match[2]),
+    value: decodeURIComponent(match[3]),
+  };
+}
+
+function matchReviewRoute(
+  pathname: string,
+): { owner: string; name: string; number: string } | null {
+  const match = pathname.match(
+    /^\/api\/repositories\/([^/]+)\/([^/]+)\/pulls\/([^/]+)\/reviews$/,
+  );
+  if (match === null) {
+    return null;
+  }
+  return {
+    owner: decodeURIComponent(match[1]),
+    name: decodeURIComponent(match[2]),
+    number: decodeURIComponent(match[3]),
+  };
+}
+
+function matchWebhookPingRoute(pathname: string): { id: string } | null {
+  const match = pathname.match(/^\/api\/webhooks\/([^/]+)\/ping$/);
+  return match === null ? null : { id: decodeURIComponent(match[1]) };
 }
 
 function matchGitRoute(

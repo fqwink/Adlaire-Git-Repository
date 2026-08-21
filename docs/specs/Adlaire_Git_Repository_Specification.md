@@ -1,6 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.0.1
+**文書バージョン**: v.0.2
+**ステータス**: Phase 2 完了・開発継続
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
 
@@ -55,6 +56,163 @@ UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換�
 GitHub Actions、GitHub Pages、Package registry、Container registry、Copilot、Advanced Security 等は、個別に採用可否、実装時期、必要性、外部依存、セキュリティ、ライセンスを評価し、ユーザー承認を得るまで実装対象に含めない。
 
 GitHub 互換を目標とする場合でも、GitHub 固有サービスへの直接依存、GitHub の商標・ブランド表現の無承認利用、GitHub API の完全再現を前提にした無承認実装は行わない。
+
+## Phase 2 開発支援機能最小仕様
+
+Issue は、リポジトリ単位でバグ、タスク、要望を管理するための開発支援機能とする。
+
+Phase 2 の Issue 最小実装では、以下を実装対象とする。
+
+- Issue の作成
+- Issue の一覧
+- Issue の詳細取得
+- Issue のタイトル、本文、状態の更新
+- Issue の `open` / `closed` 状態管理
+- リポジトリ単位の連番
+- 作成者の記録
+- 操作ログへの `issue.create` / `issue.update` 記録
+- Repository 権限に基づく参照制御
+- Issue 作成者、Repository owner、admin による更新制御
+
+Issue の API は、Repository 配下の REST API として提供する。
+
+```text
+GET    /api/repositories/{owner}/{name}/issues
+POST   /api/repositories/{owner}/{name}/issues
+GET    /api/repositories/{owner}/{name}/issues/{number}
+PATCH  /api/repositories/{owner}/{name}/issues/{number}
+```
+
+`GET /issues` は、`state=open` または `state=closed` による絞り込みを許可する。`state` を指定しない場合は、対象Repositoryで参照可能なすべてのIssueを返す。
+
+Issue 作成時の必須項目は `title` とする。`body` は任意とし、未指定の場合は空文字として扱う。
+
+Phase 2 の Issue 最小実装では、以下を対象外とする。
+
+- Label
+- Assignee
+- Milestone
+- Comment
+- Attachment
+- Mention
+- Issue template
+- Project 連携
+- Pull Request との自動リンク
+- Webhook イベント送信
+
+これらの対象外機能を追加する場合は、マスター開発計画と本仕様書を改訂し、ユーザー承認を得てから実装する。
+
+### Pull Request / Code Review 最小仕様
+
+Pull Request は、リポジトリ単位で変更提案、レビュー、マージ状態を管理するための開発支援機能とする。
+
+Phase 2 の Pull Request / Code Review 最小実装では、以下を実装対象とする。
+
+- Pull Request の作成
+- Pull Request の一覧
+- Pull Request の詳細取得
+- Pull Request のタイトル、本文、状態、マージコミットSHAの更新
+- Pull Request の `open` / `closed` / `merged` 状態管理
+- Pull Request のリポジトリ単位の連番
+- Code Review の作成
+- Code Review の一覧
+- Code Review の `commented` / `approved` / `changes_requested` 状態管理
+- Repository 権限に基づく参照制御
+- Repository owner、admin による Pull Request 更新制御
+- 操作ログへの `pull_request.create` / `pull_request.update` / `code_review.create` 記録
+
+Pull Request / Code Review の API は、Repository 配下の REST API として提供する。
+
+```text
+GET    /api/repositories/{owner}/{name}/pulls
+POST   /api/repositories/{owner}/{name}/pulls
+GET    /api/repositories/{owner}/{name}/pulls/{number}
+PATCH  /api/repositories/{owner}/{name}/pulls/{number}
+GET    /api/repositories/{owner}/{name}/pulls/{number}/reviews
+POST   /api/repositories/{owner}/{name}/pulls/{number}/reviews
+```
+
+Pull Request 作成時の必須項目は `title`、`sourceBranch`、`targetBranch` とする。`body` は任意とし、未指定の場合は空文字として扱う。
+
+`state=merged` へ更新する場合は `mergeCommitSha` を必須とする。Phase 2 最小実装では、実 Git branch の差分計算、競合検出、自動マージ、CI 状態連携、レビュー必須条件は対象外とする。
+
+### Wiki 最小仕様
+
+Wiki は、リポジトリ単位の簡易文書管理機能とする。
+
+Phase 2 の Wiki 最小実装では、以下を実装対象とする。
+
+- Wiki page の作成または更新
+- Wiki page の一覧
+- Wiki page の詳細取得
+- `slug` による page 識別
+- 更新ごとの version 加算
+- Repository 権限に基づく参照制御
+- Repository owner、admin による編集制御
+- 操作ログへの `wiki.upsert` 記録
+
+Wiki の API は、Repository 配下の REST API として提供する。
+
+```text
+GET    /api/repositories/{owner}/{name}/wiki
+POST   /api/repositories/{owner}/{name}/wiki
+GET    /api/repositories/{owner}/{name}/wiki/{slug}
+```
+
+Phase 2 最小実装では、Wiki page の過去本文履歴、添付ファイル、ページ間リンク解決、Markdown レンダリング、WYSIWYG エディター連携は対象外とする。API は JSON として本文を返すため、HTML レンダリング時の XSS 対策は、Web UI 実装フェーズで別途検証対象とする。
+
+### Webhook 最小仕様
+
+Webhook は、Repository owner または admin が、リポジトリ単位で外部通知先を登録するための開発支援機能とする。
+
+Phase 2 の Webhook 最小実装では、以下を実装対象とする。
+
+- Webhook の作成
+- Webhook の一覧
+- `http` / `https` URL の検証
+- event 名の検証
+- secret の保存
+- `ping` event の署名付き HTTP POST 送信
+- delivery の成功または失敗記録
+- Repository owner、admin による参照・作成・ping 制御
+- 操作ログへの `webhook.create` / `webhook.ping` 記録
+
+Webhook の API は、Repository 配下および Webhook 単位の REST API として提供する。
+
+```text
+GET    /api/repositories/{owner}/{name}/webhooks
+POST   /api/repositories/{owner}/{name}/webhooks
+POST   /api/webhooks/{id}/ping
+```
+
+`ping` event 送信時は、`x-adlaire-event: ping` と `x-adlaire-signature-256: sha256={HMAC_SHA256}` を付与する。
+
+Phase 2 最小実装では、任意 event の自動発火、再送管理、配送キュー、Webhook 更新・削除、受信側 Webhook の署名検証エンドポイントは対象外とする。
+
+### Release 最小仕様
+
+Release は、リポジトリ単位でタグ名に紐づく公開メタデータを管理するための機能とする。
+
+Phase 2 の Release 最小実装では、以下を実装対象とする。
+
+- Release の作成
+- Release の一覧
+- Release の詳細取得
+- `tagName` の一意性管理
+- `draft` 状態の保存
+- Repository 権限に基づく参照制御
+- Repository owner、admin による作成制御
+- 操作ログへの `release.create` 記録
+
+Release の API は、Repository 配下の REST API として提供する。
+
+```text
+GET    /api/repositories/{owner}/{name}/releases
+POST   /api/repositories/{owner}/{name}/releases
+GET    /api/repositories/{owner}/{name}/releases/{tagName}
+```
+
+Phase 2 最小実装では、Git tag の実在確認、成果物アップロード、release asset、公開範囲の細分化、Release 更新・削除は対象外とする。
 
 ## OSS Git プロバイダー参考方針
 
@@ -239,19 +397,19 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
 
 正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。
 
-初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。たとえば `0.2.0` は正式表記 `v.0.2` に対応する。
+初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。たとえば `0.3.0` は正式表記 `v.0.3` に対応する。
 
 ```json
 {
   "name": "adlaire-git-repository",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "CLOSED",
   "exports": "./src/main.ts",
   "tasks": {
     "dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run src/main.ts",
     "fmt": "deno fmt deno.json src/ tests/",
     "lint": "deno lint",
-    "test": "deno test --allow-read --allow-write --allow-env --allow-run tests/",
+    "test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/",
     "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=adlaire-git-repo src/main.ts"
   },
   "compilerOptions": {
@@ -418,7 +576,7 @@ $ tar -czf /backup/repos_$(date +\%Y\%m\%d).tar.gz /home/gitrepo/repos/
 
 ---
 
-### Phase 2: PR/Issue + Wiki
+### Phase 2: PR/Issue/Wiki/Webhook/Release
 
 **構成**
 ```
@@ -683,7 +841,7 @@ VPS: 2GB × 1
 
 ---
 
-### Phase 2: PR/Issue + Wiki
+### Phase 2: PR/Issue/Wiki/Webhook/Release
 
 **Xserver VPS**
 ```
@@ -1100,7 +1258,7 @@ Optimization:
 テーマ: ライトテーマのみ
 ```
 
-**Phase 2: PR/Issue + Wiki**
+**Phase 2: PR/Issue/Wiki/Webhook/Release**
 ```
 追加:
   - Issues/PR タブ
