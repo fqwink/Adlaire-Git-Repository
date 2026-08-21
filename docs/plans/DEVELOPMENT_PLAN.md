@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.35
-**現行フェーズ基準バージョン**: v.0.5
-**ステータス**: Phase 4 完了
+**計画バージョン**: v.0.36
+**現行フェーズ基準バージョン**: v.0.6
+**ステータス**: Phase 5 完了
 
 ---
 
@@ -91,7 +91,7 @@
 | Phase 2 | v.0.3 | 完了 | GitHub 互換の Pull Request、Code Review、Issue、Wiki、Webhook、Release、REST API 基本機能。WYSIWYG エディター実装時期は未定 |
 | Phase 3 | v.0.4 | 完了 | Organizations 最小運用、Teams 最小運用、Projects 最小運用、Adlaire 内製 Deno Module Registry 最小実装、運用基盤拡張 |
 | Phase 4 | v.0.5 | 完了 | Phase 1 から Phase 3 までの統合、仕様整合、移行準備、検証導線整理 |
-| Phase 5 | v.0.6 | 未着手 | 補助的リリース判定、デザイン関連の改良・改修。安定版リリース対象外 |
+| Phase 5 | v.0.6 | 完了 | 補助的リリース判定、デザイン関連の改良・改修。安定版リリース対象外 |
 | Phase 6 | v.0.7 | 未着手 | 大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズ |
 | Phase 7 | v.0.8 / 安定版承認時 v.1.8 | 未着手 | デフォルト安定版リリースフェーズ |
 | Phase 8 | v.0.9 / 初回安定版済みの場合 v.1.9 | 未着手 | 7系安定版判定後の長期運用準備、保留解除候補の再評価、検証 |
@@ -693,6 +693,33 @@ Phase 5 のデザイン関連作業では、外部フレームワークを採用
 - 既知バグが残っていない。
 - リポジトリ全体の整合性確認と整合性向上が完了している。
 
+### 10.6 Phase 5 実装完了範囲
+
+Phase 5 では、既存 API と既存ドメイン機能を変更せず、トップページの Web UI を対象にデザイン関連の改良・改修を行った。
+
+実装完了範囲は以下とする。
+
+- トップページの Phase 表記を `Phase 5 / v.0.6` へ更新
+- ヘッダー、ステータス領域、フォーム領域、Repository 一覧領域の情報設計を整理
+- ユーザー登録、API token 発行、Repository 作成、Repository 更新の主要導線を維持
+- Repository 一覧を owner/name、clone URL、visibility の役割ごとに読み取りやすく整理
+- モバイル、デスクトップ双方で破綻しにくい responsive layout を追加
+- focus visible、status live region、色、余白、文字サイズ、状態表示を整理
+- 外部フレームワーク、外部ライブラリ、Node.js runtime、npm ecosystem を採用しない
+
+### 10.7 Phase 5 検証結果
+
+Phase 5 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` とする。
+
+検証結果は以下とする。
+
+```text
+24 passed | 0 failed
+adlaire-git-repository-check-ok
+```
+
+Phase 5 の UI 表示契約は `tests/integration/phase5_ui_test.ts` で検証する。
+
 ---
 
 ## 11. Phase 6: 安定版リリース準備
@@ -856,3 +883,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.33 | Phase 3 | v.0.4 | Teams、Projects、Adlaire 内製 Deno Module Registry、Webhook event dispatch、Audit log 参照、Operations status、libSQL 再評価参照の最小運用を実装し、Phase 3 完了へ更新 |
 | v.0.34 | Phase 4 | v.0.5 | Phase 1 から Phase 3 までの統合として Organization 所有 private repository の権限境界を Issue、Pull Request、Code Review、Wiki、Webhook、Release へ統合し、仕様整合、移行境界、検証導線を整理して Phase 4 完了へ更新 |
 | v.0.35 | 全フェーズ共通 | - | フェーズ単位でドキュメント等の整合性向上を必須化し、リポジトリ整合性が取れていない状態で次フェーズへ進むことを禁止する方針を反映 |
+| v.0.36 | Phase 5 | v.0.6 | Web UI の情報設計、画面レイアウト、視覚表現、操作導線、アクセシビリティ、可読性を改善し、Phase 5 完了へ更新 |

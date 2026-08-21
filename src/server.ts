@@ -1227,39 +1227,169 @@ function renderHome(): string {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Adlaire Git Repository</title>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 0; color: #1f2937; background: #f8fafc; }
-    main { max-width: 1040px; margin: 0 auto; padding: 2rem; }
-    section { margin-top: 1.5rem; padding: 1rem 0; border-top: 1px solid #d1d5db; }
-    label { display: block; margin-top: 0.75rem; font-weight: 600; }
-    input, select, button { font: inherit; padding: 0.55rem 0.65rem; margin-top: 0.25rem; }
-    input, select { width: min(100%, 420px); border: 1px solid #9ca3af; border-radius: 6px; background: white; }
-    button { border: 1px solid #1f2937; background: #1f2937; color: white; border-radius: 6px; cursor: pointer; }
-    ul { padding-left: 1.25rem; }
-    code { background: #e5e7eb; padding: 0.1rem 0.3rem; border-radius: 4px; }
-    .status { min-height: 1.5rem; color: #374151; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --surface-muted: #eef2f7;
+      --border: #ccd3dd;
+      --border-strong: #8b96a8;
+      --text: #17202e;
+      --muted: #5d6878;
+      --accent: #126159;
+      --accent-strong: #0b403b;
+      --danger: #9b1c1c;
+      --shadow: 0 1px 2px rgba(23, 32, 46, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+    }
+    main { max-width: 1180px; margin: 0 auto; padding: 1.5rem; }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 0 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h1, h2 { margin: 0; line-height: 1.2; letter-spacing: 0; }
+    h1 { font-size: 1.65rem; }
+    h2 { font-size: 1rem; }
+    section { margin-top: 1.25rem; }
+    label { display: block; margin-top: 0.75rem; font-size: 0.92rem; font-weight: 650; color: var(--text); }
+    input, select, button { font: inherit; }
+    input, select {
+      width: 100%;
+      min-height: 2.45rem;
+      margin-top: 0.3rem;
+      padding: 0.55rem 0.65rem;
+      border: 1px solid var(--border-strong);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+    }
+    input:focus, select:focus, button:focus-visible {
+      outline: 3px solid rgba(18, 97, 89, 0.24);
+      outline-offset: 2px;
+    }
+    button {
+      min-height: 2.45rem;
+      margin-top: 0.9rem;
+      padding: 0.55rem 0.85rem;
+      border: 1px solid var(--accent-strong);
+      background: var(--accent);
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 650;
+    }
+    button:hover { background: var(--accent-strong); }
+    code {
+      display: inline-block;
+      max-width: 100%;
+      padding: 0.12rem 0.35rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--surface-muted);
+      color: var(--text);
+      overflow-wrap: anywhere;
+    }
+    .phase { color: var(--muted); font-size: 0.95rem; margin-top: 0.35rem; }
+    .status {
+      min-height: 2.25rem;
+      width: min(100%, 520px);
+      padding: 0.55rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--muted);
+      box-shadow: var(--shadow);
+    }
+    .status[data-kind="error"] { border-color: var(--danger); color: var(--danger); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+    .panel {
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .toolbar button { margin-top: 0; }
+    .repository-list {
+      display: grid;
+      gap: 0.65rem;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    .repository-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.75rem;
+      align-items: center;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+    }
+    .repository-name { min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+    .repository-meta { margin-top: 0.25rem; color: var(--muted); font-size: 0.9rem; }
+    .visibility {
+      padding: 0.16rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-muted);
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    @media (max-width: 680px) {
+      main { padding: 1rem; }
+      header, .toolbar { align-items: stretch; flex-direction: column; }
+      .status { width: 100%; }
+      .repository-item { grid-template-columns: 1fr; }
+      button { width: 100%; }
+    }
   </style>
 </head>
 <body>
   <main>
-    <h1>Adlaire Git Repository</h1>
-    <p>Phase 1</p>
-    <div class="status" id="status"></div>
+    <header>
+      <div>
+        <h1>Adlaire Git Repository</h1>
+        <div class="phase">Phase 5 / v.0.6</div>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+    </header>
     <section class="grid">
-      <form id="register-form">
+      <form class="panel" id="register-form">
         <h2>ユーザー登録</h2>
         <label>Username <input name="username" autocomplete="username" required></label>
         <label>Password <input name="password" type="password" autocomplete="new-password" required></label>
         <button type="submit">登録</button>
       </form>
-      <form id="token-form">
+      <form class="panel" id="token-form">
         <h2>API token</h2>
         <label>Username <input name="username" autocomplete="username" required></label>
         <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
         <label>Label <input name="label" value="browser" required></label>
         <button type="submit">発行</button>
       </form>
-      <form id="repo-form">
+      <form class="panel" id="repo-form">
         <h2>Repository作成</h2>
         <label>Owner <input name="owner" required></label>
         <label>Name <input name="name" required></label>
@@ -1272,10 +1402,12 @@ function renderHome(): string {
         <button type="submit">作成</button>
       </form>
     </section>
-    <section>
-      <h2>Repositories</h2>
-      <button id="refresh" type="button">更新</button>
-      <ul id="repositories"></ul>
+    <section class="panel">
+      <div class="toolbar">
+        <h2>Repositories</h2>
+        <button id="refresh" type="button">更新</button>
+      </div>
+      <ul class="repository-list" id="repositories"></ul>
     </section>
   </main>
   <script>
@@ -1283,8 +1415,9 @@ function renderHome(): string {
     const status = document.querySelector("#status");
     const repositories = document.querySelector("#repositories");
 
-    function setStatus(message) {
+    function setStatus(message, kind = "info") {
       status.textContent = message;
+      status.dataset.kind = kind;
     }
 
     function headers(json = true) {
@@ -1302,27 +1435,39 @@ function renderHome(): string {
 
     document.querySelector("#register-form").addEventListener("submit", async (event) => {
       event.preventDefault();
-      const data = Object.fromEntries(new FormData(event.currentTarget));
-      await request("/api/users", { method: "POST", headers: headers(), body: JSON.stringify(data) });
-      setStatus("ユーザーを登録しました。");
+      try {
+        const data = Object.fromEntries(new FormData(event.currentTarget));
+        await request("/api/users", { method: "POST", headers: headers(), body: JSON.stringify(data) });
+        setStatus("ユーザーを登録しました。");
+      } catch (error) {
+        setStatus(error.message, "error");
+      }
     });
 
     document.querySelector("#token-form").addEventListener("submit", async (event) => {
       event.preventDefault();
-      const data = Object.fromEntries(new FormData(event.currentTarget));
-      const result = await request("/api/tokens", { method: "POST", headers: headers(), body: JSON.stringify(data) });
-      state.token = result.token;
-      localStorage.setItem("adlaireToken", state.token);
-      setStatus("API tokenを保存しました。");
-      await loadRepositories();
+      try {
+        const data = Object.fromEntries(new FormData(event.currentTarget));
+        const result = await request("/api/tokens", { method: "POST", headers: headers(), body: JSON.stringify(data) });
+        state.token = result.token;
+        localStorage.setItem("adlaireToken", state.token);
+        setStatus("API tokenを保存しました。");
+        await loadRepositories();
+      } catch (error) {
+        setStatus(error.message, "error");
+      }
     });
 
     document.querySelector("#repo-form").addEventListener("submit", async (event) => {
       event.preventDefault();
-      const data = Object.fromEntries(new FormData(event.currentTarget));
-      await request("/api/repositories", { method: "POST", headers: headers(), body: JSON.stringify(data) });
-      setStatus("Repositoryを作成しました。");
-      await loadRepositories();
+      try {
+        const data = Object.fromEntries(new FormData(event.currentTarget));
+        await request("/api/repositories", { method: "POST", headers: headers(), body: JSON.stringify(data) });
+        setStatus("Repositoryを作成しました。");
+        await loadRepositories();
+      } catch (error) {
+        setStatus(error.message, "error");
+      }
     });
 
     document.querySelector("#refresh").addEventListener("click", loadRepositories);
@@ -1332,14 +1477,26 @@ function renderHome(): string {
       const result = await request("/api/repositories", { headers: headers(false) });
       for (const repo of result.repositories) {
         const item = document.createElement("li");
+        item.className = "repository-item";
+        const detail = document.createElement("div");
+        const name = document.createElement("div");
+        name.className = "repository-name";
+        name.textContent = repo.owner + "/" + repo.name;
+        const meta = document.createElement("div");
+        meta.className = "repository-meta";
         const code = document.createElement("code");
         code.textContent = "/git/" + repo.owner + "/" + repo.name + ".git";
-        item.append(repo.owner + "/" + repo.name + " [" + repo.visibility + "] ", code);
+        meta.append(code);
+        detail.append(name, meta);
+        const visibility = document.createElement("span");
+        visibility.className = "visibility";
+        visibility.textContent = repo.visibility;
+        item.append(detail, visibility);
         repositories.append(item);
       }
     }
 
-    loadRepositories().catch((error) => setStatus(error.message));
+    loadRepositories().catch((error) => setStatus(error.message, "error"));
   </script>
 </body>
 </html>`;
