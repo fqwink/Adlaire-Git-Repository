@@ -55,6 +55,8 @@ UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換�
 
 GitHub Actions、GitHub Pages、汎用 Package registry、Container registry、Copilot、Advanced Security 等は、個別に採用可否、実装時期、必要性、外部依存、セキュリティ、ライセンスを評価し、ユーザー承認を得るまで実装対象に含めない。
 
+汎用 Package registry は、今後の計画として検討する。ただし、現時点では保留方針とし、実装対象、推奨候補フェーズ、実装予定として扱わない。
+
 Adlaire 内製 Deno Module Registry は、汎用 Package registry とは分離して扱う。Adlaire 内製 Deno Module Registry は、クローズドな Adlaire 内製 Deno package を Adlaire Git Repository 本体から配布するための中長期計画であり、早期フェーズで本体実装に着手する方針とする。
 
 GitHub 互換を目標とする場合でも、GitHub 固有サービスへの直接依存、GitHub の商標・ブランド表現の無承認利用、GitHub API の完全再現を前提にした無承認実装は行わない。
@@ -75,7 +77,7 @@ Adlaire 内製 Deno Module Registry は、Adlaire Group 内部向けの Deno / T
 
 Adlaire 内製 Deno Module Registry は npm registry 互換レジストリではない。`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提にしてはならない。
 
-汎用 Package registry、npm registry 互換、Container registry は、本仕様の Adlaire 内製 Deno Module Registry とは別機能として扱い、ユーザー承認を得るまで実装対象に含めない。
+汎用 Package registry、npm registry 互換、Container registry は、本仕様の Adlaire 内製 Deno Module Registry とは別機能として扱う。汎用 Package registry は今後の計画として検討するが、保留解除とユーザー承認を得るまで実装対象に含めない。
 
 ## Phase 2 開発支援機能最小仕様
 

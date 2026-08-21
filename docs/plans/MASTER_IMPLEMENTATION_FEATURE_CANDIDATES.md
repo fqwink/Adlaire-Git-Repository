@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター実装機能候補リスト
 **対象**: Auris / Adlaire Git Repository
-**文書バージョン**: v.0.6
+**文書バージョン**: v.0.7
 **ステータス**: 候補整理中
 
 ---
@@ -90,7 +90,7 @@ Phase 2 補強候補は、Phase 2 の中核候補を安全に運用するため�
 | Code search | 保留 | 検索インデックス、性能、ストレージ設計が必要であり、小規模運用では後回しにできるため |
 | Pages 相当 | 保留 | 静的ホスティング機能であり、Git ホスティング本体の優先度より低いため |
 | CI / Actions 互換 | 保留 | 実行環境、権限分離、ジョブ隔離、セキュリティ設計が重いため |
-| 汎用 Package registry | 保留 | Adlaire 内製 Deno Module Registry とは別機能であり、容量管理、認証、配布設計が重いため |
+| 汎用 Package registry | 保留 | 今後の計画として検討するが、Adlaire 内製 Deno Module Registry とは別機能であり、容量管理、認証、配布設計が重いため |
 | Container registry | 保留 | Git ホスティング本体から外れ、ストレージ、セキュリティ、運用負荷が大きいため |
 | Advanced Security | 保留 | 脆弱性DB、依存関係解析、スキャン基盤など外部依存や運用負荷が大きいため |
 
@@ -104,7 +104,7 @@ Adlaire 内製 Deno Module Registry は、汎用 Package registry とは分離�
 
 初期候補範囲は、package metadata、version 管理、module 登録、checksum、Deno native import / download endpoint、認証・認可、監査ログとする。
 
-汎用 Package registry、npm registry 互換レジストリ、Container registry は保留候補のままとし、本候補に含めない。
+汎用 Package registry は今後の計画として検討するが、保留候補のままとし、本候補に含めない。npm registry 互換レジストリ、Container registry も保留候補のままとする。
 
 ## 5. 採用見送り候補
 
@@ -127,3 +127,4 @@ Adlaire 内製 Deno Module Registry は、汎用 Package registry とは分離�
 | v.0.4 | 保留候補はフェーズ候補ではなく保留扱いであることを明確化 |
 | v.0.5 | Phase 2 最小実装範囲に合わせて Release 管理候補の説明を整合 |
 | v.0.6 | Adlaire 内製 Deno Module Registry を汎用 Package registry から分離し、Phase 3 早期実装候補として明記 |
+| v.0.7 | 汎用 Package registry は今後の計画として検討するが、現時点では保留方針であることを明記 |

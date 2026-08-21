@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.26
+**計画バージョン**: v.0.27
 **現行フェーズ基準バージョン**: v.0.3
 **ステータス**: Phase 2 完了
 
@@ -517,6 +517,8 @@ Adlaire 内製 Deno Module Registry 最小実装では、Deno / TypeScript / ESM
 - クラウドDBホスティングの無承認採用
 - npm registry 互換レジストリ、汎用 Package registry、Container registry
 
+汎用 Package registry は今後の計画として検討する。ただし、Phase 3 では保留方針とし、Adlaire 内製 Deno Module Registry 最小実装の対象範囲へ含めない。
+
 ### 8.5 完了条件
 
 - 組織・チーム単位の権限管理が成立している。
@@ -687,3 +689,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.24 | 全フェーズ共通 | - | Deno 標準ライブラリ優先、承認済み JSR 公開ライブラリ採用可、未承認 JSR 採用禁止、クローズド資産の JSR 公開禁止、Adlaire 内製 Deno Module Registry 方針を反映 |
 | v.0.25 | Phase 3 | v.0.4 | Adlaire 内製 Deno Module Registry を中長期計画かつ早期の本体実装対象として Phase 3 へ反映 |
 | v.0.26 | 全フェーズ共通 | - | JSR 公開ライブラリであっても npm 互換、npm specifier、Node.js / npm ecosystem 依存を前提とするものは採用禁止であることを明記 |
+| v.0.27 | Phase 3 | v.0.4 | 汎用 Package registry は今後の計画として検討するが、現時点では保留方針であり Phase 3 実装対象外であることを明記 |
