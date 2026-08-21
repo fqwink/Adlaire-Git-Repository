@@ -1,7 +1,7 @@
 import { createApp } from "../../src/server.ts";
 import { assert, assertEquals } from "../support/assert.ts";
 
-Deno.test("phase 6 home UI exposes release-preparation baseline and workflow layout", async () => {
+Deno.test("phase 7 home UI exposes release-judgment baseline and workflow layout", async () => {
   const root = await Deno.makeTempDir();
   const app = await createApp({
     host: "127.0.0.1",
@@ -24,8 +24,8 @@ Deno.test("phase 6 home UI exposes release-preparation baseline and workflow lay
 
     const html = await response.text();
     assert(
-      html.includes("Phase 6 / v.0.7"),
-      "Home UI must expose the Phase 6 release-preparation baseline.",
+      html.includes("Phase 7 / v.0.8"),
+      "Home UI must expose the Phase 7 release-judgment baseline before stable release approval.",
     );
     assert(html.includes('id="register-form"'));
     assert(html.includes('id="token-form"'));

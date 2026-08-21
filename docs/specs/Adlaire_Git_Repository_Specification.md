@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
 **文書バージョン**: v.0.12
-**ステータス**: Phase 6 完了・開発継続
+**ステータス**: Phase 7 着手
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
 
@@ -599,12 +599,12 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
 
 正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。
 
-初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。たとえば `0.7.0` は正式表記 `v.0.7` に対応する。
+初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。たとえば `0.8.0` は正式表記 `v.0.8` に対応する。
 
 ```json
 {
   "name": "adlaire-git-repository",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "license": "CLOSED",
   "exports": "./src/main.ts",
   "tasks": {
@@ -1175,6 +1175,16 @@ Phase 6 は、Phase 7 のデフォルト安定版リリース判定へ進むた�
 Phase 6 では、database schema、Database Gateway、Repository 層、Service 層の責務境界を維持する。既存 API と既存ドメイン機能は維持しつつ、認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧制御、HTTP Authorization scheme の大小文字処理、Webhook secret API 非露出、Team member の Organization member 境界等の既知バグ修正、ドキュメント整合性向上、移行・ロールバック前提整理、主要 workflow 検証を行う。
 
 Phase 6 から Phase 5 相当へ戻す場合、データ構造の migration は不要である。ロールバックは、SQLite database、bare repository、設定、配布 binary のバックアップを前提に行う。
+
+## Phase 7 安定版リリース判定仕様
+
+Phase 7 は、Phase 6 までの成果を対象に、7系フェーズのデフォルト安定版リリース判定を行うフェーズである。
+
+Phase 7 の基準バージョンは、安定版リリース判定前は `v.0.8` とする。初回安定版リリースとして承認された場合のみ、安定版系列 `v.1.8` へ進める。
+
+Phase 7 では、既存 API、既存ドメイン機能、database schema、Database Gateway、Repository 層、Service 層の責務境界を維持する。安定版リリース判定では、既知バグ、主要 workflow、リリースノート、既知制約、対象外機能、backup / restore 手順、リポジトリ全体の整合性を確認する。
+
+Phase 7 はデフォルト安定版リリース判定フェーズであるが、自動的な公開フェーズではない。tag 作成、GitHub Releases 作成、成果物配置、release notes 公開、`v.1.8` への移行は、リリース提案と別途ユーザー承認を得るまで行わない。
 
 ### 採用デザイン
 

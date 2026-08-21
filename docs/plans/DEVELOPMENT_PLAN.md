@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.43
-**現行フェーズ基準バージョン**: v.0.7
-**ステータス**: Phase 6 完了
+**計画バージョン**: v.0.44
+**現行フェーズ基準バージョン**: v.0.8
+**ステータス**: Phase 7 着手
 
 ---
 
@@ -95,7 +95,7 @@
 | Phase 4 | v.0.5 | 完了 | Phase 1 から Phase 3 までの統合、仕様整合、移行準備、検証導線整理 |
 | Phase 5 | v.0.6 | 完了 | 補助的リリース判定、デザイン関連の改良・改修。安定版リリース対象外 |
 | Phase 6 | v.0.7 | 完了 | 大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズ |
-| Phase 7 | v.0.8 / 安定版承認時 v.1.8 | 未着手 | デフォルト安定版リリースフェーズ |
+| Phase 7 | v.0.8 / 安定版承認時 v.1.8 | 着手 | デフォルト安定版リリースフェーズ |
 | Phase 8 | v.0.9 / 初回安定版済みの場合 v.1.9 | 未着手 | 7系安定版判定後の長期運用準備、保留解除候補の再評価、検証 |
 | Phase 9 | v.0.10 / 初回安定版済みの場合 v.1.10 | 未着手 | 補助的リリース判定フェーズ。ケースバイケースで安定版対象 |
 
@@ -112,7 +112,7 @@ v.0.1 -> v.0.2 -> v.0.3 -> v.0.4 -> v.0.5
 初回安定版リリースとして承認された場合の例:
 
 ```text
-v.0.7 -> v.1.8
+v.0.8 -> v.1.8
 ```
 
 `Major` を更新する場合も、`Minor` はリセットしない。フェーズ番号、`Major`、`Minor` のいずれも過去の値へ戻してはならない。
@@ -720,7 +720,7 @@ Phase 5 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` �
 adlaire-git-repository-check-ok
 ```
 
-Phase 5 の UI 表示契約は、Phase 6 以降の安定版準備 baseline として `tests/integration/phase6_release_preparation_test.ts` に継承する。
+Phase 5 の UI 表示契約は、Phase 6 以降の安定版準備 baseline として継承し、Phase 7 では `tests/integration/phase7_release_judgment_test.ts` で表示契約を検証する。
 
 ---
 
@@ -806,7 +806,7 @@ Phase 6 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` �
 adlaire-git-repository-check-ok
 ```
 
-Phase 6 の安定版準備 baseline は `tests/integration/phase6_release_preparation_test.ts` で検証する。
+Phase 6 の安定版準備 baseline は Phase 7 の安定版リリース判定 baseline として継承し、`tests/integration/phase7_release_judgment_test.ts` で検証する。
 
 ### 11.10 Phase 6 再確認結果
 
@@ -821,7 +821,7 @@ Phase 6 の安定版準備 baseline は `tests/integration/phase6_release_prepar
 - 追加精査で確認した、既存管理者による管理者追加不能、JSON Content-Type 誤受理、HTTP Authorization scheme の大小文字誤判定、Webhook secret API 露出、Team member の Organization member 境界漏れを修正した。
 - Phase 6 追加バグ精査後のドキュメント整合性向上として、`docs/specs/Auris_System_Design.md`、`docs/specs/Adlaire_Git_Repository_Specification.md`、`docs/DOCUMENT_INDEX.md` の Phase 6 表記、既知バグ修正範囲、現在の実ファイル構成を整合した。
 - Phase 6 は安定版リリースフェーズではなく、引き続きリリース対象外である。
-- Phase 7 は未着手のままとし、安定版リリース判定へ進む場合は別途ユーザー承認を得る。
+- Phase 7 へ進む場合は、Phase 6 の PR を main へ取り込んだ後、Phase 7 用ブランチで安定版リリース判定フェーズとして着手する。
 
 ---
 
@@ -838,6 +838,61 @@ Phase 6 までの成果を対象に、7系フェーズのデフォルト安定�
 ### 12.3 リリース方針
 
 Phase 7 は7系フェーズであり、デフォルト安定版リリースフェーズである。ただし、安定版リリース判定条件を満たさない場合はリリースしてはならない。
+
+Phase 7 は、自動的な安定版公開を意味しない。初回安定版リリース判定、`v.1.8` への移行、tag 作成、GitHub Releases 作成、成果物配置、release notes 公開は、リリース提案を提示し、別途ユーザー承認を得るまで実施しない。
+
+### 12.4 実施対象
+
+- Phase 6 までの成果に対する安定版リリース可否判定
+- リリースノートの整理
+- GitHub Releases を主配置とするリリース配置案の確認
+- リポジトリ内に配置する release notes 元資料、manifest、checksum、運用手順の必要性確認
+- 既知制約、対象外機能、保留候補の明示
+- backup / restore 手順の最終確認
+- 主要 workflow の最終検証
+- 1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、マスター実装機能候補リスト、README、実装、テスト、検証導線、バージョン表記、Pull Request 説明の整合性確認と整合性向上
+
+### 12.5 対象外
+
+- 承認前の初回安定版リリース判定
+- 承認前の `v.1.8` への移行
+- 承認前の tag 作成
+- 承認前の GitHub Releases 作成
+- 承認前の成果物配置
+- 承認前の release notes 公開
+- Phase 8 以降の長期運用準備
+- 保留候補の実装
+
+### 12.6 必須検証
+
+Phase 7 の標準検証は `tools/check-adlaire-git-repository.sh` とする。
+
+最低限、以下を確認する。
+
+- `deno fmt --check`
+- `deno lint`
+- `deno test`
+- `deno compile`
+- 主要 workflow 統合テスト
+- Phase 7 の表示契約
+- 既知バグ再発防止テスト
+
+### 12.7 完了条件
+
+- Phase 6 までの成果に対する既知バグが標準検証範囲で確認されていない。
+- リリースノート、既知制約、対象外機能、保留候補を説明できる。
+- backup / restore 手順とロールバック前提を説明できる。
+- 主要 workflow の検証結果を説明できる。
+- 1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、マスター実装機能候補リスト、README、実装、テスト、検証導線、バージョン表記、Pull Request 説明の整合性が確認されている。
+- 初回安定版リリースを行う場合は、リリース提案を提示し、別途ユーザー承認を得ている。
+
+### 12.8 Phase 7 着手範囲
+
+Phase 7 は、Phase 6 の PR が GitHub の `main` へ取り込まれた後、Phase 7 用ブランチで着手する。
+
+Phase 7 着手時点では、`deno.json` の内部バージョンを `0.8.0` へ更新し、正式表記 `v.0.8` と対応させる。トップページの Phase 表記は `Phase 7 / v.0.8` とする。
+
+この変更は、安定版リリース判定フェーズへの移行を示すものであり、初回安定版リリース、`v.1.8` への移行、tag 作成、GitHub Releases 作成、成果物配置、release notes 公開を意味しない。
 
 ---
 
