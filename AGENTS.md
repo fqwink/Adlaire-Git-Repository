@@ -195,6 +195,18 @@ TypeScript は **6系の最新安定版** を採用方針とする。Deno に同
 
 Node.js ランタイムは、セキュリティ上のリスクによるプロジェクト方針として採用を禁止する。
 
+### 2.2.1 標準運用基盤
+
+Adlaire Git Repository 本体の標準運用基盤は、self-host、Docker、VPS、専用サーバーを前提とする。
+
+Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、本体の標準運用基盤は、これらを直接管理しやすい self-host / Docker / VPS / 専用サーバーを基準にする。
+
+Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。採用を検討する場合は、3類マスター仕様書とマスター開発計画へ採用理由、対象範囲、対象外、リスク、検証範囲を反映し、ユーザー承認を得る。
+
+Deno Deploy を採用候補にする場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提にしてはならない。
+
+Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、Database Gateway と内製 `libsql` driver の接続先差し替えとして扱い、アプリケーション上位層へサービス固有APIやサービス名を露出してはならない。
+
 ### 2.3 依存関係ポリシー
 
 原則として、外部依存は必要最小限に抑える。

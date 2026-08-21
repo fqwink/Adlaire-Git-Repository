@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.0.5
+**文書バージョン**: v.0.8
 **ステータス**: Phase 2 完了・開発継続
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
@@ -24,7 +24,7 @@
 - オープンソース Git プロバイダーはサブの機能互換インスパイア対象とする
 - Git 基本操作と開発支援機能を段階的に実装する
 - UI は GitHub 互換の対象外とし、本プロジェクト独自の利用体験として段階的に拡張する
-- 外部依存ゼロ（Deno std のみ）
+- 外部依存は必要最小限とし、Deno 標準ライブラリ、SQLite、将来移行候補の libSQL を中心に扱う
 - ワンバイナリで起動
 
 **対象ユーザー**
@@ -78,6 +78,143 @@ Adlaire 内製 Deno Module Registry は、Adlaire Group 内部向けの Deno / T
 Adlaire 内製 Deno Module Registry は npm registry 互換レジストリではない。`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提にしてはならない。
 
 汎用 Package registry、npm registry 互換、Container registry は、本仕様の Adlaire 内製 Deno Module Registry とは別機能として扱う。汎用 Package registry は今後の計画として検討するが、保留解除とユーザー承認を得るまで実装対象に含めない。
+
+## Phase 3 Organizations 最小運用仕様
+
+Organizations は、リポジトリ所有者をユーザー単位だけでなく組織単位へ拡張するための Phase 3 最小運用機能とする。
+
+Phase 3 の Organizations 最小運用では、以下を実装対象とする。
+
+- Organization の作成
+- Organization の一覧
+- Organization の詳細取得
+- Organization member の追加
+- `owner` / `member` の最小 role 管理
+- Organization owner による Organization 所有 repository の作成
+- Organization member による Organization 所有 private repository の参照
+- Organization owner または admin による Organization 所有 repository の更新
+- 操作ログへの `organization.create` / `organization.member.add` 記録
+
+Organizations の API は、Organization 単位の REST API として提供する。
+
+```text
+GET    /api/organizations
+POST   /api/organizations
+GET    /api/organizations/{slug}
+POST   /api/organizations/{slug}/members
+```
+
+Organization 作成時の必須項目は `slug` と `name` とする。作成者は自動的に `owner` member として登録する。
+
+Organization member 追加時の必須項目は `username` とする。`role` は `owner` または `member` とし、未指定の場合は `member` とする。
+
+Phase 3 の Organizations 最小運用では、以下を対象外とする。
+
+- Teams
+- Projects
+- Organization 設定画面
+- Organization 削除
+- Organization member 削除
+- Organization member role 更新
+- Organization の公開プロフィール
+- Organization 単位の詳細な権限プリセット
+- Organization invite flow
+- 請求、プラン、外部ID連携
+
+Organization owner は Organization 所有 repository に対して書込権限を持つ。Organization member は Organization 所有 private repository を参照できるが、repository 更新、visibility 変更、削除はできない。
+
+## Phase 3 Teams 最小運用仕様
+
+Teams は、Organization 配下でユーザーを作業単位へまとめるための Phase 3 最小運用機能とする。
+
+Phase 3 の Teams 最小運用では、以下を実装対象とする。
+
+- Organization 配下の Team 作成
+- Organization 配下の Team 一覧
+- Team member の追加
+- Team member の一覧
+- 操作ログへの `team.create` / `team.member.add` 記録
+
+Teams の API は、Organization 配下の REST API として提供する。
+
+```text
+GET    /api/organizations/{slug}/teams
+POST   /api/organizations/{slug}/teams
+GET    /api/organizations/{slug}/teams/{teamSlug}/members
+POST   /api/organizations/{slug}/teams/{teamSlug}/members
+```
+
+Phase 3 の Teams 最小運用では、Team による repository 権限付与、Team 削除、Team member 削除、Team member role、Team 設定画面、Team invite flow は対象外とする。
+
+## Phase 3 Projects 最小運用仕様
+
+Projects は、Repository 配下で作業単位を整理するための Phase 3 最小運用機能とする。
+
+Phase 3 の Projects 最小運用では、以下を実装対象とする。
+
+- Repository 配下の Project 作成
+- Repository 配下の Project 一覧
+- Project の `open` / `closed` 状態管理
+- 操作ログへの `project.create` / `project.update` 記録
+
+Projects の API は、Repository 配下の REST API として提供する。
+
+```text
+GET    /api/repositories/{owner}/{name}/projects
+POST   /api/repositories/{owner}/{name}/projects
+PATCH  /api/repositories/{owner}/{name}/projects/{number}
+```
+
+Phase 3 の Projects 最小運用では、カンバンビュー、Project item、Issue / Pull Request 連携、複数 view、集計、Automation は対象外とする。
+
+## Phase 3 Adlaire 内製 Deno Module Registry 最小運用仕様
+
+Adlaire 内製 Deno Module Registry は、Adlaire Group 内部向けの Deno / TypeScript / ESM module 配布基盤として、Phase 3 では最小運用を実装する。
+
+Phase 3 の Registry 最小運用では、以下を実装対象とする。
+
+- Package metadata の作成
+- Package 一覧
+- Version 登録
+- Version 一覧
+- Module source の保存
+- SHA-256 checksum の記録
+- Deno native import / download endpoint
+- Package / Version 操作の監査ログ
+
+Registry の API は、Registry 単位の REST API として提供する。
+
+```text
+GET    /api/registry/packages
+POST   /api/registry/packages
+GET    /api/registry/packages/{scope}/{name}/versions
+POST   /api/registry/packages/{scope}/{name}/versions
+GET    /api/registry/packages/{scope}/{name}/versions/{version}/download
+```
+
+`scope` は user または Organization の owner 名として扱う。Organization scope への publish は Organization owner または admin に限定する。
+
+Phase 3 の Registry 最小運用では、npm registry 互換、`package.json`、`node_modules`、Node.js runtime、npm ecosystem、汎用 Package registry、Container registry、削除、非公開 token scope、署名付き artifact、複数 module file、依存解決は対象外とする。
+
+## Phase 3 運用・監査・移行性確認仕様
+
+Phase 3 では、運用性と将来移行性の最小確認として、以下を実装対象とする。
+
+- Webhook の任意 event dispatch
+- Audit log の admin 参照
+- Operations status の参照
+- libSQL 採用可否の再評価結果参照
+
+API は以下とする。
+
+```text
+POST   /api/repositories/{owner}/{name}/webhook-events
+GET    /api/audit-logs
+GET    /api/operations/status
+GET    /api/operations/libsql-evaluation
+```
+
+Phase 3 の libSQL 再評価では、SQLite を現行 driver として維持し、Database Gateway 境界を保ったまま将来の libSQL 移行可能性を保持する。Phase 3 では libSQL driver とクラウドDBホスティングを正式採用しない。
 
 ## Phase 2 開発支援機能最小仕様
 
@@ -350,6 +487,18 @@ libSQL は、SQLite 互換を活かした将来の移行候補として保持す
 Turso Cloud 等のクラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングは新しいデータベースエンジンではなく、libSQL の接続先または運用形態の候補として扱う。採用する場合は、外部サービス依存、データ所在、認証トークン管理、バックアップ、障害時の復旧、運用費用を評価し、例外採用としてユーザー承認を得る。
 
 将来移行を容易にするため、DBアクセスは Database Gateway と専用 driver 層に集約する。SQL は可能な限り SQLite 標準互換に保ち、libSQL 固有機能へ直接依存する場合はマスター仕様書に明記する。
+
+### 標準運用基盤方針
+
+Adlaire Git Repository 本体の標準運用基盤は、self-host、Docker、VPS、専用サーバーを前提とする。
+
+Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、本体の標準運用基盤は、これらを直接管理しやすい self-host / Docker / VPS / 専用サーバーを基準にする。
+
+Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
+
+Deno Deploy を採用候補にする場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提にしてはならない。
+
+Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、Database Gateway と内製 `libsql` driver の接続先差し替えとして扱い、アプリケーション上位層へサービス固有APIやサービス名を露出してはならない。
 
 ### データベースアクセス層仕様
 

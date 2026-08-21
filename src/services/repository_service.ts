@@ -52,9 +52,15 @@ export interface GitStorage {
   ): Promise<string | null>;
 }
 
+export interface RepositoryOwnerAccess {
+  canReadOwner(owner: string, actor: Principal | null): Promise<boolean>;
+  canWriteOwner(owner: string, actor: Principal): Promise<boolean>;
+}
+
 export class RepositoryService {
   constructor(
     private readonly repositoryRepository: RepositoryStore,
+    private readonly ownerAccess: RepositoryOwnerAccess,
     private readonly git: GitStorage,
     private readonly audit: AuditSink,
   ) {}
@@ -65,6 +71,9 @@ export class RepositoryService {
   ): Promise<RepositoryRecord> {
     const owner = validateRepositoryName(input.owner, "owner");
     const name = validateRepositoryName(input.name, "name");
+    if (!(await this.ownerAccess.canWriteOwner(owner, actor))) {
+      throw new Response("repository owner access denied.", { status: 403 });
+    }
     const now = new Date().toISOString();
     const barePath = await this.git.initializeBareRepository(owner, name);
 
@@ -88,11 +97,18 @@ export class RepositoryService {
     return created;
   }
 
-  listRepositories(actor: Principal | null): Promise<RepositoryRecord[]> {
-    return this.repositoryRepository.listVisibleTo(
-      actor?.username ?? null,
-      actor?.role === "admin",
-    );
+  async listRepositories(actor: Principal | null): Promise<RepositoryRecord[]> {
+    const repositories = await this.repositoryRepository.list();
+    const visible: RepositoryRecord[] = [];
+    for (const repository of repositories) {
+      if (
+        repository.visibility === "public" ||
+        await this.ownerAccess.canReadOwner(repository.owner, actor)
+      ) {
+        visible.push(repository);
+      }
+    }
+    return visible;
   }
 
   async getRepository(
@@ -215,10 +231,11 @@ export class RepositoryService {
       throw new Response("repository not found.", { status: 404 });
     }
 
-    if (
-      repository.visibility === "public" || actor?.role === "admin" ||
-      actor?.username === repository.owner
-    ) {
+    if (repository.visibility === "public") {
+      return repository;
+    }
+
+    if (await this.ownerAccess.canReadOwner(repository.owner, actor)) {
       return repository;
     }
 
@@ -231,7 +248,7 @@ export class RepositoryService {
     actor: Principal,
   ): Promise<RepositoryRecord> {
     const repository = await this.requireVisibleRepository(owner, name, actor);
-    if (actor.role === "admin" || actor.username === repository.owner) {
+    if (await this.ownerAccess.canWriteOwner(repository.owner, actor)) {
       return repository;
     }
     throw new Response("repository write access denied.", { status: 403 });
