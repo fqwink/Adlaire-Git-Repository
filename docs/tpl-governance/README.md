@@ -16,12 +16,29 @@
 
 ## 2. 予定する雛形
 
-今後、必要に応じて以下の雛形を追加する。
+本ディレクトリは、共通コアと個別具体化用 policy slots に分ける。
 
-- `AGENTS_TEMPLATE.md`
-- `DOCUMENT_INDEX_TEMPLATE.md`
-- `DOCUMENT_CHARTER_TEMPLATE.md`
-- `DEVELOPMENT_POLICY_RULEBOOK_TEMPLATE.md`
-- `APPROVAL_PROCESS_TEMPLATE.md`
+共通コアは、AdlaireGroup 関連プロジェクト、プロダクトで共通採用する最上位ドキュメント体系の必須雛形である。
+
+policy slots は、各プロジェクトで個別具体化する2類ポリシーの必須枠である。policy slots は現行プロジェクトのポリシー本体ではなく、各プロジェクトで具体値、採用技術、運用条件を定義するための雛形である。
+
+```text
+docs/tpl-governance/
+  core/
+    AGENTS_TEMPLATE.md
+    DOCUMENT_INDEX_TEMPLATE.md
+    DOCUMENT_CHARTER_TEMPLATE.md
+    DEVELOPMENT_POLICY_RULEBOOK_TEMPLATE.md
+  policy-slots/
+    TECHNICAL_REQUIREMENTS_POLICY_TEMPLATE.md
+    VERSION_POLICY_TEMPLATE.md
+    RELEASE_POLICY_TEMPLATE.md
+    TEST_POLICY_TEMPLATE.md
+    LICENSE_POLICY_TEMPLATE.md
+    SECURITY_POLICY_TEMPLATE.md
+    DATA_POLICY_TEMPLATE.md
+    DEPENDENCY_POLICY_TEMPLATE.md
+    DEPLOYMENT_POLICY_TEMPLATE.md
+```
 
 雛形を追加する場合も、変更前に変更対象、変更理由、変更案、影響範囲、検証方法を提示し、ユーザー承認を得る。
