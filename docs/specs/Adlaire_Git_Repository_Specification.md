@@ -56,6 +56,51 @@ GitHub Actions、GitHub Pages、Package registry、Container registry、Copilot�
 
 GitHub 互換を目標とする場合でも、GitHub 固有サービスへの直接依存、GitHub の商標・ブランド表現の無承認利用、GitHub API の完全再現を前提にした無承認実装は行わない。
 
+## Phase 2 Issue 最小仕様
+
+Issue は、リポジトリ単位でバグ、タスク、要望を管理するための開発支援機能とする。
+
+Phase 2 の Issue 最小実装では、以下を実装対象とする。
+
+- Issue の作成
+- Issue の一覧
+- Issue の詳細取得
+- Issue のタイトル、本文、状態の更新
+- Issue の `open` / `closed` 状態管理
+- リポジトリ単位の連番
+- 作成者の記録
+- 操作ログへの `issue.create` / `issue.update` 記録
+- Repository 権限に基づく参照制御
+- Issue 作成者、Repository owner、admin による更新制御
+
+Issue の API は、Repository 配下の REST API として提供する。
+
+```text
+GET    /api/repositories/{owner}/{name}/issues
+POST   /api/repositories/{owner}/{name}/issues
+GET    /api/repositories/{owner}/{name}/issues/{number}
+PATCH  /api/repositories/{owner}/{name}/issues/{number}
+```
+
+`GET /issues` は、`state=open` または `state=closed` による絞り込みを許可する。`state` を指定しない場合は、対象Repositoryで参照可能なすべてのIssueを返す。
+
+Issue 作成時の必須項目は `title` とする。`body` は任意とし、未指定の場合は空文字として扱う。
+
+Phase 2 の Issue 最小実装では、以下を対象外とする。
+
+- Label
+- Assignee
+- Milestone
+- Comment
+- Attachment
+- Mention
+- Issue template
+- Project 連携
+- Pull Request との自動リンク
+- Webhook イベント送信
+
+これらの対象外機能を追加する場合は、マスター開発計画と本仕様書を改訂し、ユーザー承認を得てから実装する。
+
 ## OSS Git プロバイダー参考方針
 
 オープンソースの Git プロバイダーやセルフホスト型 Git ホスティング製品は、サブの機能互換インスパイア対象として扱う。
@@ -239,12 +284,12 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
 
 正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。
 
-初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。たとえば `0.2.0` は正式表記 `v.0.2` に対応する。
+初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。たとえば `0.3.0` は正式表記 `v.0.3` に対応する。
 
 ```json
 {
   "name": "adlaire-git-repository",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "CLOSED",
   "exports": "./src/main.ts",
   "tasks": {

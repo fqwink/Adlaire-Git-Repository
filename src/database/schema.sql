@@ -36,6 +36,19 @@ CREATE TABLE IF NOT EXISTS repositories (
   UNIQUE(owner, name)
 );
 
+CREATE TABLE IF NOT EXISTS issues (
+  id TEXT PRIMARY KEY,
+  repository_id TEXT NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
+  number INTEGER NOT NULL CHECK (number > 0),
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  state TEXT NOT NULL CHECK (state IN ('open', 'closed')),
+  author TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  UNIQUE(repository_id, number)
+);
+
 CREATE TABLE IF NOT EXISTS audit_logs (
   id TEXT PRIMARY KEY,
   actor TEXT NOT NULL,

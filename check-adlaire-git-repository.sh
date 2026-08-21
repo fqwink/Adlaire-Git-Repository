@@ -96,16 +96,21 @@ check_required_paths() {
     src/main.ts \
     src/server.ts \
     src/config.ts \
+    src/domain/issue.ts \
     src/database/types.ts \
     src/database/gateway.ts \
     src/database/sql.ts \
     src/database/sqlite_cli_driver.ts \
     src/database/schema.sql \
+    src/repositories/issue_repository.ts \
+    src/services/issue_service.ts \
     tests/support/assert.ts \
     tests/unit/auth_service_test.ts \
     tests/unit/git_http_backend_test.ts \
+    tests/unit/issue_service_test.ts \
     tests/unit/repository_name_test.ts \
     tests/unit/repository_path_test.ts \
+    tests/integration/issue_api_test.ts \
     tests/integration/repository_service_test.ts; do
     if [ ! -f "$ROOT_DIR/$path" ]; then
       echo "missing Adlaire Git Repository required path: $path" >&2

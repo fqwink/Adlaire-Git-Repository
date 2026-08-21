@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.19
-**現行フェーズ基準バージョン**: v.0.2
-**ステータス**: Phase 1 実装完了・開発検証段階
+**計画バージョン**: v.0.20
+**現行フェーズ基準バージョン**: v.0.3
+**ステータス**: Phase 2 Issue 最小実装中
 
 ---
 
@@ -78,7 +78,7 @@
 |---|---:|---|---|
 | Phase 0 | v.0.1 | 完了 | 実装前の文書整備、設計整理、計画策定 |
 | Phase 1 | v.0.2 | 実装完了・開発検証段階 | Git 基本機能、認証、Repository CRUD、SQLite 基盤、Docker/Deno 実行環境 |
-| Phase 2 | v.0.3 | 未着手 | GitHub 互換の Pull Request、Issue、Wiki、Webhook、開発支援機能。WYSIWYG エディター実装時期は未定 |
+| Phase 2 | v.0.3 | Issue 最小実装中 | GitHub 互換の Pull Request、Issue、Wiki、Webhook、開発支援機能。WYSIWYG エディター実装時期は未定 |
 | Phase 3 | v.0.4 | 未着手 | Organizations、Teams、Projects、運用拡張 |
 | Phase 4 | v.0.5 | 未着手 | 補助的リリース判定前の統合、修正、仕様整合、移行準備 |
 | Phase 5 | v.0.6 | 未着手 | 補助的リリース判定フェーズ。ケースバイケースで安定版対象。安定版承認時のみ `v.1.6` へ進める |
@@ -318,6 +318,8 @@ Phase 2 の基準バージョンは `v.0.3` とする。
 
 Phase 2 は、Phase 1 の PR が `main` へマージされ、Phase 1 の開発検証判定が完了してから着手する。
 
+Phase 2 の初回実装対象は、ユーザー承認に基づき Issue 最小実装とする。
+
 ### 7.3 実装対象
 
 - Pull Request
@@ -327,6 +329,21 @@ Phase 2 は、Phase 1 の PR が `main` へマージされ、Phase 1 の開発�
 - Webhook
 - Release 管理
 - REST API 基本機能
+
+### 7.3.1 Issue 最小実装対象
+
+Issue 最小実装では、以下を対象とする。
+
+- Issue の作成
+- Issue の一覧
+- Issue の詳細取得
+- Issue のタイトル、本文、状態の更新
+- `open` / `closed` 状態管理
+- Repository 権限に基づく参照制御
+- Issue 作成者、Repository owner、admin による更新制御
+- 操作ログへの記録
+
+Label、Assignee、Milestone、Comment、Attachment、Mention、Issue template、Project 連携、Pull Request との自動リンク、Webhook イベント送信は対象外とする。
 
 ### 7.4 対象外
 
@@ -606,3 +623,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.17 | 全フェーズ共通 | - | 開発計画の改訂単位をフェーズ単位に統一 |
 | v.0.18 | 全フェーズ共通 | - | ドキュメント憲章と2類ドキュメント群の表記整合を反映 |
 | v.0.19 | 全フェーズ共通 | - | 安定版未リリース中は `v.0.x` 系を維持するバージョン整合を反映 |
+| v.0.20 | Phase 2 | v.0.3 | Phase 2 の Issue 最小実装開始、対象範囲、対象外、検証範囲を反映 |

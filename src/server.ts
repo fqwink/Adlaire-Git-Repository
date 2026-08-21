@@ -10,11 +10,18 @@ import {
   textResponse,
 } from "./http/responses.ts";
 import { AuditLogRepository } from "./repositories/audit_log_repository.ts";
+import { IssueRepository } from "./repositories/issue_repository.ts";
 import { RepositoryRepository } from "./repositories/repository_repository.ts";
 import { UserRepository } from "./repositories/user_repository.ts";
 import { AuditService } from "./services/audit_service.ts";
 import { AuthService } from "./services/auth_service.ts";
+import { IssueService } from "./services/issue_service.ts";
 import { RepositoryService } from "./services/repository_service.ts";
+import {
+  type IssueState,
+  parseIssueNumber,
+  validateIssueState,
+} from "./domain/issue.ts";
 import type { Principal } from "./domain/user.ts";
 
 export interface App {
@@ -42,10 +49,15 @@ export async function createApp(config: AppConfig): Promise<App> {
     new GitService(config.repositoryRoot),
     auditService,
   );
+  const issueService = new IssueService(
+    repositoryRepository,
+    new IssueRepository(database),
+    auditService,
+  );
 
   return {
     fetch: (request: Request) =>
-      handle(request, authService, repositoryService, gitHttp),
+      handle(request, authService, repositoryService, issueService, gitHttp),
   };
 }
 
@@ -53,10 +65,11 @@ async function handle(
   request: Request,
   auth: AuthService,
   repositories: RepositoryService,
+  issues: IssueService,
   gitHttp: GitHttpBackend,
 ): Promise<Response> {
   try {
-    return await route(request, auth, repositories, gitHttp);
+    return await route(request, auth, repositories, issues, gitHttp);
   } catch (error) {
     if (error instanceof Response) {
       return error;
@@ -70,6 +83,7 @@ async function route(
   request: Request,
   auth: AuthService,
   repositories: RepositoryService,
+  issues: IssueService,
   gitHttp: GitHttpBackend,
 ): Promise<Response> {
   const url = new URL(request.url);
@@ -165,6 +179,68 @@ async function route(
       visibility: readVisibility(body["visibility"]),
     }, principal);
     return jsonResponse({ repository: created }, 201);
+  }
+
+  const issueCollectionRoute = matchIssueCollectionRoute(url.pathname);
+  if (issueCollectionRoute !== null) {
+    if (request.method === "GET") {
+      return jsonResponse({
+        issues: await issues.listIssues(
+          issueCollectionRoute.owner,
+          issueCollectionRoute.name,
+          actor,
+          readIssueStateQuery(url.searchParams.get("state")),
+        ),
+      });
+    }
+
+    if (request.method === "POST") {
+      const body = await readJson(request);
+      const issue = await issues.createIssue(
+        issueCollectionRoute.owner,
+        issueCollectionRoute.name,
+        {
+          title: readRequiredString(body, "title"),
+          body: readOptionalString(body["body"], "body"),
+        },
+        requireAuthenticated(actor),
+      );
+      return jsonResponse({ issue }, 201);
+    }
+  }
+
+  const issueRoute = matchIssueRoute(url.pathname);
+  if (issueRoute !== null) {
+    const number = parseIssueNumber(issueRoute.number);
+
+    if (request.method === "GET") {
+      return jsonResponse({
+        issue: await issues.getIssue(
+          issueRoute.owner,
+          issueRoute.name,
+          number,
+          actor,
+        ),
+      });
+    }
+
+    if (request.method === "PATCH") {
+      const body = await readJson(request);
+      const issue = await issues.updateIssue(
+        issueRoute.owner,
+        issueRoute.name,
+        number,
+        {
+          title: readOptionalString(body["title"], "title"),
+          body: readOptionalString(body["body"], "body"),
+          state: body["state"] === undefined
+            ? undefined
+            : validateIssueState(body["state"]),
+        },
+        requireAuthenticated(actor),
+      );
+      return jsonResponse({ issue });
+    }
   }
 
   const repositoryRoute = matchRepositoryRoute(url.pathname);
@@ -282,6 +358,16 @@ function readRequiredString(
   return value;
 }
 
+function readOptionalString(value: unknown, key: string): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (typeof value !== "string") {
+    throw new Response(`${key} must be a string.`, { status: 400 });
+  }
+  return value;
+}
+
 function readVisibility(value: unknown): "public" | "private" {
   if (value === undefined) {
     return "private";
@@ -300,6 +386,13 @@ function readRole(value: unknown): "admin" | "developer" | undefined {
     return value;
   }
   throw new Response("role must be admin or developer.", { status: 400 });
+}
+
+function readIssueStateQuery(value: string | null): IssueState | undefined {
+  if (value === null || value === "") {
+    return undefined;
+  }
+  return validateIssueState(value);
 }
 
 async function authenticateRequest(
@@ -372,6 +465,37 @@ function matchRepositoryRoute(
     owner: decodeURIComponent(match[1]),
     name: decodeURIComponent(match[2]),
     suffix: match[3] === undefined ? "" : decodeURIComponent(match[3]),
+  };
+}
+
+function matchIssueCollectionRoute(
+  pathname: string,
+): { owner: string; name: string } | null {
+  const match = pathname.match(
+    /^\/api\/repositories\/([^/]+)\/([^/]+)\/issues$/,
+  );
+  if (match === null) {
+    return null;
+  }
+  return {
+    owner: decodeURIComponent(match[1]),
+    name: decodeURIComponent(match[2]),
+  };
+}
+
+function matchIssueRoute(
+  pathname: string,
+): { owner: string; name: string; number: string } | null {
+  const match = pathname.match(
+    /^\/api\/repositories\/([^/]+)\/([^/]+)\/issues\/([^/]+)$/,
+  );
+  if (match === null) {
+    return null;
+  }
+  return {
+    owner: decodeURIComponent(match[1]),
+    name: decodeURIComponent(match[2]),
+    number: decodeURIComponent(match[3]),
   };
 }
 
