@@ -13,6 +13,7 @@ import { AuditLogRepository } from "./repositories/audit_log_repository.ts";
 import { IssueRepository } from "./repositories/issue_repository.ts";
 import { OrganizationRepository } from "./repositories/organization_repository.ts";
 import { Phase2Repository } from "./repositories/phase2_repository.ts";
+import { Phase3Repository } from "./repositories/phase3_repository.ts";
 import { RepositoryRepository } from "./repositories/repository_repository.ts";
 import { UserRepository } from "./repositories/user_repository.ts";
 import { AuditService } from "./services/audit_service.ts";
@@ -20,6 +21,7 @@ import { AuthService } from "./services/auth_service.ts";
 import { IssueService } from "./services/issue_service.ts";
 import { OrganizationService } from "./services/organization_service.ts";
 import { Phase2Service } from "./services/phase2_service.ts";
+import { Phase3Service } from "./services/phase3_service.ts";
 import { RepositoryService } from "./services/repository_service.ts";
 import {
   type IssueState,
@@ -37,7 +39,9 @@ import {
   type ReviewState,
   validatePullRequestState,
   validateReviewState,
+  validateWebhookEvents,
 } from "./domain/phase2.ts";
+import { validateProjectState } from "./domain/phase3.ts";
 import type { Principal } from "./domain/user.ts";
 
 export interface App {
@@ -81,6 +85,12 @@ export async function createApp(config: AppConfig): Promise<App> {
     new Phase2Repository(database),
     auditService,
   );
+  const phase3Service = new Phase3Service(
+    new Phase3Repository(database),
+    organizationService,
+    repositoryService,
+    auditService,
+  );
 
   return {
     fetch: (request: Request) =>
@@ -91,6 +101,8 @@ export async function createApp(config: AppConfig): Promise<App> {
         issueService,
         organizationService,
         phase2Service,
+        phase3Service,
+        auditService,
         gitHttp,
       ),
   };
@@ -103,6 +115,8 @@ async function handle(
   issues: IssueService,
   organizations: OrganizationService,
   phase2: Phase2Service,
+  phase3: Phase3Service,
+  audit: AuditService,
   gitHttp: GitHttpBackend,
 ): Promise<Response> {
   try {
@@ -113,6 +127,8 @@ async function handle(
       issues,
       organizations,
       phase2,
+      phase3,
+      audit,
       gitHttp,
     );
   } catch (error) {
@@ -131,6 +147,8 @@ async function route(
   issues: IssueService,
   organizations: OrganizationService,
   phase2: Phase2Service,
+  phase3: Phase3Service,
+  audit: AuditService,
   gitHttp: GitHttpBackend,
 ): Promise<Response> {
   const url = new URL(request.url);
@@ -228,6 +246,135 @@ async function route(
       requireAuthenticated(actor),
     );
     return jsonResponse({ member }, 201);
+  }
+
+  const organizationTeamsRoute = matchOrganizationTeamsRoute(url.pathname);
+  if (organizationTeamsRoute !== null) {
+    if (request.method === "GET") {
+      return jsonResponse({
+        teams: await phase3.listTeams(
+          organizationTeamsRoute.slug,
+          requireAuthenticated(actor),
+        ),
+      });
+    }
+    if (request.method === "POST") {
+      const body = await readJson(request);
+      const team = await phase3.createTeam(
+        organizationTeamsRoute.slug,
+        {
+          slug: readRequiredString(body, "slug"),
+          name: readRequiredString(body, "name"),
+        },
+        requireAuthenticated(actor),
+      );
+      return jsonResponse({ team }, 201);
+    }
+  }
+
+  const teamMembersRoute = matchTeamMembersRoute(url.pathname);
+  if (teamMembersRoute !== null) {
+    if (request.method === "GET") {
+      return jsonResponse({
+        members: await phase3.listTeamMembers(
+          teamMembersRoute.organizationSlug,
+          teamMembersRoute.teamSlug,
+          requireAuthenticated(actor),
+        ),
+      });
+    }
+    if (request.method === "POST") {
+      const body = await readJson(request);
+      const member = await phase3.addTeamMember(
+        teamMembersRoute.organizationSlug,
+        teamMembersRoute.teamSlug,
+        { username: readRequiredString(body, "username") },
+        requireAuthenticated(actor),
+      );
+      return jsonResponse({ member }, 201);
+    }
+  }
+
+  if (url.pathname === "/api/audit-logs" && request.method === "GET") {
+    return jsonResponse({
+      auditLogs: await audit.list(
+        requireAuthenticated(actor),
+        readLimit(url.searchParams.get("limit")),
+      ),
+    });
+  }
+
+  if (url.pathname === "/api/operations/status" && request.method === "GET") {
+    requireAuthenticated(actor);
+    return jsonResponse(phase3.operationsStatus());
+  }
+
+  if (
+    url.pathname === "/api/operations/libsql-evaluation" &&
+    request.method === "GET"
+  ) {
+    requireAuthenticated(actor);
+    return jsonResponse(phase3.libsqlEvaluation());
+  }
+
+  if (url.pathname === "/api/registry/packages") {
+    const principal = requireAuthenticated(actor);
+    if (request.method === "GET") {
+      return jsonResponse({
+        packages: await phase3.listRegistryPackages(
+          url.searchParams.get("scope") ?? undefined,
+          principal,
+        ),
+      });
+    }
+    if (request.method === "POST") {
+      const body = await readJson(request);
+      const pack = await phase3.createRegistryPackage({
+        scope: readRequiredString(body, "scope"),
+        name: readRequiredString(body, "name"),
+        description: readOptionalString(body["description"], "description"),
+      }, principal);
+      return jsonResponse({ package: pack }, 201);
+    }
+  }
+
+  const registryVersionsRoute = matchRegistryVersionsRoute(url.pathname);
+  if (registryVersionsRoute !== null) {
+    const principal = requireAuthenticated(actor);
+    if (request.method === "GET") {
+      return jsonResponse({
+        versions: await phase3.listRegistryVersions(
+          registryVersionsRoute.scope,
+          registryVersionsRoute.name,
+          principal,
+        ),
+      });
+    }
+    if (request.method === "POST") {
+      const body = await readJson(request);
+      const version = await phase3.publishRegistryVersion(
+        registryVersionsRoute.scope,
+        registryVersionsRoute.name,
+        {
+          version: readRequiredString(body, "version"),
+          modulePath: readRequiredString(body, "modulePath"),
+          source: readRequiredString(body, "source"),
+        },
+        principal,
+      );
+      return jsonResponse({ version }, 201);
+    }
+  }
+
+  const registryDownloadRoute = matchRegistryDownloadRoute(url.pathname);
+  if (registryDownloadRoute !== null && request.method === "GET") {
+    const version = await phase3.downloadRegistryVersion(
+      registryDownloadRoute.scope,
+      registryDownloadRoute.name,
+      registryDownloadRoute.version,
+      requireAuthenticated(actor),
+    );
+    return textResponse(version.source, "text/typescript; charset=utf-8");
   }
 
   if (request.method === "GET" && url.pathname === "/api/ssh-keys") {
@@ -507,6 +654,25 @@ async function route(
     }, 202);
   }
 
+  const webhookEventRoute = matchRepositoryChildRoute(
+    url.pathname,
+    "webhook-events",
+  );
+  if (webhookEventRoute !== null && request.method === "POST") {
+    const body = await readJson(request);
+    const event = validateWebhookEvents([
+      readRequiredString(body, "event"),
+    ])[0];
+    return jsonResponse({
+      deliveries: await phase2.dispatchWebhookEvent(
+        webhookEventRoute.owner,
+        webhookEventRoute.name,
+        event,
+        requireAuthenticated(actor),
+      ),
+    }, 202);
+  }
+
   const releaseCollectionRoute = matchRepositoryChildRoute(
     url.pathname,
     "releases",
@@ -653,6 +819,54 @@ async function route(
     }
   }
 
+  const projectCollectionRoute = matchRepositoryChildRoute(
+    url.pathname,
+    "projects",
+  );
+  if (projectCollectionRoute !== null) {
+    if (request.method === "GET") {
+      return jsonResponse({
+        projects: await phase3.listProjects(
+          projectCollectionRoute.owner,
+          projectCollectionRoute.name,
+          actor,
+        ),
+      });
+    }
+    if (request.method === "POST") {
+      const body = await readJson(request);
+      const project = await phase3.createProject(
+        projectCollectionRoute.owner,
+        projectCollectionRoute.name,
+        {
+          title: readRequiredString(body, "title"),
+          body: readOptionalString(body["body"], "body"),
+        },
+        requireAuthenticated(actor),
+      );
+      return jsonResponse({ project }, 201);
+    }
+  }
+
+  const projectRoute = matchRepositoryNumberRoute(url.pathname, "projects");
+  if (projectRoute !== null && request.method === "PATCH") {
+    const body = await readJson(request);
+    const project = await phase3.updateProject(
+      projectRoute.owner,
+      projectRoute.name,
+      parsePositiveNumber(projectRoute.number, "project number"),
+      {
+        title: readOptionalString(body["title"], "title"),
+        body: readOptionalString(body["body"], "body"),
+        state: body["state"] === undefined
+          ? undefined
+          : validateProjectState(body["state"]),
+      },
+      requireAuthenticated(actor),
+    );
+    return jsonResponse({ project });
+  }
+
   return notFound();
 }
 
@@ -728,6 +942,13 @@ function readReviewState(value: unknown): ReviewState {
     return "commented";
   }
   return validateReviewState(value);
+}
+
+function readLimit(value: string | null): number {
+  if (value === null || value === "") {
+    return 100;
+  }
+  return parsePositiveNumber(value, "limit");
 }
 
 async function authenticateRequest(
@@ -940,6 +1161,62 @@ function matchOrganizationMembersRoute(
     return null;
   }
   return { slug: validateOrganizationSlug(decodeURIComponent(match[1])) };
+}
+
+function matchOrganizationTeamsRoute(
+  pathname: string,
+): { slug: string } | null {
+  const match = pathname.match(/^\/api\/organizations\/([^/]+)\/teams$/);
+  if (match === null) {
+    return null;
+  }
+  return { slug: validateOrganizationSlug(decodeURIComponent(match[1])) };
+}
+
+function matchTeamMembersRoute(
+  pathname: string,
+): { organizationSlug: string; teamSlug: string } | null {
+  const match = pathname.match(
+    /^\/api\/organizations\/([^/]+)\/teams\/([^/]+)\/members$/,
+  );
+  if (match === null) {
+    return null;
+  }
+  return {
+    organizationSlug: validateOrganizationSlug(decodeURIComponent(match[1])),
+    teamSlug: decodeURIComponent(match[2]),
+  };
+}
+
+function matchRegistryVersionsRoute(
+  pathname: string,
+): { scope: string; name: string } | null {
+  const match = pathname.match(
+    /^\/api\/registry\/packages\/([^/]+)\/([^/]+)\/versions$/,
+  );
+  if (match === null) {
+    return null;
+  }
+  return {
+    scope: decodeURIComponent(match[1]),
+    name: decodeURIComponent(match[2]),
+  };
+}
+
+function matchRegistryDownloadRoute(
+  pathname: string,
+): { scope: string; name: string; version: string } | null {
+  const match = pathname.match(
+    /^\/api\/registry\/packages\/([^/]+)\/([^/]+)\/versions\/([^/]+)\/download$/,
+  );
+  if (match === null) {
+    return null;
+  }
+  return {
+    scope: decodeURIComponent(match[1]),
+    name: decodeURIComponent(match[2]),
+    version: decodeURIComponent(match[3]),
+  };
 }
 
 function renderHome(): string {

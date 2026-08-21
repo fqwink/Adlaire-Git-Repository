@@ -300,6 +300,40 @@ export class Phase2Service {
     return delivery;
   }
 
+  async dispatchWebhookEvent(
+    owner: string,
+    name: string,
+    event: string,
+    actor: Principal,
+  ): Promise<WebhookDeliveryRecord[]> {
+    const repository = await this.requireWritableRepository(owner, name, actor);
+    const webhooks = (await this.store.listWebhooks(repository.id)).filter((
+      webhook,
+    ) => webhook.active && webhook.events.includes(event));
+    const deliveries: WebhookDeliveryRecord[] = [];
+    for (const webhook of webhooks) {
+      const sent = await sendWebhookEvent(webhook, event);
+      deliveries.push(
+        await this.store.recordWebhookDelivery({
+          id: crypto.randomUUID(),
+          webhookId: webhook.id,
+          event,
+          status: sent.ok ? "success" : "failure",
+          statusCode: sent.statusCode,
+          error: sent.error,
+          createdAt: new Date().toISOString(),
+        }),
+      );
+    }
+    await this.record(
+      actor,
+      "webhook.event.dispatch",
+      "repository",
+      repository.id,
+    );
+    return deliveries;
+  }
+
   async createRelease(owner: string, name: string, input: {
     readonly tagName: string;
     readonly title: string;
@@ -423,13 +457,35 @@ export class Phase2Service {
   }
 }
 
-async function sendWebhookPing(webhook: WebhookRecord): Promise<{
+function sendWebhookEvent(
+  webhook: WebhookRecord,
+  event: string,
+): Promise<{
+  readonly ok: boolean;
+  readonly statusCode: number | null;
+  readonly error: string | null;
+}> {
+  return sendWebhook(webhook, event);
+}
+
+function sendWebhookPing(webhook: WebhookRecord): Promise<{
+  readonly ok: boolean;
+  readonly statusCode: number | null;
+  readonly error: string | null;
+}> {
+  return sendWebhook(webhook, "ping");
+}
+
+async function sendWebhook(
+  webhook: WebhookRecord,
+  event: string,
+): Promise<{
   readonly ok: boolean;
   readonly statusCode: number | null;
   readonly error: string | null;
 }> {
   const body = JSON.stringify({
-    event: "ping",
+    event,
     webhookId: webhook.id,
     repositoryId: webhook.repositoryId,
     deliveredAt: new Date().toISOString(),
@@ -440,7 +496,7 @@ async function sendWebhookPing(webhook: WebhookRecord): Promise<{
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-adlaire-event": "ping",
+        "x-adlaire-event": event,
         "x-adlaire-signature-256": `sha256=${signature}`,
       },
       body,

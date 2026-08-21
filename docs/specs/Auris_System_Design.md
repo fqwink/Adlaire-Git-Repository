@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.0.8
-**ステータス**: Phase 2 完了・開発継続
+**文書バージョン**: v.0.9
+**ステータス**: Phase 3 完了・開発継続
 
 ---
 
@@ -217,8 +217,11 @@ WYSIWYG エディターの実装時期、採用Phase、連携範囲は未定と�
 - Webhook 対象イベント拡張
 - 高度な監査ログ
 - 運用自動化
+- libSQL driver 採用可否の再評価
 
 Discussions、Organizations / Teams 本格運用、Projects 本格運用、複数インスタンス本格運用は保留候補とし、保留解除とユーザー承認があるまで Phase 3 の実装対象へ含めない。
+
+Phase 3 は最小運用として完了している。Team による repository 権限付与、Projects 本格運用、Registry の複数 module file / 依存解決 / 削除、libSQL driver 正式採用、クラウドDBホスティング採用は Phase 3 の対象外とする。
 
 ### 6.4 Phase 4
 
