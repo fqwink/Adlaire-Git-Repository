@@ -13,6 +13,13 @@ Deno.test("phase 6 rejects unsafe registration and namespace collisions", async 
     });
     assertEquals(secondAdmin.status, 403);
 
+    const authorizedAdmin = await send(app, "POST", "/api/users", {
+      username: "adminops",
+      password: "secret-password",
+      role: "admin",
+    }, adminToken);
+    assertEquals(authorizedAdmin.status, 201);
+
     await request(app, "POST", "/api/users", {
       username: "bob",
       password: "secret-password",
@@ -52,6 +59,18 @@ Deno.test("phase 6 returns client errors for malformed input", async () => {
       }),
     );
     assertEquals(malformedJson.status, 400);
+
+    const invalidContentType = await app.fetch(
+      new Request("http://localhost/api/users", {
+        method: "POST",
+        headers: { "content-type": "application/jsonp" },
+        body: JSON.stringify({
+          username: "jsonp",
+          password: "secret-password",
+        }),
+      }),
+    );
+    assertEquals(invalidContentType.status, 415);
 
     const invalidUsername = await send(app, "POST", "/api/users", {
       username: "ab",
@@ -168,6 +187,75 @@ Deno.test("phase 6 registry global list only returns readable packages", async (
       bobToken,
     ) as { packages: Array<{ id: string }> };
     assertEquals(global.packages.length, 0);
+  } finally {
+    await cleanup();
+  }
+});
+
+Deno.test("phase 6 treats HTTP authorization schemes case-insensitively", async () => {
+  const { app, cleanup } = await setupApp();
+  try {
+    const token = await registerAndToken(app, "alice");
+    await request(app, "POST", "/api/repositories", {
+      owner: "alice",
+      name: "runtime",
+      visibility: "private",
+    }, token);
+
+    const bearer = await sendWithAuthorization(
+      app,
+      "GET",
+      "/api/repositories/alice/runtime",
+      undefined,
+      `bearer ${token}`,
+    );
+    assertEquals(bearer.status, 200);
+
+    const basic = await sendWithAuthorization(
+      app,
+      "GET",
+      "/api/repositories/alice/runtime",
+      undefined,
+      `basic ${btoa("alice:secret-password")}`,
+    );
+    assertEquals(basic.status, 200);
+  } finally {
+    await cleanup();
+  }
+});
+
+Deno.test("phase 6 does not expose webhook secrets through API responses", async () => {
+  const { app, cleanup } = await setupApp();
+  try {
+    const token = await registerAndToken(app, "alice");
+    await request(app, "POST", "/api/repositories", {
+      owner: "alice",
+      name: "runtime",
+      visibility: "private",
+    }, token);
+
+    const created = await request(
+      app,
+      "POST",
+      "/api/repositories/alice/runtime/webhooks",
+      {
+        url: "http://127.0.0.1:9/hook",
+        secret: "top-secret",
+        events: ["push"],
+      },
+      token,
+    ) as { webhook: Record<string, unknown> };
+    assertEquals("secret" in created.webhook, false);
+
+    const listed = await request(
+      app,
+      "GET",
+      "/api/repositories/alice/runtime/webhooks",
+      undefined,
+      token,
+    ) as { webhooks: Array<Record<string, unknown>> };
+    assertEquals(listed.webhooks.length, 1);
+    assertEquals("secret" in listed.webhooks[0], false);
   } finally {
     await cleanup();
   }
@@ -298,6 +386,28 @@ function send(
   if (token !== undefined) {
     headers.set("authorization", `Bearer ${token}`);
   }
+
+  return app.fetch(
+    new Request(`http://localhost${path}`, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }),
+  );
+}
+
+function sendWithAuthorization(
+  app: { readonly fetch: (request: Request) => Promise<Response> },
+  method: string,
+  path: string,
+  body: unknown,
+  authorization: string,
+): Promise<Response> {
+  const headers = new Headers();
+  if (body !== undefined) {
+    headers.set("content-type", "application/json");
+  }
+  headers.set("authorization", authorization);
 
   return app.fetch(
     new Request(`http://localhost${path}`, {

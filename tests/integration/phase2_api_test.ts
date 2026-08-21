@@ -96,9 +96,17 @@ Deno.test("phase 2 API supports wiki, webhook, and release basics", async () => 
         events: ["push", "pull_request"],
       },
       token,
-    ) as { webhook: { id: string; events: string[]; active: boolean } };
+    ) as {
+      webhook: {
+        id: string;
+        events: string[];
+        active: boolean;
+        secret?: string;
+      };
+    };
     assertEquals(webhook.webhook.events.length, 2);
     assertEquals(webhook.webhook.active, true);
+    assertEquals(webhook.webhook.secret, undefined);
 
     const delivery = await request(
       app,

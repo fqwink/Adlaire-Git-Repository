@@ -93,9 +93,13 @@ export class AuthService {
     readonly username: string;
     readonly password: string;
     readonly role?: "admin" | "developer";
+    readonly allowAdminRegistration?: boolean;
   }): Promise<PublicUser> {
     const username = validateUsername(input.username);
-    if (input.role === "admin" && await this.users.hasAnyUser()) {
+    if (
+      input.role === "admin" && await this.users.hasAnyUser() &&
+      input.allowAdminRegistration !== true
+    ) {
       throw new Response("admin registration requires an existing admin.", {
         status: 403,
       });

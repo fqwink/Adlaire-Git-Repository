@@ -153,7 +153,7 @@ Phase 3 の Teams 最小運用では、以下を実装対象とする。
 
 - Organization 配下の Team 作成
 - Organization 配下の Team 一覧
-- Team member の追加
+- Organization member に限定した Team member の追加
 - Team member の一覧
 - 操作ログへの `team.create` / `team.member.add` 記録
 
@@ -353,6 +353,7 @@ Phase 2 の Webhook 最小実装では、以下を実装対象とする。
 - `http` / `https` URL の検証
 - event 名の検証
 - secret の保存
+- API 応答で secret を返さないこと
 - `ping` event の署名付き HTTP POST 送信
 - delivery の成功または失敗記録
 - Repository owner、admin による参照・作成・ping 制御

@@ -172,4 +172,10 @@ export class OrganizationService {
     }
     throw new Response("organization write access denied.", { status: 403 });
   }
+
+  async isMember(slug: string, userId: string): Promise<boolean> {
+    const safeSlug = validateOrganizationSlug(slug);
+    return (await this.organizations.findMembership(safeSlug, userId)) !==
+      null;
+  }
 }

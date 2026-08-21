@@ -132,6 +132,11 @@ export class Phase3Service {
     if (userId === null) {
       throw new Response("user not found.", { status: 404 });
     }
+    if (!(await this.organizations.isMember(organizationSlug, userId))) {
+      throw new Response("team member must belong to organization.", {
+        status: 403,
+      });
+    }
     const member = await this.store.addTeamMember({
       id: crypto.randomUUID(),
       teamId: team.id,

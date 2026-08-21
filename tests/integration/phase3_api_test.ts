@@ -32,6 +32,20 @@ Deno.test("phase 3 API supports teams, projects, registry, webhook events, and o
     ) as { team: { slug: string } };
     assertEquals(team.team.slug, "runtime");
 
+    const outsideTeamMember = await send(
+      app,
+      "POST",
+      "/api/organizations/adlaire/teams/runtime/members",
+      { username: "bob" },
+      aliceToken,
+    );
+    assertEquals(outsideTeamMember.status, 403);
+
+    await request(app, "POST", "/api/organizations/adlaire/members", {
+      username: "bob",
+      role: "member",
+    }, aliceToken);
+
     const teamMember = await request(
       app,
       "POST",

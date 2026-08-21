@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.41
+**計画バージョン**: v.0.42
 **現行フェーズ基準バージョン**: v.0.7
 **ステータス**: Phase 6 完了
 
@@ -768,7 +768,7 @@ Phase 6 では、Phase 7 のデフォルト安定版リリース判定へ進む�
 - 1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、README、実装、テスト、検証導線、バージョン表記の整合性を確認した。
 - `docs/DOCUMENT_INDEX.md` を参照索引として新設し、最上位ドキュメント、2類ポリシー、3類マスター仕様書、計画文書、README の参照導線を整理した。
 - AdlaireGroup 関連プロジェクト、プロダクトへ共通展開する最上位ドキュメント雛形として `docs/tpl-governance/` を整備し、共通コアと個別具体化用 policy slots を分離した。
-- Phase 6 バグ精査で確認した認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧漏えいを修正し、再発防止テストを追加した。
+- Phase 6 バグ精査で確認した認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧漏えい、HTTP Authorization scheme の大小文字処理、Webhook secret API 露出、Team member の Organization member 境界漏れを修正し、再発防止テストを追加した。
 - 既知バグは標準検証と主要 workflow test の範囲では確認されていない。
 - Phase 6 は安定版リリースフェーズではなく、リリース対象外であることを確認した。
 
@@ -802,7 +802,7 @@ Phase 6 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` �
 検証結果は以下とする。
 
 ```text
-30 passed | 0 failed
+32 passed | 0 failed
 adlaire-git-repository-check-ok
 ```
 
@@ -816,8 +816,9 @@ Phase 6 の安定版準備 baseline は `tests/integration/phase6_release_prepar
 
 - `src/` と `tests/` に未処理の `TODO`、`FIXME`、`BUG` 表記は確認されていない。
 - 標準検証 `tools/check-adlaire-git-repository.sh` は成功した。
-- 検証結果は `30 passed | 0 failed` および `adlaire-git-repository-check-ok` である。
+- 検証結果は `32 passed | 0 failed` および `adlaire-git-repository-check-ok` である。
 - Phase 6 バグ精査で確認した既知バグについて、`tests/integration/phase6_bug_audit_test.ts` に再発防止の統合テストを追加した。
+- 追加精査で確認した、既存管理者による管理者追加不能、JSON Content-Type 誤受理、HTTP Authorization scheme の大小文字誤判定、Webhook secret API 露出、Team member の Organization member 境界漏れを修正した。
 - Phase 6 は安定版リリースフェーズではなく、引き続きリリース対象外である。
 - Phase 7 は未着手のままとし、安定版リリース判定へ進む場合は別途ユーザー承認を得る。
 
@@ -956,3 +957,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.39 | Phase 6 | v.0.7 | Document Index と AdlaireGroup 共通 `tpl-governance` 雛形を Phase 6 のドキュメント整合性向上として整理 |
 | v.0.40 | Phase 6 | v.0.7 | 本来の Phase 6 作業として、既知バグ確認、主要 workflow 検証、標準検証結果を再確認 |
 | v.0.41 | Phase 6 | v.0.7 | Phase 6 バグ精査で確認した認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧漏えいを修正し、再発防止テストと標準検証結果を反映 |
+| v.0.42 | Phase 6 | v.0.7 | Phase 6 追加バグ精査で確認した管理者追加、JSON Content-Type、HTTP Authorization scheme、Webhook secret API 露出、Team member の Organization member 境界漏れを修正し、再発防止テストを追加 |

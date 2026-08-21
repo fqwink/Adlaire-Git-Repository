@@ -214,10 +214,12 @@ async function route(
         status: 409,
       });
     }
+    const role = readRole(body["role"]);
     const user = await auth.register({
       username,
       password: readRequiredString(body, "password"),
-      role: readRole(body["role"]),
+      role,
+      allowAdminRegistration: role === "admin" && actor?.role === "admin",
     });
     return jsonResponse({ user }, 201);
   }
@@ -985,8 +987,15 @@ async function authenticateRequest(
     return null;
   }
 
-  if (authorization.startsWith("Bearer ")) {
-    const token = authorization.slice("Bearer ".length).trim();
+  const separator = authorization.indexOf(" ");
+  if (separator < 0) {
+    throw new Response("unsupported authorization scheme.", { status: 401 });
+  }
+  const scheme = authorization.slice(0, separator).toLowerCase();
+  const credentials = authorization.slice(separator + 1).trim();
+
+  if (scheme === "bearer") {
+    const token = credentials;
     if (token === "") {
       throw new Response("bearer token is required.", { status: 401 });
     }
@@ -997,17 +1006,15 @@ async function authenticateRequest(
     return principal;
   }
 
-  if (authorization.startsWith("Basic ")) {
-    const decoded = decodeBasicAuthorization(
-      authorization.slice("Basic ".length),
-    );
-    const separator = decoded.indexOf(":");
-    if (separator < 0) {
+  if (scheme === "basic") {
+    const decoded = decodeBasicAuthorization(credentials);
+    const credentialSeparator = decoded.indexOf(":");
+    if (credentialSeparator < 0) {
       throw new Response("invalid basic authorization.", { status: 401 });
     }
     const principal = await auth.authenticateBasic(
-      decoded.slice(0, separator),
-      decoded.slice(separator + 1),
+      decoded.slice(0, credentialSeparator),
+      decoded.slice(credentialSeparator + 1),
     );
     if (principal === null) {
       throw new Response("invalid basic credentials.", { status: 401 });

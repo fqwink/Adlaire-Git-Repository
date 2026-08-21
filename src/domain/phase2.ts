@@ -49,6 +49,8 @@ export interface WebhookRecord {
   readonly updatedAt: string;
 }
 
+export type WebhookPublicRecord = Omit<WebhookRecord, "secret">;
+
 export interface WebhookDeliveryRecord {
   readonly id: string;
   readonly webhookId: string;

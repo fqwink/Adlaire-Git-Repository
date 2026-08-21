@@ -30,7 +30,8 @@ export async function readJson(
   request: Request,
 ): Promise<Record<string, unknown>> {
   const contentType = request.headers.get("content-type") ?? "";
-  if (!contentType.includes("application/json")) {
+  const mediaType = contentType.split(";")[0].trim().toLowerCase();
+  if (mediaType !== "application/json" && !mediaType.endsWith("+json")) {
     throw new Response("content-type must be application/json.", {
       status: 415,
     });
