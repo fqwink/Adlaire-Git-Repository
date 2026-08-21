@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.29
+**計画バージョン**: v.0.30
 **現行フェーズ基準バージョン**: v.0.3
 **ステータス**: Phase 2 完了
 
@@ -84,12 +84,12 @@
 | Phase 0 | v.0.1 | 完了 | 実装前の文書整備、設計整理、計画策定 |
 | Phase 1 | v.0.2 | 実装完了・開発検証段階 | Git 基本機能、認証、Repository CRUD、SQLite 基盤、Docker/Deno 実行環境 |
 | Phase 2 | v.0.3 | 完了 | GitHub 互換の Pull Request、Code Review、Issue、Wiki、Webhook、Release、REST API 基本機能。WYSIWYG エディター実装時期は未定 |
-| Phase 3 | v.0.4 | 未着手 | Organizations、Teams、Projects、Adlaire 内製 Deno Module Registry 最小実装、運用拡張 |
-| Phase 4 | v.0.5 | 未着手 | 補助的リリース判定前の統合、修正、仕様整合、移行準備 |
+| Phase 3 | v.0.4 | 未着手 | Organizations 最小運用、Teams 最小運用、Projects 最小運用、Adlaire 内製 Deno Module Registry 最小実装、運用基盤拡張 |
+| Phase 4 | v.0.5 | 未着手 | Phase 1 から Phase 3 までの統合、仕様整合、移行準備、検証導線整理 |
 | Phase 5 | v.0.6 | 未着手 | 補助的リリース判定、デザイン関連の改良・改修。安定版リリース対象外 |
 | Phase 6 | v.0.7 | 未着手 | 大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズ |
 | Phase 7 | v.0.8 / 安定版承認時 v.1.8 | 未着手 | デフォルト安定版リリースフェーズ |
-| Phase 8 | v.0.9 / 初回安定版済みの場合 v.1.9 | 未着手 | 7系安定版判定後の拡張、長期運用準備、検証 |
+| Phase 8 | v.0.9 / 初回安定版済みの場合 v.1.9 | 未着手 | 7系安定版判定後の長期運用準備、保留解除候補の再評価、検証 |
 | Phase 9 | v.0.10 / 初回安定版済みの場合 v.1.10 | 未着手 | 補助的リリース判定フェーズ。ケースバイケースで安定版対象 |
 
 上記は各フェーズの基準バージョンである。表の `Major` は安定版リリース系列であり、累積フェーズ番号ではない。初回安定版リリース前は `v.0.x` 系を維持する。
@@ -493,20 +493,18 @@ Phase 3 の基準バージョンは `v.0.4` とする。
 
 ### 8.2 目的
 
-組織管理、チーム管理、プロジェクト管理、Adlaire 内製 Deno Module Registry 最小実装、運用自動化を追加し、内部向け Git ホスティング基盤としての運用性と内製 Deno package 配布基盤を高める。
+組織管理、チーム管理、プロジェクト管理の最小運用、Adlaire 内製 Deno Module Registry 最小実装、運用自動化を追加し、内部向け Git ホスティング基盤としての運用性と内製 Deno package 配布基盤を高める。
 
 ### 8.3 実装対象
 
-- Organizations
-- Teams
-- Projects
+- Organizations 最小運用
+- Teams 最小運用
+- Projects 最小運用
 - Adlaire 内製 Deno Module Registry 最小実装
-- Discussions
-- REST API 拡張
-- Webhook 拡張
+- REST API 対象リソース拡張
+- Webhook 対象イベント拡張
 - 高度な監査ログ
 - 運用自動化
-- 複数インスタンス運用の検討
 - libSQL driver 採用可否の再評価
 
 Adlaire 内製 Deno Module Registry 最小実装では、Deno / TypeScript / ESM 前提の package metadata、version 管理、module 登録、checksum、認証・認可、監査ログ、Deno native import / download endpoint を候補範囲とする。
@@ -517,13 +515,20 @@ Adlaire 内製 Deno Module Registry 最小実装では、Deno / TypeScript / ESM
 - Node.js ランタイム採用
 - 外部フレームワーク採用
 - クラウドDBホスティングの無承認採用
+- Discussions
+- Organizations / Teams 本格運用
+- Projects 本格運用
+- 複数インスタンス本格運用
 - npm registry 互換レジストリ、汎用 Package registry、Container registry
 
 汎用 Package registry は今後の計画として検討する。ただし、Phase 3 では保留方針とし、Adlaire 内製 Deno Module Registry 最小実装の対象範囲へ含めない。
 
+Discussions は保留候補のままとし、Issue と Wiki で当面代替する。保留解除する場合は、3類マスター仕様書、マスター開発計画、検証範囲へ反映し、ユーザー承認を得る。
+
 ### 8.5 完了条件
 
-- 組織・チーム単位の権限管理が成立している。
+- 組織・チーム単位の最小権限管理が成立している。
+- Projects 最小運用の対象範囲と対象外範囲を説明できる。
 - Adlaire 内製 Deno Module Registry 最小実装の対象範囲と対象外範囲を説明できる。
 - 運用機能が3類マスター仕様書に基づいて成立している。
 - libSQL またはクラウドDBホスティングを採用する場合は、別途ユーザー承認と仕様更新が完了している。
@@ -545,6 +550,22 @@ Phase 1 から Phase 3 までの開発成果を統合し、補助的リリース
 ### 9.3 リリース方針
 
 Phase 4 は安定版リリースフェーズではない。Phase 4 では例外なく安定版リリース方針を持たない。
+
+### 9.4 実施対象
+
+- Phase 1 から Phase 3 までの統合確認
+- 1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、マスター実装機能候補リストの仕様整合
+- SQLite / libSQL 移行可能性を維持するための永続化境界確認
+- 移行手順、バックアップ、復旧、ロールバック前提の整理
+- 補助的リリース判定前の検証導線整理
+
+### 9.5 完了条件
+
+- Phase 1 から Phase 3 までの成果を組み合わせた主要ワークフローを説明できる。
+- Phase 5 に進む前の仕様矛盾、古い表記、検証導線の不足が整理されている。
+- SQLite / libSQL 以外のデータベースエンジン、Node.js ランタイム、外部フレームワーク、無承認外部ライブラリに依存していない。
+- 既知バグが残っていない。
+- リポジトリ全体の整合性確認が完了している。
 
 ---
 
@@ -648,11 +669,20 @@ Phase 8 の基準バージョンは、Phase 7 で初回安定版リリース済�
 
 ### 13.2 目的
 
-Phase 7 の7系安定版判定後の拡張、長期運用準備、検証、移行性確認を行う。
+Phase 7 の7系安定版判定後の長期運用準備、検証、移行性確認、保留解除候補の再評価を行う。
 
 ### 13.3 リリース方針
 
 Phase 8 は安定版リリースフェーズではない。Phase 8 では例外なく安定版リリース方針を持たない。
+
+### 13.4 実施対象
+
+- 長期運用準備
+- 移行性確認
+- 監査、保守、運用手順の整理
+- 保留解除候補の再評価
+
+Phase 8 で保留解除を検討できる候補は、`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` の保留候補を基準とする。ただし、保留解除候補の再評価は実装承認ではない。正式な実装対象にする場合は、3類マスター仕様書、本書、検証範囲へ反映し、ユーザー承認を得る。
 
 ---
 
@@ -736,3 +766,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.27 | Phase 3 | v.0.4 | 汎用 Package registry は今後の計画として検討するが、現時点では保留方針であり Phase 3 実装対象外であることを明記 |
 | v.0.28 | Phase 5 | v.0.6 | Phase 5 にデザイン関連の改良・改修方針を追加 |
 | v.0.29 | Phase 5 / Phase 6 | v.0.6 / v.0.7 | 5系フェーズを安定版リリース対象外とし、6系フェーズを大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズとして定義 |
+| v.0.30 | Phase 3 / Phase 4 / Phase 8 | v.0.4 / v.0.5 / v.0.9 | マスター実装機能候補リストに合わせ、Phase 3 を最小運用と内製 Deno Module Registry、Phase 4 を統合・仕様整合・移行準備、Phase 8 を長期運用準備と保留解除候補再評価へ再編 |
