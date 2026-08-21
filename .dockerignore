@@ -1,4 +1,5 @@
 .git
+.check-work
 data
 adlaire-git-repo
 *.sqlite3
