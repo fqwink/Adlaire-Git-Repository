@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.37
+**計画バージョン**: v.0.43
 **現行フェーズ基準バージョン**: v.0.7
 **ステータス**: Phase 6 完了
 
@@ -56,6 +56,8 @@
 - Phase 6、Phase 16、Phase 26 のような 6系フェーズは、大規模なバグ修正とドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズとする。必要に応じて移行準備と検証強化も行う。6系フェーズ自体は安定版リリースフェーズとして扱わない。
 - Phase 9、Phase 19、Phase 29 のような 9系フェーズは補助的なリリース判定フェーズとし、ケースバイケースで安定版リリースフェーズになる場合と、ならない場合がある。
 - 9系フェーズを安定版リリースフェーズとして扱う場合は、マスター開発計画と2類ポリシーに明記し、ユーザー承認を得る。
+- リリース提案、リリース配置、リリース成果物、リリース自動化は `docs/policies/RELEASE_POLICY.md` に従う。リリース配置は GitHub Releases を主配置とし、リポジトリ内には軽量な配置記録、release notes 元資料、manifest、checksum、運用手順を必要に応じて配置する。
+- ドキュメント参照導線は `docs/DOCUMENT_INDEX.md` を索引として確認する。AdlaireGroup 共通の最上位ドキュメント雛形は `docs/tpl-governance/` 配下で管理し、現行プロジェクトの正本とは分離する。
 - フェーズ番号は累積方式とし、安定版リリース後もリセットしない。
 - バージョン表記は `v.{Major}.{Minor}` に統一する。`Major` は安定版リリース系列を表し、初回安定版リリース前は `0` を維持する。`Minor` は累積変更番号として扱い、リセットしない。
 - 本書の計画バージョンと各フェーズの基準バージョンは分けて管理する。計画バージョンは本書の改訂履歴を示し、フェーズ基準バージョンは実装・検証対象の基準を示す。
@@ -530,7 +532,7 @@ Phase 3 では、最小運用として以下を実装済み範囲とする。
 - Organization member による Organization 所有 private repository の参照
 - Organization owner または admin による Organization 所有 repository の更新
 - `organization.create` / `organization.member.add` の監査ログ記録
-- Team の作成、一覧、member 追加、member 一覧
+- Team の作成、一覧、Organization member に限定した Team member 追加、Team member 一覧
 - `team.create` / `team.member.add` の監査ログ記録
 - Repository 配下の Project 作成、一覧、`open` / `closed` 状態管理
 - `project.create` / `project.update` の監査ログ記録
@@ -764,12 +766,15 @@ Phase 6 では、Phase 7 のデフォルト安定版リリース判定へ進む�
 - トップページの Phase 表記を `Phase 6 / v.0.7` へ更新した。
 - Phase 5 の UI 表示契約テストを Phase 6 の安定版準備 baseline test として継承した。
 - 1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、README、実装、テスト、検証導線、バージョン表記の整合性を確認した。
+- `docs/DOCUMENT_INDEX.md` を参照索引として新設し、最上位ドキュメント、2類ポリシー、3類マスター仕様書、計画文書、README の参照導線を整理した。
+- AdlaireGroup 関連プロジェクト、プロダクトへ共通展開する最上位ドキュメント雛形として `docs/tpl-governance/` を整備し、共通コアと個別具体化用 policy slots を分離した。
+- Phase 6 バグ精査で確認した認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧漏えい、HTTP Authorization scheme の大小文字処理、Webhook secret API 露出、Team member の Organization member 境界漏れを修正し、再発防止テストを追加した。
 - 既知バグは標準検証と主要 workflow test の範囲では確認されていない。
 - Phase 6 は安定版リリースフェーズではなく、リリース対象外であることを確認した。
 
 ### 11.7 移行・ロールバック前提
 
-Phase 6 では database schema、SQLite driver、Database Gateway、Repository 層、Service 層の責務境界を変更しない。
+Phase 6 では database schema、Database Gateway、Repository 層、Service 層の責務境界を維持する。SQLite driver は Database Gateway 内部の責務として、各 SQLite CLI 実行で外部キー制約を有効化する。
 
 Phase 6 から Phase 5 相当へ戻す場合、データ構造の migration は不要である。ロールバックは以下を前提とする。
 
@@ -784,6 +789,8 @@ Phase 7 へ進む前に確認すべき残課題は以下とする。
 
 - 安定版リリース判定を行うかどうかのユーザー承認
 - リリースノートの整理
+- GitHub Releases を主配置とするリリース配置案の確認
+- リポジトリ内に配置する release notes 元資料、manifest、checksum、運用手順の必要性確認
 - 既知制約、対象外機能、保留候補の明示
 - backup / restore 手順の最終確認
 - 主要 workflow の最終検証
@@ -795,11 +802,26 @@ Phase 6 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` �
 検証結果は以下とする。
 
 ```text
-24 passed | 0 failed
+32 passed | 0 failed
 adlaire-git-repository-check-ok
 ```
 
 Phase 6 の安定版準備 baseline は `tests/integration/phase6_release_preparation_test.ts` で検証する。
+
+### 11.10 Phase 6 再確認結果
+
+本来の Phase 6 作業として、既知バグ確認、ドキュメント整合性確認、主要 workflow 検証を再実施した。
+
+再確認結果は以下とする。
+
+- `src/` と `tests/` に未処理の `TODO`、`FIXME`、`BUG` 表記は確認されていない。
+- 標準検証 `tools/check-adlaire-git-repository.sh` は成功した。
+- 検証結果は `32 passed | 0 failed` および `adlaire-git-repository-check-ok` である。
+- Phase 6 バグ精査で確認した既知バグについて、`tests/integration/phase6_bug_audit_test.ts` に再発防止の統合テストを追加した。
+- 追加精査で確認した、既存管理者による管理者追加不能、JSON Content-Type 誤受理、HTTP Authorization scheme の大小文字誤判定、Webhook secret API 露出、Team member の Organization member 境界漏れを修正した。
+- Phase 6 追加バグ精査後のドキュメント整合性向上として、`docs/specs/Auris_System_Design.md`、`docs/specs/Adlaire_Git_Repository_Specification.md`、`docs/DOCUMENT_INDEX.md` の Phase 6 表記、既知バグ修正範囲、現在の実ファイル構成を整合した。
+- Phase 6 は安定版リリースフェーズではなく、引き続きリリース対象外である。
+- Phase 7 は未着手のままとし、安定版リリース判定へ進む場合は別途ユーザー承認を得る。
 
 ---
 
@@ -932,3 +954,9 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.35 | 全フェーズ共通 | - | フェーズ単位でドキュメント等の整合性向上を必須化し、リポジトリ整合性が取れていない状態で次フェーズへ進むことを禁止する方針を反映 |
 | v.0.36 | Phase 5 | v.0.6 | Web UI の情報設計、画面レイアウト、視覚表現、操作導線、アクセシビリティ、可読性を改善し、Phase 5 完了へ更新 |
 | v.0.37 | Phase 6 | v.0.7 | 安定版リリース準備として、既知バグ確認、ドキュメント整合性向上、移行・ロールバック前提整理、検証導線強化を行い、Phase 6 完了へ更新 |
+| v.0.38 | 全フェーズ共通 | - | リリース提案、GitHub Releases を主配置とするリリース配置、承認後のリリース自動化方針への参照を反映 |
+| v.0.39 | Phase 6 | v.0.7 | Document Index と AdlaireGroup 共通 `tpl-governance` 雛形を Phase 6 のドキュメント整合性向上として整理 |
+| v.0.40 | Phase 6 | v.0.7 | 本来の Phase 6 作業として、既知バグ確認、主要 workflow 検証、標準検証結果を再確認 |
+| v.0.41 | Phase 6 | v.0.7 | Phase 6 バグ精査で確認した認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧漏えいを修正し、再発防止テストと標準検証結果を反映 |
+| v.0.42 | Phase 6 | v.0.7 | Phase 6 追加バグ精査で確認した管理者追加、JSON Content-Type、HTTP Authorization scheme、Webhook secret API 露出、Team member の Organization member 境界漏れを修正し、再発防止テストを追加 |
+| v.0.43 | Phase 6 | v.0.7 | Phase 6 追加バグ精査後のドキュメント整合性向上として、仕様書の既知バグ修正範囲、プロジェクト構成、Document Index の状態表記を整合 |

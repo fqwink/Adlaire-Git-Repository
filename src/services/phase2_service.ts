@@ -18,6 +18,7 @@ import {
   validateWebhookEvents,
   validateWebhookUrl,
   type WebhookDeliveryRecord,
+  type WebhookPublicRecord,
   type WebhookRecord,
   type WikiPageRecord,
 } from "../domain/phase2.ts";
@@ -248,7 +249,7 @@ export class Phase2Service {
     readonly secret?: string;
     readonly events: unknown;
     readonly active?: unknown;
-  }, actor: Principal): Promise<WebhookRecord> {
+  }, actor: Principal): Promise<WebhookPublicRecord> {
     const repository = await this.requireWritableRepository(owner, name, actor);
     const now = new Date().toISOString();
     const webhook = await this.store.createWebhook({
@@ -264,16 +265,16 @@ export class Phase2Service {
       updatedAt: now,
     });
     await this.record(actor, "webhook.create", "webhook", webhook.id);
-    return webhook;
+    return toPublicWebhook(webhook);
   }
 
   async listWebhooks(
     owner: string,
     name: string,
     actor: Principal,
-  ): Promise<WebhookRecord[]> {
+  ): Promise<WebhookPublicRecord[]> {
     const repository = await this.requireWritableRepository(owner, name, actor);
-    return await this.store.listWebhooks(repository.id);
+    return (await this.store.listWebhooks(repository.id)).map(toPublicWebhook);
   }
 
   async recordWebhookPing(
@@ -442,6 +443,18 @@ export class Phase2Service {
       targetId,
     });
   }
+}
+
+function toPublicWebhook(webhook: WebhookRecord): WebhookPublicRecord {
+  return {
+    id: webhook.id,
+    repositoryId: webhook.repositoryId,
+    url: webhook.url,
+    events: webhook.events,
+    active: webhook.active,
+    createdAt: webhook.createdAt,
+    updatedAt: webhook.updatedAt,
+  };
 }
 
 function sendWebhookEvent(

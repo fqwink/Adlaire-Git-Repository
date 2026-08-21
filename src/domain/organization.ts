@@ -1,3 +1,5 @@
+import { ValidationError } from "./validation_error.ts";
+
 export type OrganizationMemberRole = "owner" | "member";
 
 export interface OrganizationInput {
@@ -26,17 +28,19 @@ const ORGANIZATION_SLUG_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{2,62}$/;
 export function validateOrganizationSlug(value: string): string {
   const slug = value.trim();
   if (!ORGANIZATION_SLUG_PATTERN.test(slug)) {
-    throw new Error(
+    throw new ValidationError(
       "organization slug must be 3-63 characters and contain only alphanumeric characters, dots, underscores, or hyphens.",
     );
   }
   if (slug.includes("..") || slug.includes("/") || slug.includes("\\")) {
-    throw new Error(
+    throw new ValidationError(
       "organization slug must not contain path traversal characters.",
     );
   }
   if (slug.endsWith(".git")) {
-    throw new Error("organization slug must not include the .git suffix.");
+    throw new ValidationError(
+      "organization slug must not include the .git suffix.",
+    );
   }
   return slug;
 }

@@ -37,6 +37,10 @@ class MemoryUsers {
     return Promise.resolve(this.users.find((user) => user.id === id) ?? null);
   }
 
+  hasAnyUser(): Promise<boolean> {
+    return Promise.resolve(this.users.length > 0);
+  }
+
   createApiToken(
     input: { readonly userId: string; readonly tokenHash: string },
   ): Promise<void> {

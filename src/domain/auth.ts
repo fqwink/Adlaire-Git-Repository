@@ -1,3 +1,5 @@
+import { ValidationError } from "./validation_error.ts";
+
 const PASSWORD_HASH_PREFIX = "sha256";
 
 export async function hashPassword(
@@ -26,7 +28,7 @@ export async function verifyPassword(
 
 export function validatePassword(password: string): void {
   if (password.length < 12) {
-    throw new Error("password must be at least 12 characters.");
+    throw new ValidationError("password must be at least 12 characters.");
   }
 }
 

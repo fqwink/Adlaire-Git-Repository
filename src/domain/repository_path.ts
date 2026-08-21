@@ -1,3 +1,5 @@
+import { ValidationError } from "./validation_error.ts";
+
 export function validateRepositoryPath(value: string): string {
   const path = value.trim();
 
@@ -6,7 +8,7 @@ export function validateRepositoryPath(value: string): string {
   }
 
   if (path.startsWith("/") || path.includes("\\") || path.includes("\0")) {
-    throw new Error("repository path must be relative.");
+    throw new ValidationError("repository path must be relative.");
   }
 
   const segments = path.split("/");
@@ -15,7 +17,9 @@ export function validateRepositoryPath(value: string): string {
       segment === "" || segment === "." || segment === ".."
     )
   ) {
-    throw new Error("repository path must not contain traversal segments.");
+    throw new ValidationError(
+      "repository path must not contain traversal segments.",
+    );
   }
 
   return path;
@@ -27,7 +31,7 @@ export function validateGitRef(value: string): string {
     ref === "" || ref.includes("..") || ref.includes(":") || /\s/.test(ref) ||
     ref.includes("\\") || ref.includes("\0") || ref.startsWith("-")
   ) {
-    throw new Error("git ref is invalid.");
+    throw new ValidationError("git ref is invalid.");
   }
   return ref;
 }

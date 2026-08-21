@@ -30,13 +30,19 @@ export async function readJson(
   request: Request,
 ): Promise<Record<string, unknown>> {
   const contentType = request.headers.get("content-type") ?? "";
-  if (!contentType.includes("application/json")) {
+  const mediaType = contentType.split(";")[0].trim().toLowerCase();
+  if (mediaType !== "application/json" && !mediaType.endsWith("+json")) {
     throw new Response("content-type must be application/json.", {
       status: 415,
     });
   }
 
-  const value = await request.json();
+  let value: unknown;
+  try {
+    value = await request.json();
+  } catch {
+    throw new Response("request body must be valid JSON.", { status: 400 });
+  }
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     throw new Response("request body must be a JSON object.", { status: 400 });
   }

@@ -42,6 +42,11 @@ export class OrganizationService {
     actor: Principal,
   ): Promise<OrganizationRecord> {
     const slug = validateOrganizationSlug(input.slug);
+    if ((await this.organizations.findUserIdByUsername(slug)) !== null) {
+      throw new Response("organization slug conflicts with an existing user.", {
+        status: 409,
+      });
+    }
     const name = validateOrganizationName(input.name);
     const now = new Date().toISOString();
     const organizationId = crypto.randomUUID();
@@ -75,6 +80,13 @@ export class OrganizationService {
 
   listOrganizations(actor: Principal): Promise<OrganizationRecord[]> {
     return this.organizations.listForActor(actor);
+  }
+
+  async organizationExists(slug: string): Promise<boolean> {
+    return (await this.organizations.findBySlug(
+      validateOrganizationSlug(slug),
+    )) !==
+      null;
   }
 
   async getOrganization(
@@ -159,5 +171,11 @@ export class OrganizationService {
       return organization;
     }
     throw new Response("organization write access denied.", { status: 403 });
+  }
+
+  async isMember(slug: string, userId: string): Promise<boolean> {
+    const safeSlug = validateOrganizationSlug(slug);
+    return (await this.organizations.findMembership(safeSlug, userId)) !==
+      null;
   }
 }

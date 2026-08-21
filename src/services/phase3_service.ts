@@ -132,6 +132,11 @@ export class Phase3Service {
     if (userId === null) {
       throw new Response("user not found.", { status: 404 });
     }
+    if (!(await this.organizations.isMember(organizationSlug, userId))) {
+      throw new Response("team member must belong to organization.", {
+        status: 403,
+      });
+    }
     const member = await this.store.addTeamMember({
       id: crypto.randomUUID(),
       teamId: team.id,
@@ -270,9 +275,19 @@ export class Phase3Service {
     actor: Principal,
   ): Promise<RegistryPackageRecord[]> {
     if (scope !== undefined) {
-      await this.requireScopeRead(validateRegistryScope(scope), actor);
+      const safeScope = validateRegistryScope(scope);
+      await this.requireScopeRead(safeScope, actor);
+      return await this.store.listRegistryPackages(safeScope);
     }
-    return await this.store.listRegistryPackages(scope);
+
+    const packages = await this.store.listRegistryPackages();
+    const visible: RegistryPackageRecord[] = [];
+    for (const pack of packages) {
+      if (await this.canReadScope(pack.scope, actor)) {
+        visible.push(pack);
+      }
+    }
+    return visible;
   }
 
   async publishRegistryVersion(
@@ -423,6 +438,21 @@ export class Phase3Service {
     } catch (error) {
       if (error instanceof Response && error.status === 404) {
         throw new Response("registry scope not found.", { status: 404 });
+      }
+      throw error;
+    }
+  }
+
+  private async canReadScope(
+    scope: string,
+    actor: Principal,
+  ): Promise<boolean> {
+    try {
+      await this.requireScopeRead(scope, actor);
+      return true;
+    } catch (error) {
+      if (error instanceof Response) {
+        return false;
       }
       throw error;
     }
