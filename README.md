@@ -1,5 +1,7 @@
 # Adlaire Git Repository
 
+**現行フェーズ**: Phase 6 / v.0.7
+
 ## ドキュメント
 
 - 最上位ルールブック: [AGENTS.md](./AGENTS.md)
