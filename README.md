@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**現行フェーズ**: Phase 6 / v.0.7
+**現行フェーズ**: Phase 7 / v.0.8
 
 ## ドキュメント
 
@@ -43,3 +43,5 @@
 `AGENTS.md` は本リポジトリの最上位ルールブックである。`docs/DOCUMENT_INDEX.md` は参照索引であり、正本ではない。`docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` は2類ドキュメント群の総則であり、ドキュメント憲章と責務別ポリシーは `docs/policies/` 配下で管理する。`docs/specs/Auris_System_Design.md` は、3類マスター仕様書群におけるシステム全体の最上位マスター仕様書である。`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` は候補整理の正本であり、実装承認ではない。`docs/tpl-governance/` は AdlaireGroup 関連プロジェクト、プロダクトへ共通展開する雛形置き場であり、現行プロジェクトの正本ではない。ソースコード実装作業は、1類ルールブック、2類ドキュメント群、3類マスター仕様書、`docs/plans/DEVELOPMENT_PLAN.md` の承認済みフェーズ計画に基づいて行う。
 
 フェーズ単位で、必ずドキュメント等の整合性向上を行う。リポジトリ整合性が取れていない状態で、次のフェーズに進んではならない。
+
+Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズである。ただし、現時点の基準バージョンは安定版リリース判定前の `v.0.8` であり、初回安定版リリース `v.1.8`、tag 作成、GitHub Releases 公開は別途ユーザー承認を得るまで行わない。
