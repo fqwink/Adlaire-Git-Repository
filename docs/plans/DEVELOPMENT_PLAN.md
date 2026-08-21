@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.36
-**現行フェーズ基準バージョン**: v.0.6
-**ステータス**: Phase 5 完了
+**計画バージョン**: v.0.37
+**現行フェーズ基準バージョン**: v.0.7
+**ステータス**: Phase 6 完了
 
 ---
 
@@ -92,7 +92,7 @@
 | Phase 3 | v.0.4 | 完了 | Organizations 最小運用、Teams 最小運用、Projects 最小運用、Adlaire 内製 Deno Module Registry 最小実装、運用基盤拡張 |
 | Phase 4 | v.0.5 | 完了 | Phase 1 から Phase 3 までの統合、仕様整合、移行準備、検証導線整理 |
 | Phase 5 | v.0.6 | 完了 | 補助的リリース判定、デザイン関連の改良・改修。安定版リリース対象外 |
-| Phase 6 | v.0.7 | 未着手 | 大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズ |
+| Phase 6 | v.0.7 | 完了 | 大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズ |
 | Phase 7 | v.0.8 / 安定版承認時 v.1.8 | 未着手 | デフォルト安定版リリースフェーズ |
 | Phase 8 | v.0.9 / 初回安定版済みの場合 v.1.9 | 未着手 | 7系安定版判定後の長期運用準備、保留解除候補の再評価、検証 |
 | Phase 9 | v.0.10 / 初回安定版済みの場合 v.1.10 | 未着手 | 補助的リリース判定フェーズ。ケースバイケースで安定版対象 |
@@ -718,7 +718,7 @@ Phase 5 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` �
 adlaire-git-repository-check-ok
 ```
 
-Phase 5 の UI 表示契約は `tests/integration/phase5_ui_test.ts` で検証する。
+Phase 5 の UI 表示契約は、Phase 6 以降の安定版準備 baseline として `tests/integration/phase6_release_preparation_test.ts` に継承する。
 
 ---
 
@@ -753,6 +753,53 @@ Phase 6 は安定版リリースフェーズではない。Phase 6 では例外�
 - Phase 7 の安定版リリース判定に必要な検証範囲、移行手順、ロールバック手順、残課題を説明できる。
 - 1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、実装、テスト、検証導線が矛盾していない。
 - Phase 6 が安定版リリースフェーズではないことを確認している。
+
+### 11.6 Phase 6 実施完了範囲
+
+Phase 6 では、Phase 7 のデフォルト安定版リリース判定へ進むため、既知バグ確認、ドキュメント整合性向上、移行・ロールバック前提整理、検証導線強化を行った。
+
+実施完了範囲は以下とする。
+
+- `deno.json` の内部バージョンを `0.7.0` へ更新し、正式表記 `v.0.7` と対応させた。
+- トップページの Phase 表記を `Phase 6 / v.0.7` へ更新した。
+- Phase 5 の UI 表示契約テストを Phase 6 の安定版準備 baseline test として継承した。
+- 1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、README、実装、テスト、検証導線、バージョン表記の整合性を確認した。
+- 既知バグは標準検証と主要 workflow test の範囲では確認されていない。
+- Phase 6 は安定版リリースフェーズではなく、リリース対象外であることを確認した。
+
+### 11.7 移行・ロールバック前提
+
+Phase 6 では database schema、SQLite driver、Database Gateway、Repository 層、Service 層の責務境界を変更しない。
+
+Phase 6 から Phase 5 相当へ戻す場合、データ構造の migration は不要である。ロールバックは以下を前提とする。
+
+- `dataDir` 配下の SQLite database と bare repository を事前バックアップする。
+- `dist/adlaire-git-repo` または配布 binary を Phase 5 相当の成果物へ戻す。
+- 起動後に `/health`、トップページ、Repository 一覧、主要 API workflow を確認する。
+- `deno.json` の内部バージョン表記は、Phase 5 相当へ戻す場合のみ `0.6.0` と対応させる。
+
+### 11.8 Phase 7 残課題
+
+Phase 7 へ進む前に確認すべき残課題は以下とする。
+
+- 安定版リリース判定を行うかどうかのユーザー承認
+- リリースノートの整理
+- 既知制約、対象外機能、保留候補の明示
+- backup / restore 手順の最終確認
+- 主要 workflow の最終検証
+
+### 11.9 Phase 6 検証結果
+
+Phase 6 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` とする。
+
+検証結果は以下とする。
+
+```text
+24 passed | 0 failed
+adlaire-git-repository-check-ok
+```
+
+Phase 6 の安定版準備 baseline は `tests/integration/phase6_release_preparation_test.ts` で検証する。
 
 ---
 
@@ -884,3 +931,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.34 | Phase 4 | v.0.5 | Phase 1 から Phase 3 までの統合として Organization 所有 private repository の権限境界を Issue、Pull Request、Code Review、Wiki、Webhook、Release へ統合し、仕様整合、移行境界、検証導線を整理して Phase 4 完了へ更新 |
 | v.0.35 | 全フェーズ共通 | - | フェーズ単位でドキュメント等の整合性向上を必須化し、リポジトリ整合性が取れていない状態で次フェーズへ進むことを禁止する方針を反映 |
 | v.0.36 | Phase 5 | v.0.6 | Web UI の情報設計、画面レイアウト、視覚表現、操作導線、アクセシビリティ、可読性を改善し、Phase 5 完了へ更新 |
+| v.0.37 | Phase 6 | v.0.7 | 安定版リリース準備として、既知バグ確認、ドキュメント整合性向上、移行・ロールバック前提整理、検証導線強化を行い、Phase 6 完了へ更新 |

@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.0.10
-**ステータス**: Phase 5 完了・開発継続
+**文書バージョン**: v.0.11
+**ステータス**: Phase 6 完了・開発継続
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
 
@@ -598,12 +598,12 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
 
 正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。
 
-初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。たとえば `0.6.0` は正式表記 `v.0.6` に対応する。
+初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。たとえば `0.7.0` は正式表記 `v.0.7` に対応する。
 
 ```json
 {
   "name": "adlaire-git-repository",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "license": "CLOSED",
   "exports": "./src/main.ts",
   "tasks": {
@@ -1151,6 +1151,14 @@ Phase 5 のデザイン関連改良・改修は、情報設計、画面レイア
 Phase 5 のデザイン関連改良・改修では、外部フレームワークを採用してはならない。外部ライブラリまたは外部ツールが必要な場合は、2類ポリシーに従い、例外採用としてユーザー承認を得る。
 
 Phase 5 では、トップページの Web UI を対象に、ヘッダー、ステータス領域、ユーザー登録、API token 発行、Repository 作成、Repository 一覧の情報設計と表示品質を改善する。既存 API と既存ドメイン機能は変更せず、外から見た主要ワークフローを維持する。
+
+## Phase 6 安定版準備仕様
+
+Phase 6 は、Phase 7 のデフォルト安定版リリース判定へ進むための準備フェーズである。Phase 6 自体は安定版リリース対象ではない。
+
+Phase 6 では、database schema、SQLite driver、Database Gateway、Repository 層、Service 層の責務境界を変更しない。既存 API と既存ドメイン機能は維持し、既知バグ確認、ドキュメント整合性向上、移行・ロールバック前提整理、主要 workflow 検証を行う。
+
+Phase 6 から Phase 5 相当へ戻す場合、データ構造の migration は不要である。ロールバックは、SQLite database、bare repository、設定、配布 binary のバックアップを前提に行う。
 
 ### 採用デザイン
 
