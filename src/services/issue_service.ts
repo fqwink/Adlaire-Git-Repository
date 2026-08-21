@@ -9,10 +9,9 @@ import {
   validateIssueTitle,
 } from "../domain/issue.ts";
 import type { RepositoryRecord } from "../domain/repository.ts";
-import { validateRepositoryName } from "../domain/repository.ts";
 import type { Principal } from "../domain/user.ts";
 import type { AuditSink } from "./audit_service.ts";
-import type { RepositoryStore } from "./repository_service.ts";
+import type { RepositoryAccess } from "./repository_service.ts";
 
 export interface IssueStore {
   nextNumber(repositoryId: string): Promise<number>;
@@ -33,7 +32,7 @@ export interface IssueStore {
 
 export class IssueService {
   constructor(
-    private readonly repositories: RepositoryStore,
+    private readonly repositories: RepositoryAccess,
     private readonly issues: IssueStore,
     private readonly audit: AuditSink,
   ) {}
@@ -116,11 +115,8 @@ export class IssueService {
       actor,
     );
     const current = await this.requireIssue(repository, number);
-    if (
-      actor.role !== "admin" && actor.username !== repository.owner &&
-      actor.username !== current.author
-    ) {
-      throw new Response("issue write access denied.", { status: 403 });
+    if (actor.username !== current.author) {
+      await this.repositories.requireWritableRepository(owner, name, actor);
     }
 
     const updated = await this.issues.update(repository.id, number, {
@@ -165,20 +161,6 @@ export class IssueService {
     name: string,
     actor: Principal | null,
   ): Promise<RepositoryRecord> {
-    const safeOwner = validateRepositoryName(owner, "owner");
-    const safeName = validateRepositoryName(name, "name");
-    const repository = await this.repositories.find(safeOwner, safeName);
-    if (repository === null) {
-      throw new Response("repository not found.", { status: 404 });
-    }
-
-    if (
-      repository.visibility === "public" || actor?.role === "admin" ||
-      actor?.username === repository.owner
-    ) {
-      return repository;
-    }
-
-    throw new Response("repository access denied.", { status: 403 });
+    return await this.repositories.requireVisibleRepository(owner, name, actor);
   }
 }

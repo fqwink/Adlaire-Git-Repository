@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.33
-**現行フェーズ基準バージョン**: v.0.3
-**ステータス**: Phase 3 完了
+**計画バージョン**: v.0.34
+**現行フェーズ基準バージョン**: v.0.5
+**ステータス**: Phase 4 完了
 
 ---
 
@@ -88,7 +88,7 @@
 | Phase 1 | v.0.2 | 実装完了・開発検証段階 | Git 基本機能、認証、Repository CRUD、SQLite 基盤、Docker/Deno 実行環境 |
 | Phase 2 | v.0.3 | 完了 | GitHub 互換の Pull Request、Code Review、Issue、Wiki、Webhook、Release、REST API 基本機能。WYSIWYG エディター実装時期は未定 |
 | Phase 3 | v.0.4 | 完了 | Organizations 最小運用、Teams 最小運用、Projects 最小運用、Adlaire 内製 Deno Module Registry 最小実装、運用基盤拡張 |
-| Phase 4 | v.0.5 | 未着手 | Phase 1 から Phase 3 までの統合、仕様整合、移行準備、検証導線整理 |
+| Phase 4 | v.0.5 | 完了 | Phase 1 から Phase 3 までの統合、仕様整合、移行準備、検証導線整理 |
 | Phase 5 | v.0.6 | 未着手 | 補助的リリース判定、デザイン関連の改良・改修。安定版リリース対象外 |
 | Phase 6 | v.0.7 | 未着手 | 大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズ |
 | Phase 7 | v.0.8 / 安定版承認時 v.1.8 | 未着手 | デフォルト安定版リリースフェーズ |
@@ -613,6 +613,38 @@ Phase 4 は安定版リリースフェーズではない。Phase 4 では例外�
 - 既知バグが残っていない。
 - リポジトリ全体の整合性確認が完了している。
 
+### 9.6 Phase 4 実装完了範囲
+
+Phase 4 では、Phase 3 で導入した Organization 所有 repository の権限モデルを、Phase 1 から Phase 2 で実装済みの repository 配下機能へ統合した。
+
+実装完了範囲は以下とする。
+
+- Issue の参照、作成、更新時に、Organization 所有 private repository の参照権限を `RepositoryService` の権限境界で判定する。
+- Pull Request、Code Review、Wiki、Webhook、Release の参照および書込操作を `RepositoryService` の権限境界で判定する。
+- Organization owner は Organization 所有 repository に対して書込操作を実行できる。
+- Organization member は Organization 所有 private repository の参照操作を実行できる。
+- Webhook event dispatch は Organization 所有 repository でも repository 書込権限に基づいて実行できる。
+- HTTP handler、Issue service、Phase 2 service から個別の repository owner 判定を重複実装せず、RepositoryAccess 境界を経由する。
+
+Phase 4 では、新しい外部依存、Node.js ランタイム、外部フレームワーク、SQLite / libSQL 以外のデータベースエンジンは採用していない。
+
+### 9.7 Phase 4 検証範囲
+
+Phase 4 の追加検証では、Organization 所有 private repository を対象に、以下の組み合わせワークフローを確認する。
+
+- Organization 作成
+- Organization member 追加
+- Organization 所有 private repository 作成
+- Organization member による Issue 作成と一覧取得
+- Organization member による Pull Request 作成と一覧取得
+- Organization owner による Wiki 作成と Organization member による参照
+- Organization owner による Release 作成と Organization member による参照
+- Organization owner による Webhook 作成と Webhook event dispatch
+
+標準検証は `tools/check-adlaire-git-repository.sh` とする。
+
+Phase 4 完了時点で、Database Gateway、SQLite driver、Repository 層、Service 層の責務境界に変更はない。SQLite は現行 driver として維持し、libSQL は将来移行候補として保持する。libSQL driver、Turso Cloud 等のクラウドDBホスティング、その他データベースエンジンは Phase 4 の採用対象外である。
+
 ---
 
 ## 10. Phase 5: 補助的リリース判定
@@ -816,3 +848,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.31 | 全フェーズ共通 | - | Adlaire Git Repository 本体は self-host、Docker、VPS、専用サーバーを標準運用基盤とし、Deno Deploy、Turso Cloud、libSQL 系クラウドDBサービスは将来候補として保留する方針を反映 |
 | v.0.32 | Phase 3 | v.0.4 | Phase 3 を実装中へ更新し、Organizations 最小運用の実装済み範囲、未実装範囲、検証範囲を反映 |
 | v.0.33 | Phase 3 | v.0.4 | Teams、Projects、Adlaire 内製 Deno Module Registry、Webhook event dispatch、Audit log 参照、Operations status、libSQL 再評価参照の最小運用を実装し、Phase 3 完了へ更新 |
+| v.0.34 | Phase 4 | v.0.5 | Phase 1 から Phase 3 までの統合として Organization 所有 private repository の権限境界を Issue、Pull Request、Code Review、Wiki、Webhook、Release へ統合し、仕様整合、移行境界、検証導線を整理して Phase 4 完了へ更新 |

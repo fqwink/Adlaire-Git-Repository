@@ -57,6 +57,19 @@ export interface RepositoryOwnerAccess {
   canWriteOwner(owner: string, actor: Principal): Promise<boolean>;
 }
 
+export interface RepositoryAccess {
+  requireVisibleRepository(
+    owner: string,
+    name: string,
+    actor: Principal | null,
+  ): Promise<RepositoryRecord>;
+  requireWritableRepository(
+    owner: string,
+    name: string,
+    actor: Principal,
+  ): Promise<RepositoryRecord>;
+}
+
 export class RepositoryService {
   constructor(
     private readonly repositoryRepository: RepositoryStore,

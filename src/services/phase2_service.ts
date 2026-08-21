@@ -1,5 +1,4 @@
 import type { RepositoryRecord } from "../domain/repository.ts";
-import { validateRepositoryName } from "../domain/repository.ts";
 import type { Principal } from "../domain/user.ts";
 import {
   parseBoolean,
@@ -23,7 +22,7 @@ import {
   type WikiPageRecord,
 } from "../domain/phase2.ts";
 import type { AuditSink } from "./audit_service.ts";
-import type { RepositoryStore } from "./repository_service.ts";
+import type { RepositoryAccess } from "./repository_service.ts";
 
 export interface Phase2Store {
   nextPullRequestNumber(repositoryId: string): Promise<number>;
@@ -71,7 +70,7 @@ export interface Phase2Store {
 
 export class Phase2Service {
   constructor(
-    private readonly repositories: RepositoryStore,
+    private readonly repositories: RepositoryAccess,
     private readonly store: Phase2Store,
     private readonly audit: AuditSink,
   ) {}
@@ -415,19 +414,7 @@ export class Phase2Service {
     name: string,
     actor: Principal | null,
   ): Promise<RepositoryRecord> {
-    const safeOwner = validateRepositoryName(owner, "owner");
-    const safeName = validateRepositoryName(name, "name");
-    const repository = await this.repositories.find(safeOwner, safeName);
-    if (repository === null) {
-      throw new Response("repository not found.", { status: 404 });
-    }
-    if (
-      repository.visibility === "public" || actor?.role === "admin" ||
-      actor?.username === repository.owner
-    ) {
-      return repository;
-    }
-    throw new Response("repository access denied.", { status: 403 });
+    return await this.repositories.requireVisibleRepository(owner, name, actor);
   }
 
   private async requireWritableRepository(
@@ -435,11 +422,11 @@ export class Phase2Service {
     name: string,
     actor: Principal,
   ): Promise<RepositoryRecord> {
-    const repository = await this.requireVisibleRepository(owner, name, actor);
-    if (actor.role === "admin" || actor.username === repository.owner) {
-      return repository;
-    }
-    throw new Response("repository write access denied.", { status: 403 });
+    return await this.repositories.requireWritableRepository(
+      owner,
+      name,
+      actor,
+    );
   }
 
   private async record(

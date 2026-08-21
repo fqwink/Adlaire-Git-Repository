@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.0.8
-**ステータス**: Phase 2 完了・開発継続
+**文書バージョン**: v.0.9
+**ステータス**: Phase 4 完了・開発継続
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
 
@@ -122,6 +122,28 @@ Phase 3 の Organizations 最小運用では、以下を対象外とする。
 - 請求、プラン、外部ID連携
 
 Organization owner は Organization 所有 repository に対して書込権限を持つ。Organization member は Organization 所有 private repository を参照できるが、repository 更新、visibility 変更、削除はできない。
+
+## Phase 4 Repository 権限統合仕様
+
+Phase 4 では、Repository 配下機能の権限判定を `RepositoryService` の RepositoryAccess 境界へ統合する。
+
+対象機能は以下とする。
+
+- Issue
+- Pull Request
+- Code Review
+- Wiki
+- Webhook
+- Webhook event dispatch
+- Release
+
+Repository 配下機能は、repository owner 文字列と actor username の単純比較を権限判定の正本として扱ってはならない。Organization 所有 repository、user 所有 repository、public repository、admin 権限を同じ境界で扱うため、参照操作は `requireVisibleRepository` 相当、書込操作は `requireWritableRepository` 相当の権限境界を経由する。
+
+Organization owner は、Organization 所有 repository の Issue、Pull Request、Wiki、Webhook、Release に対して書込操作を実行できる。
+
+Organization member は、Organization 所有 private repository の Issue、Pull Request、Code Review、Wiki、Release を参照できる。Organization member による書込操作は、対象機能の仕様で別途許可されている場合を除き、Organization owner または admin の書込権限とは区別する。
+
+Phase 4 の統合検証では、Organization 所有 private repository を対象に、Issue、Pull Request、Wiki、Release、Webhook event dispatch が repository 権限境界に基づいて成立することを確認する。
 
 ## Phase 3 Teams 最小運用仕様
 
@@ -576,12 +598,12 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
 
 正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。
 
-初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。たとえば `0.3.0` は正式表記 `v.0.3` に対応する。
+初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。たとえば `0.5.0` は正式表記 `v.0.5` に対応する。
 
 ```json
 {
   "name": "adlaire-git-repository",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "license": "CLOSED",
   "exports": "./src/main.ts",
   "tasks": {
