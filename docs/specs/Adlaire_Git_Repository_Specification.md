@@ -1,6 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.0.1
+**文書バージョン**: v.0.2
+**ステータス**: Phase 2 完了・開発継続
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
 
@@ -408,7 +409,7 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
     "dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run src/main.ts",
     "fmt": "deno fmt deno.json src/ tests/",
     "lint": "deno lint",
-    "test": "deno test --allow-read --allow-write --allow-env --allow-run tests/",
+    "test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/",
     "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=adlaire-git-repo src/main.ts"
   },
   "compilerOptions": {
@@ -575,7 +576,7 @@ $ tar -czf /backup/repos_$(date +\%Y\%m\%d).tar.gz /home/gitrepo/repos/
 
 ---
 
-### Phase 2: PR/Issue + Wiki
+### Phase 2: PR/Issue/Wiki/Webhook/Release
 
 **構成**
 ```
@@ -840,7 +841,7 @@ VPS: 2GB × 1
 
 ---
 
-### Phase 2: PR/Issue + Wiki
+### Phase 2: PR/Issue/Wiki/Webhook/Release
 
 **Xserver VPS**
 ```
@@ -1257,7 +1258,7 @@ Optimization:
 テーマ: ライトテーマのみ
 ```
 
-**Phase 2: PR/Issue + Wiki**
+**Phase 2: PR/Issue/Wiki/Webhook/Release**
 ```
 追加:
   - Issues/PR タブ

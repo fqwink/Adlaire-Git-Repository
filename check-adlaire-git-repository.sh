@@ -210,7 +210,7 @@ run_step "deno lint" \
   run_deno lint
 
 run_step "deno test" \
-run_deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/
+  run_deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/
 
 run_step "deno compile" \
   run_deno compile \

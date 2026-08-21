@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.21
+**計画バージョン**: v.0.22
 **現行フェーズ基準バージョン**: v.0.3
-**ステータス**: Phase 2 最小実装完了・開発検証段階
+**ステータス**: Phase 2 完了
 
 ---
 
@@ -78,7 +78,7 @@
 |---|---:|---|---|
 | Phase 0 | v.0.1 | 完了 | 実装前の文書整備、設計整理、計画策定 |
 | Phase 1 | v.0.2 | 実装完了・開発検証段階 | Git 基本機能、認証、Repository CRUD、SQLite 基盤、Docker/Deno 実行環境 |
-| Phase 2 | v.0.3 | 最小実装完了・開発検証段階 | GitHub 互換の Pull Request、Issue、Wiki、Webhook、Release、REST API 基本機能。WYSIWYG エディター実装時期は未定 |
+| Phase 2 | v.0.3 | 完了 | GitHub 互換の Pull Request、Code Review、Issue、Wiki、Webhook、Release、REST API 基本機能。WYSIWYG エディター実装時期は未定 |
 | Phase 3 | v.0.4 | 未着手 | Organizations、Teams、Projects、運用拡張 |
 | Phase 4 | v.0.5 | 未着手 | 補助的リリース判定前の統合、修正、仕様整合、移行準備 |
 | Phase 5 | v.0.6 | 未着手 | 補助的リリース判定フェーズ。ケースバイケースで安定版対象。安定版承認時のみ `v.1.6` へ進める |
@@ -361,6 +361,7 @@ Phase 2 最小完了では、以下を対象とする。
 - Database Gateway 経由の SQLite 永続化
 - 操作ログへの主要 action 記録
 - REST API による主要ワークフロー提供
+- リポジトリ全体の Phase 2 表記、実行コマンド例、候補リスト、上位仕様との整合性確認
 
 ### 7.4 対象外
 
@@ -449,6 +450,7 @@ Phase 2 の完了判定では、以下を必須検証として扱う。
 - Node.js ランタイム、外部フレームワーク、無承認外部ライブラリへ依存していない。
 - 既知バグが残っていない。
 - 次フェーズに進むための開発検証結果を説明できる状態である。
+- Phase 2 実装範囲と、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター実装機能候補リスト、検証導線の表記が整合している。
 
 ---
 
@@ -646,3 +648,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.19 | 全フェーズ共通 | - | 安定版未リリース中は `v.0.x` 系を維持するバージョン整合を反映 |
 | v.0.20 | Phase 2 | v.0.3 | Phase 2 の Issue 最小実装開始、対象範囲、対象外、検証範囲を反映 |
 | v.0.21 | Phase 2 | v.0.3 | Phase 2 の Pull Request、Code Review、Issue、Wiki、Webhook、Release、REST API 基本機能の最小実装完了範囲と検証結果を反映 |
+| v.0.22 | Phase 2 | v.0.3 | リポジトリ全体の Phase 2 表記、実行コマンド例、候補リスト、上位仕様との整合性確認を完了し、Phase 2 完了へ更新 |
