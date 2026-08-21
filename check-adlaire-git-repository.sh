@@ -165,6 +165,13 @@ check_forbidden_node_files() {
   fi
 }
 
+check_forbidden_unapproved_registries() {
+  if grep -R -n -E '["'\''](jsr|npm):' "$ROOT_DIR/src" "$ROOT_DIR/tests" "$ROOT_DIR/deno.json" >/dev/null 2>&1; then
+    echo "JSR/npm registry dependencies are not allowed without explicit approval and policy updates." >&2
+    exit 1
+  fi
+}
+
 check_deno_tasks() {
   if ! grep -F '"fmt": "deno fmt deno.json src/ tests/"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the fmt task." >&2
@@ -192,6 +199,7 @@ trap cleanup EXIT INT HUP TERM
 run_step "required path check" check_required_paths
 run_step "version policy check" check_version_policy
 run_step "forbidden Node.js project file check" check_forbidden_node_files
+run_step "forbidden unapproved registry dependency check" check_forbidden_unapproved_registries
 run_step "deno task definition check" check_deno_tasks
 
 prepare_runtime

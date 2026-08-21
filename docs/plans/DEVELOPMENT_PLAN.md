@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.23
+**計画バージョン**: v.0.24
 **現行フェーズ基準バージョン**: v.0.3
 **ステータス**: Phase 2 完了
 
@@ -115,6 +115,14 @@ v.0.7 -> v.1.8
 採用バージョンの基本方針は、各技術の **最新の安定版** とする。
 
 Deno、SQLite、libSQL、Git、Docker、Docker Compose、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリ、その他ユーザー承認を得て採用する技術は、採用または更新の時点で公式情報を確認し、最新の安定版を採用候補とする。
+
+Deno 標準ライブラリを最優先候補とする。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
+
+JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする。JSR へ公開する package は、公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
+
+クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を目標とする。
+
+npm registry 互換レジストリは、Node.js / npm ecosystem リスクと衝突するため標準採用しない。
 
 TypeScript は **6系の最新安定版** を採用方針とする。Deno に同梱される TypeScript を利用する場合も、TypeScript 6系の最新安定版であることを採用条件とする。
 
@@ -671,3 +679,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.21 | Phase 2 | v.0.3 | Phase 2 の Pull Request、Code Review、Issue、Wiki、Webhook、Release、REST API 基本機能の最小実装完了範囲と検証結果を反映 |
 | v.0.22 | Phase 2 | v.0.3 | リポジトリ全体の Phase 2 表記、実行コマンド例、候補リスト、上位仕様との整合性確認を完了し、Phase 2 完了へ更新 |
 | v.0.23 | 全フェーズ共通 | - | フェーズ完了時のリポジトリ整合性確認を全フェーズ共通の義務として明記 |
+| v.0.24 | 全フェーズ共通 | - | Deno 標準ライブラリ優先、承認済み JSR 公開ライブラリ採用可、未承認 JSR 採用禁止、クローズド資産の JSR 公開禁止、Adlaire 内製 Deno Module Registry 方針を反映 |

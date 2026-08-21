@@ -285,6 +285,12 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 **原則**:
 - Deno std のみ
 - フレームワーク採用禁止（内製化のみ）
+- Deno 標準ライブラリを最優先候補とする。ただし、個別モジュールの採用はユーザー承認を必須とする
+- JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする
+- JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする
+- クローズドライセンス、内部専用、非公開資産は JSR へ公開しない
+- クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を目標とする
+- npm registry 互換レジストリは標準採用しない
 - 必要最小限の外部ライブラリ
 - 外部ライブラリは内製ラッパー、内製driver、または Database Gateway の内部に閉じ込める
 - Deno、SQLite、libSQL、Git、Docker、Docker Compose、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリは、各技術の最新の安定版を採用方針とする
