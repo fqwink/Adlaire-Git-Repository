@@ -74,7 +74,116 @@ run_step() {
   "$@"
 }
 
+check_required_paths() {
+  for path in \
+    AGENTS.md \
+    README.md \
+    deno.json \
+    Dockerfile \
+    compose.yaml \
+    docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md \
+    docs/policies/DOCUMENT_CHARTER.md \
+    docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md \
+    docs/policies/VERSION_POLICY.md \
+    docs/policies/RELEASE_POLICY.md \
+    docs/policies/TEST_POLICY.md \
+    docs/policies/LICENSE_POLICY.md \
+    docs/specs/Auris_System_Design.md \
+    docs/specs/Adlaire_Git_Repository_Specification.md \
+    docs/specs/WYSIWYG_Editor_Specification.md \
+    docs/plans/DEVELOPMENT_PLAN.md \
+    docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md \
+    src/main.ts \
+    src/server.ts \
+    src/config.ts \
+    src/database/types.ts \
+    src/database/gateway.ts \
+    src/database/sql.ts \
+    src/database/sqlite_cli_driver.ts \
+    src/database/schema.sql \
+    tests/support/assert.ts \
+    tests/unit/auth_service_test.ts \
+    tests/unit/git_http_backend_test.ts \
+    tests/unit/repository_name_test.ts \
+    tests/unit/repository_path_test.ts \
+    tests/integration/repository_service_test.ts; do
+    if [ ! -f "$ROOT_DIR/$path" ]; then
+      echo "missing Adlaire Git Repository required path: $path" >&2
+      exit 1
+    fi
+  done
+}
+
+check_version_policy() {
+  version=$(sed -n 's/.*"version": "\([^"]*\)".*/\1/p' deno.json | sed -n '1p')
+  if [ -z "$version" ]; then
+    echo "deno.json must define version." >&2
+    exit 1
+  fi
+
+  case "$version" in
+    0.*.0) ;;
+    *)
+      echo "pre-stable deno.json version must use 0.<minor>.0: $version" >&2
+      exit 1
+      ;;
+  esac
+
+  minor_version=${version#0.}
+  minor_version=${minor_version%.0}
+  case "$minor_version" in
+    ''|*[!0-9]*)
+      echo "pre-stable deno.json minor version must be numeric: $version" >&2
+      exit 1
+      ;;
+  esac
+
+  formal_version="v.0.$minor_version"
+  if ! grep -F "**現行フェーズ基準バージョン**: $formal_version" docs/plans/DEVELOPMENT_PLAN.md >/dev/null 2>&1; then
+    echo "deno.json version must match current phase baseline in DEVELOPMENT_PLAN.md: $formal_version" >&2
+    exit 1
+  fi
+}
+
+check_forbidden_node_files() {
+  if find "$ROOT_DIR" \
+    -path "$ROOT_DIR/.git" -prune -o \
+    -path "$ROOT_DIR/.check-work" -prune -o \
+    \( -name 'package.json' -o -name 'package-lock.json' -o -name 'node_modules' -o -name 'tsconfig.json' \) \
+    -print | grep . >/dev/null 2>&1; then
+    echo "Adlaire Git Repository must not use Node.js/npm project files." >&2
+    exit 1
+  fi
+}
+
+check_deno_tasks() {
+  if ! grep -F '"fmt": "deno fmt deno.json src/ tests/"' deno.json >/dev/null 2>&1; then
+    echo "deno.json must define the fmt task." >&2
+    exit 1
+  fi
+
+  if ! grep -F '"lint": "deno lint"' deno.json >/dev/null 2>&1; then
+    echo "deno.json must define the lint task." >&2
+    exit 1
+  fi
+
+  if ! grep -F '"test": "deno test --allow-read --allow-write --allow-env --allow-run tests/"' deno.json >/dev/null 2>&1; then
+    echo "deno.json must define the test task." >&2
+    exit 1
+  fi
+
+  if ! grep -F '"compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=adlaire-git-repo src/main.ts"' deno.json >/dev/null 2>&1; then
+    echo "deno.json must define the compile task." >&2
+    exit 1
+  fi
+}
+
 trap cleanup EXIT INT HUP TERM
+
+run_step "required path check" check_required_paths
+run_step "version policy check" check_version_policy
+run_step "forbidden Node.js project file check" check_forbidden_node_files
+run_step "deno task definition check" check_deno_tasks
 
 prepare_runtime
 
