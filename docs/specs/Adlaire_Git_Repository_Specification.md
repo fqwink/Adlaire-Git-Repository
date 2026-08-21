@@ -237,12 +237,14 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
 
 ## deno.json
 
-正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。たとえば `1.2.0` は正式表記 `v.1.2` に対応する。
+正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。
+
+初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。たとえば `0.2.0` は正式表記 `v.0.2` に対応する。
 
 ```json
 {
   "name": "adlaire-git-repository",
-  "version": "1.2.0",
+  "version": "0.2.0",
   "license": "CLOSED",
   "exports": "./src/main.ts",
   "tasks": {
