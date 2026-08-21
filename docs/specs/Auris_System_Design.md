@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.0.9
-**ステータス**: Phase 3 完了・開発継続
+**文書バージョン**: v.0.10
+**ステータス**: Phase 4 完了・開発継続
 
 ---
 
@@ -232,6 +232,14 @@ Phase 3 は最小運用として完了している。Team による repository �
 - バグ修正
 - 移行準備
 - 補助的リリース判定前の検証整理
+
+Phase 4 は完了している。
+
+Phase 4 では、Phase 3 で追加した Organization 所有 repository の権限モデルを、Phase 1 と Phase 2 で実装済みの Issue、Pull Request、Code Review、Wiki、Webhook、Release へ統合した。
+
+Repository 配下機能は、個別に owner 文字列を比較するのではなく、RepositoryAccess 境界を経由して Organization owner、Organization member、admin、public repository の参照可否を判定する。
+
+SQLite は現行 driver として維持し、libSQL は将来移行候補として保持する。Phase 4 では libSQL driver、クラウドDBホスティング、その他データベースエンジンを採用しない。
 
 ### 6.5 Phase 5
 

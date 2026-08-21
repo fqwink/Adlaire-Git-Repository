@@ -63,6 +63,36 @@ class MemoryRepository {
     );
     return Promise.resolve();
   }
+
+  async requireVisibleRepository(
+    owner: string,
+    name: string,
+    actor: Principal | null,
+  ): Promise<RepositoryRecord> {
+    const repository = await this.find(owner, name);
+    if (repository === null) {
+      throw new Response("repository not found.", { status: 404 });
+    }
+    if (
+      repository.visibility === "public" || actor?.role === "admin" ||
+      actor?.username === repository.owner
+    ) {
+      return repository;
+    }
+    throw new Response("repository access denied.", { status: 403 });
+  }
+
+  async requireWritableRepository(
+    owner: string,
+    name: string,
+    actor: Principal,
+  ): Promise<RepositoryRecord> {
+    const repository = await this.requireVisibleRepository(owner, name, actor);
+    if (actor.role === "admin" || actor.username === repository.owner) {
+      return repository;
+    }
+    throw new Response("repository write access denied.", { status: 403 });
+  }
 }
 
 class MemoryIssue {

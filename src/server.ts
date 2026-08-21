@@ -76,12 +76,12 @@ export async function createApp(config: AppConfig): Promise<App> {
     auditService,
   );
   const issueService = new IssueService(
-    repositoryRepository,
+    repositoryService,
     new IssueRepository(database),
     auditService,
   );
   const phase2Service = new Phase2Service(
-    repositoryRepository,
+    repositoryService,
     new Phase2Repository(database),
     auditService,
   );
