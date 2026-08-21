@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.25
+**計画バージョン**: v.0.26
 **現行フェーズ基準バージョン**: v.0.3
 **ステータス**: Phase 2 完了
 
@@ -118,7 +118,7 @@ Deno、SQLite、libSQL、Git、Docker、Docker Compose、Deno 標準ライブラ
 
 Deno 標準ライブラリを最優先候補とする。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 
-JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする。JSR へ公開する package は、公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
+JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする。JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。JSR へ公開する package は、公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
 
 クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
 
@@ -686,3 +686,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.23 | 全フェーズ共通 | - | フェーズ完了時のリポジトリ整合性確認を全フェーズ共通の義務として明記 |
 | v.0.24 | 全フェーズ共通 | - | Deno 標準ライブラリ優先、承認済み JSR 公開ライブラリ採用可、未承認 JSR 採用禁止、クローズド資産の JSR 公開禁止、Adlaire 内製 Deno Module Registry 方針を反映 |
 | v.0.25 | Phase 3 | v.0.4 | Adlaire 内製 Deno Module Registry を中長期計画かつ早期の本体実装対象として Phase 3 へ反映 |
+| v.0.26 | 全フェーズ共通 | - | JSR 公開ライブラリであっても npm 互換、npm specifier、Node.js / npm ecosystem 依存を前提とするものは採用禁止であることを明記 |

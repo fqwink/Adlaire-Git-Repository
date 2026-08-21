@@ -21,6 +21,7 @@
 - フレームワークは、内製したもの以外の採用を禁止する。
 - Deno 標準ライブラリを最優先候補とする。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 - JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする。
+- JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。
 - JSR は公開可能なオープンソース package の公開候補に限る。クローズドライセンス、内部専用、非公開資産は JSR へ公開しない。
 - npm registry 互換レジストリは、Node.js / npm ecosystem リスクと衝突するため標準採用しない。
 - クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
@@ -53,6 +54,8 @@ Deno ランタイムにおける外部依存は、以下の優先順位で検討
 Deno 標準ライブラリは最優先候補である。ただし、個別モジュールの採用は自動承認ではない。採用する場合は、対象モジュール、固定バージョン、利用範囲、検証方法、ライセンス影響を整理し、ユーザー承認を得る。
 
 JSR レジストリの公開 package は採用可能であり、Deno / TypeScript / ESM と相性がよい。ただし、ユーザー承認なしに採用してはならない。JSR package を採用する場合は、必要最小限の例外採用として扱い、3類マスター仕様書とマスター開発計画に利用範囲を反映する。
+
+JSR レジストリの公開 package であっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。JSR で公開されていることは、npm 互換依存の採用許可を意味しない。
 
 JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする。クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
 

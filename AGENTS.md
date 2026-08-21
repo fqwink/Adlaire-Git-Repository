@@ -204,6 +204,7 @@ Node.js ランタイムは、セキュリティ上のリスクによるプロジ
 - Deno 標準ライブラリを優先する。
 - Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 - JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用してはならない。JSR は Deno / TypeScript / ESM と相性がよいが、承認なしの外部依存導入経路として扱ってはならない。
+- JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。
 - JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする。クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
 - クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期計画として Adlaire 内製 Deno Module Registry を Adlaire Git Repository 本体へ早期実装する方針とする。
 - npm registry 互換レジストリは、Node.js / npm ecosystem リスクと衝突するため標準採用しない。

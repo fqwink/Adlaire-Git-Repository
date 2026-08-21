@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.0.3
+**文書バージョン**: v.0.4
 **ステータス**: Phase 2 完了・開発継続
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + SQLite + Git
@@ -307,6 +307,7 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 - フレームワーク採用禁止（内製化のみ）
 - Deno 標準ライブラリを最優先候補とする。ただし、個別モジュールの採用はユーザー承認を必須とする
 - JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする
+- JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする
 - JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする
 - クローズドライセンス、内部専用、非公開資産は JSR へ公開しない
 - クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする
