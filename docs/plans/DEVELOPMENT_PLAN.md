@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.0.39
+**計画バージョン**: v.0.40
 **現行フェーズ基準バージョン**: v.0.7
 **ステータス**: Phase 6 完了
 
@@ -807,6 +807,18 @@ adlaire-git-repository-check-ok
 
 Phase 6 の安定版準備 baseline は `tests/integration/phase6_release_preparation_test.ts` で検証する。
 
+### 11.10 Phase 6 再確認結果
+
+本来の Phase 6 作業として、既知バグ確認、ドキュメント整合性確認、主要 workflow 検証を再実施した。
+
+再確認結果は以下とする。
+
+- `src/` と `tests/` に未処理の `TODO`、`FIXME`、`BUG` 表記は確認されていない。
+- 標準検証 `tools/check-adlaire-git-repository.sh` は成功した。
+- 検証結果は `24 passed | 0 failed` および `adlaire-git-repository-check-ok` である。
+- Phase 6 は安定版リリースフェーズではなく、引き続きリリース対象外である。
+- Phase 7 は未着手のままとし、安定版リリース判定へ進む場合は別途ユーザー承認を得る。
+
 ---
 
 ## 12. Phase 7: デフォルト安定版リリース
@@ -940,3 +952,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.37 | Phase 6 | v.0.7 | 安定版リリース準備として、既知バグ確認、ドキュメント整合性向上、移行・ロールバック前提整理、検証導線強化を行い、Phase 6 完了へ更新 |
 | v.0.38 | 全フェーズ共通 | - | リリース提案、GitHub Releases を主配置とするリリース配置、承認後のリリース自動化方針への参照を反映 |
 | v.0.39 | Phase 6 | v.0.7 | Document Index と AdlaireGroup 共通 `tpl-governance` 雛形を Phase 6 のドキュメント整合性向上として整理 |
+| v.0.40 | Phase 6 | v.0.7 | 本来の Phase 6 作業として、既知バグ確認、主要 workflow 検証、標準検証結果を再確認 |
