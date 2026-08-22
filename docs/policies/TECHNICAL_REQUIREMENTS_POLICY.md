@@ -92,7 +92,7 @@ Docker 採用禁止は例外なしとする。個別承認による例外採用�
 
 開発と検証は、ホストOS上に固定採用バージョンの Deno、Git、SQLite を導入し、Deno task、内製検証スクリプト、必要最小限の外部コマンドで実行する。
 
-本番とデプロイは、Deno single binary、ホストOSのファイルシステム、systemd または同等のサービス管理、release directory、`current` symlink、事前バックアップ、health check、rollback 手順を基本構成とする。
+本番とデプロイは、Deno single binary、ホストOSのファイルシステム、systemd または同等のサービス管理、release directory、`current` symlink、事前バックアップ、health check、rollback 手順を基本構成とする。デプロイ、検証、バックアップ、ロールバックの詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
 Docker に依存する成果物、手順、検証、仕様、計画、テンプレートを追加してはならない。既存の Docker 参照を発見した場合は、技術要件ポリシー違反として整理し、ホストOS実行またはDeno single binary運用へ置き換える。
 

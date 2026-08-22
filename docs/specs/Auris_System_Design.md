@@ -22,7 +22,7 @@
 
 本書は3類マスター仕様書であり、1類ルールブックである `AGENTS.md` および2類ドキュメント群に従う。
 
-2類ドキュメント群の総則は `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` とする。ドキュメント体系、責務境界、開発計画の扱いは `docs/policies/DOCUMENT_CHARTER.md` に従い、技術要件、バージョン、リリース、テスト、ライセンスの詳細方針は `docs/policies/` 配下の責務別ポリシーに従う。
+2類ドキュメント群の総則は `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` とする。ドキュメント体系、責務境界、開発計画の扱いは `docs/policies/DOCUMENT_CHARTER.md` に従い、技術要件、バージョン、リリース、デプロイ、テスト、ライセンスの詳細方針は `docs/policies/` 配下の責務別ポリシーに従う。
 
 フェーズ単位の実装計画、フェーズ別バージョン、実装対象、対象外、検証範囲、完了条件は、マスター開発計画である `docs/plans/DEVELOPMENT_PLAN.md` で管理する。
 
@@ -153,6 +153,8 @@ Phase 1 では driver 実装は SQLite のみとする。ただし、インタ�
 Adlaire Git Repository 本体の標準運用方針は、self-host、VPS、専用サーバーを前提とする。
 
 Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、標準実行基盤は、これらを直接管理しやすい self-host / VPS / 専用サーバーを基準にする。
+
+本番サーバ環境へのデプロイは、Deno single binary、release directory、`current` symlink、systemd または同等のサービス管理を基本構成とし、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。採用を検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
 

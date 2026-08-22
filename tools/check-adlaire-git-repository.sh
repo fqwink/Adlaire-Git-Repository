@@ -37,6 +37,7 @@ check_required_paths() {
     docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md \
     docs/policies/VERSION_POLICY.md \
     docs/policies/RELEASE_POLICY.md \
+    docs/policies/DEPLOYMENT_POLICY.md \
     docs/policies/TEST_POLICY.md \
     docs/policies/LICENSE_POLICY.md \
     docs/specs/Auris_System_Design.md \

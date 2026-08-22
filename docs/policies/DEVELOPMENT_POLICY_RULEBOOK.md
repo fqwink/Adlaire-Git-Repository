@@ -15,8 +15,9 @@
 | 3 | `docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` | 採用技術、ランタイム、依存関係、固定採用バージョン、技術承認 |
 | 4 | `docs/policies/VERSION_POLICY.md` | バージョン表記、累積方式、Major / Minor 更新条件 |
 | 5 | `docs/policies/RELEASE_POLICY.md` | 安定版リリース、リリース対象、リリース禁止条件 |
-| 6 | `docs/policies/TEST_POLICY.md` | 意味のあるテスト、テストピラミッド、テスト追加・削除判断 |
-| 7 | `docs/policies/LICENSE_POLICY.md` | クローズドライセンス、権利帰属、外部公開、ライセンス変更 |
+| 6 | `docs/policies/DEPLOYMENT_POLICY.md` | デプロイ、運用基盤、本番サーバ反映、バックアップ、検証、ロールバック |
+| 7 | `docs/policies/TEST_POLICY.md` | 意味のあるテスト、テストピラミッド、テスト追加・削除判断 |
+| 8 | `docs/policies/LICENSE_POLICY.md` | クローズドライセンス、権利帰属、外部公開、ライセンス変更 |
 
 各責務別ポリシーは、自分の責務範囲における正本である。他責務の詳細を重複定義せず、必要な場合は該当ポリシーを参照する。
 
@@ -128,6 +129,7 @@
 - 開発言語、ランタイム、データベース、Git、外部コマンド、外部ライブラリ、フレームワーク、採用バージョン、固定バージョン、更新方針は、ユーザーが決定する。
 - エージェントは候補提示、比較、調査、リスク整理、推奨案の提示にとどめ、ユーザー承認なしに採用決定、バージョン固定、方針確定、実装反映をしてはならない。
 - Docker は、開発、検証、本番、デプロイ、調査、一時確認、補助用途を含む全用途で例外なく採用禁止とし、詳細は `docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` を正本とする。
+- 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 - Deno 標準ライブラリを最優先候補とし、JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認なしに採用してはならない。
 - JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。
 - クローズド資産は JSR へ公開してはならず、クローズドな Adlaire 内製 Deno package の中長期配布基盤は Adlaire 内製 Deno Module Registry とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。

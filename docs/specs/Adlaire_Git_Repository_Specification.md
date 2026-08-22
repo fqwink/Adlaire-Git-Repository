@@ -515,6 +515,8 @@ Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用
 
 Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、本体の標準運用基盤は、これらを直接管理しやすい self-host / VPS / 専用サーバーを基準にする。
 
+本番サーバ環境へのデプロイは、Deno single binary、release directory、`current` symlink、systemd または同等のサービス管理を基本構成とし、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
+
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
 
 Deno Deploy を採用候補にする場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提にしてはならない。
@@ -1673,146 +1675,28 @@ Phase 別の実装対象、対象外、完了条件、検証範囲は `docs/plan
 
 ---
 
-## GitHub Actions デプロイ例
+## デプロイ自動化仕様
 
-### ワークフロー設定（.github/workflows/deploy.yml）
+本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。
 
-```yaml
-name: Deploy Adlaire Git Repository
+標準自動化は以下を含む。
 
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:  # 手動実行も可
+- 本番サーバ環境の前提確認
+- Deno single binary の取得または転送
+- 配置前検証
+- SQLite database のバックアップ
+- Git bare repository 保存領域のバックアップ
+- 設定ファイルのバックアップ
+- release directory 作成
+- `current` symlink 切り替え
+- service restart
+- `/health` 検証
+- 主要APIまたは最小workflow検証
+- deploy manifest と検証結果の記録
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+初回本番デプロイ、デプロイ先サーバ、SSH接続方式、接続ユーザー、配置パス、systemd unit、バックアップ保存先、保持世代、暗号化方針、ロールバック実行、本番データへ影響する操作は、必ず別途ユーザー承認を得る。
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: vx.x.x
-
-      - name: Run tests
-        run: deno task test
-
-      - name: Lint
-        run: deno lint src/
-
-      - name: Format check
-        run: deno fmt --check src/
-
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: vx.x.x
-
-      - name: Compile binary
-        run: deno task compile
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: adlaire-git-repo
-          path: ./dist/adlaire-git-repo
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Download artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: adlaire-git-repo
-
-      - name: Deploy to VPS
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts
-
-          # VPS へ転送
-          scp -i ~/.ssh/id_ed25519 \
-            ./dist/adlaire-git-repo \
-            $VPS_USER@$VPS_HOST:/tmp/adlaire-git-repo.new
-
-          # VPS 側でデプロイ実行
-          ssh -i ~/.ssh/id_ed25519 $VPS_USER@$VPS_HOST << 'EOF'
-          set -e
-
-          # バックアップ実行
-          /opt/adlaire-git-repo/backup.sh
-
-          # サービス停止
-          systemctl stop adlaire-git-repo
-
-          # バイナリ置き換え
-          mv /tmp/adlaire-git-repo.new /opt/adlaire-git-repo/adlaire-git-repo
-          chmod +x /opt/adlaire-git-repo/adlaire-git-repo
-
-          # サービス起動
-          systemctl start adlaire-git-repo
-
-          # ヘルスチェック
-          sleep 2
-          curl -f http://localhost:8080/health || exit 1
-          EOF
-
-      - name: Notify on success
-        if: success()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          text: '✅ デプロイ成功'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-
-      - name: Notify on failure
-        if: failure()
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          text: '❌ デプロイ失敗 - ロールバック実施'
-          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-```
-
-### GitHub Secrets 登録
-
-```bash
-# VPS_HOST: git.example.com
-# VPS_USER: gitrepo
-# VPS_SSH_KEY: (Ed25519 秘密鍵)
-# SLACK_WEBHOOK: (Slack 通知用・オプション)
-```
-
-### SSH キー生成（VPS 側）
-
-```bash
-# VPS 上で実行
-$ ssh-keygen -t ed25519 -f /home/gitrepo/.ssh/github-actions -N ""
-
-# 公開鍵を authorized_keys に追加
-$ cat /home/gitrepo/.ssh/github-actions.pub >> /home/gitrepo/.ssh/authorized_keys
-
-# 秘密鍵を GitHub Secrets に登録
-$ cat /home/gitrepo/.ssh/github-actions
-# コンテンツをコピー → GitHub Secrets に登録
-```
+GitHub Actions、内製CI、手元端末からのSSH実行などの自動化実行基盤は未固定とする。採用する場合は、Node.js runtime、npm ecosystem、Docker、未承認外部依存を前提にせず、3類マスター仕様書、2類ポリシー、マスター開発計画に反映し、ユーザー承認を得る。
 
 ---
 
