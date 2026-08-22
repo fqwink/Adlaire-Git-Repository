@@ -4,3 +4,4 @@ dist/*
 !dist/.gitkeep
 *.sqlite3
 *.sqlite3-*
+scripts/deploy/deploy.env

@@ -1,6 +1,0 @@
-.git
-.check-work
-data
-dist/adlaire-git-repo
-*.sqlite3
-*.sqlite3-*
