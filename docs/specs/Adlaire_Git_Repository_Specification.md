@@ -477,8 +477,9 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 - npm registry 互換レジストリは標準採用しない
 - 必要最小限の外部ライブラリ
 - 外部ライブラリは内製ラッパー、内製driver、または Database Gateway の内部に閉じ込める
-- Deno、SQLite、libSQL、Git、Docker、Docker Compose、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリは、各技術の最新の安定版を採用方針とする
+- Deno、SQLite、libSQL、Git、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリは、各技術の最新の安定版を採用方針とする
 - TypeScript は 6系の最新安定版を採用方針とする
+- Docker は、開発、検証、本番、デプロイ、調査、一時確認、補助用途を含む全用途で例外なく採用禁止とする
 - 承認済み固定採用バージョンは、下表に従う
 
 | 技術 | 固定採用バージョン | 扱い |
@@ -488,9 +489,6 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 | SQLite | `v3.53.4` | Phase 1 標準データベース |
 | libSQL | `libsql-server v0.24.32` | 将来移行候補。Phase 1 の実装対象外 |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
-| Docker Engine | `v29.7.2` | 開発・検証用コンテナ基盤 |
-| Docker Compose | `v5.4.0` | 開発・検証用 compose |
-
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
 ### データベース採用方針
@@ -513,9 +511,9 @@ Turso Cloud 等のクラウドDBホスティングを採用するかどうかは
 
 ### 標準運用基盤方針
 
-Adlaire Git Repository 本体の標準運用基盤は、self-host、Docker、VPS、専用サーバーを前提とする。
+Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用サーバーを前提とする。
 
-Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、本体の標準運用基盤は、これらを直接管理しやすい self-host / Docker / VPS / 専用サーバーを基準にする。
+Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、本体の標準運用基盤は、これらを直接管理しやすい self-host / VPS / 専用サーバーを基準にする。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
 
@@ -628,9 +626,7 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
 ```
 adlaire-git-repository/
 ├── AGENTS.md
-├── Dockerfile
 ├── README.md
-├── compose.yaml
 ├── deno.json
 ├── dist/                  (生成物)
 │   └── adlaire-git-repo   (single binary)
@@ -1651,15 +1647,14 @@ Phase 別の実装対象、対象外、完了条件、検証範囲は `docs/plan
 ```
 利点:
   ✅ 軽量・シンプル
-  ✅ Docker ベース
   ✅ 小規模チーム向け
 
 欠点:
-  ❌ Docker 前提
+  ❌ 現行の Docker 採用禁止方針と衝突する
   ❌ カスタマイズ性は Jenkins より低い
 
 価格: 無料（OSS）
-推奨度: ⭐⭐⭐ (代替案・自ホスト向け)
+推奨度: 採用不可
 ```
 
 **Gitea Actions / Forgejo CI**
@@ -1839,312 +1834,24 @@ $ cat /home/gitrepo/.ssh/github-actions
 
 ---
 
-## Docker サポート（選択肢）
+## 標準デプロイ方式
 
 ### 基本方針
 
-**Single Binary（基本・推奨）**
-```
-deno compile でバイナリ生成 → VPS で直接実行
-メリット: シンプル・追加導入なし
-推奨: ほとんどのケース
-```
-
-**Docker（選択肢）**
-```
-Dockerfile でイメージビルド → Docker コンテナで実行
-メリット: 環境統一・運用自動化・複数インスタンス管理
-推奨: Phase 3 複数インスタンス / 運用自動化重視
-```
-
----
-
-### Dockerfile
-
-```dockerfile
-# Multi-stage build
-
-# Stage 1: Builder
-FROM denoland/deno:latest as builder
-
-WORKDIR /app
-
-COPY . .
-
-# Deno permissions: allow all (本番では制限推奨)
-RUN deno compile \
-  --allow-all \
-  --output=dist/adlaire-git-repo \
-  src/main.ts
-
-# Stage 2: Runtime
-FROM debian:bookworm-slim
-
-RUN apt-get update && apt-get install -y \
-  git \
-  ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Builder stage から バイナリをコピー
-COPY --from=builder /app/dist/adlaire-git-repo .
-
-# SQLite データベース・Git リポジトリ用ディレクトリ
-RUN mkdir -p /app/db /app/repos /app/logs
-
-# 非 root ユーザー作成
-RUN useradd -m -u 1000 gitrepo && chown -R gitrepo:gitrepo /app
-USER gitrepo
-
-EXPOSE 8080
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:8080/health || exit 1
-
-CMD ["./adlaire-git-repo", "--port", "8080"]
-```
-
----
-
-### docker-compose.yml
-
-```yaml
-version: '3.8'
-
-services:
-  adlaire-git-repo:
-    build:
-      context: .
-      dockerfile: Dockerfile
-
-    container_name: adlaire-git-repo
-
-    ports:
-      - "8080:8080"
-
-    volumes:
-      # SQLite データベース永続化
-      - git-db:/app/db
-      # Git リポジトリ永続化
-      - git-repos:/app/repos
-      # ログ永続化
-      - git-logs:/app/logs
-
-    environment:
-      # 必要に応じて環境変数設定
-      - LOG_LEVEL=info
-      - DB_PATH=/app/db/gitrepo.db
-
-    restart: unless-stopped
-
-    networks:
-      - adlaire-network
-
-    # リソース制限（Xserver VPS 2GB 想定）
-    deploy:
-      resources:
-        limits:
-          cpus: '1.5'
-          memory: 1G
-        reservations:
-          cpus: '1'
-          memory: 512M
-
-  # Nginx リバースプロキシ（オプション）
-  nginx:
-    image: nginx:alpine
-
-    container_name: adlaire-nginx
-
-    ports:
-      - "80:80"
-      - "443:443"
-
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certs:/etc/nginx/certs:ro
-
-    depends_on:
-      - adlaire-git-repo
-
-    restart: unless-stopped
-
-    networks:
-      - adlaire-network
-
-volumes:
-  git-db:
-  git-repos:
-  git-logs:
-
-networks:
-  adlaire-network:
-    driver: bridge
-```
-
----
-
-### Docker ビルド・実行方法
-
-**イメージビルド**
-```bash
-# Dockerfile からイメージビルド
-$ docker build -t adlaire-git-repo:latest .
-
-# または docker-compose で
-$ docker-compose build
-```
-
-**コンテナ実行（単体）**
-```bash
-$ docker run -d \
-  --name adlaire-git-repo \
-  -p 8080:8080 \
-  -v git-db:/app/db \
-  -v git-repos:/app/repos \
-  -v git-logs:/app/logs \
-  adlaire-git-repo:latest
-```
-
-**docker-compose で実行**
-```bash
-# コンテナ起動
-$ docker-compose up -d
-
-# ログ確認
-$ docker-compose logs -f adlaire-git-repo
-
-# コンテナ停止
-$ docker-compose down
-
-# コンテナ再起動
-$ docker-compose restart
-```
-
-**ヘルスチェック**
-```bash
-$ curl http://localhost:8080/health
-```
-
----
-
-### GitHub Actions で Docker デプロイ
-
-```yaml
-# .github/workflows/docker-deploy.yml
-
-name: Build & Deploy Docker Image
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: vx.x.x
-
-      - name: Run tests
-        run: deno task test
-
-      - name: Build Docker image
-        run: docker build -t adlaire-git-repo:${{ github.sha }} .
-
-      - name: Tag latest
-        run: docker tag adlaire-git-repo:${{ github.sha }} adlaire-git-repo:latest
-
-      - name: Deploy to VPS
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts
-
-          # Docker イメージを tar で VPS へ転送
-          docker save adlaire-git-repo:latest | gzip > image.tar.gz
-          scp -i ~/.ssh/id_ed25519 image.tar.gz $VPS_USER@$VPS_HOST:/tmp/
-
-          # VPS でロードと再起動
-          ssh -i ~/.ssh/id_ed25519 $VPS_USER@$VPS_HOST << 'EOF'
-          set -e
-
-          # イメージをロード
-          docker load < /tmp/image.tar.gz
-
-          # バックアップ実行
-          docker-compose exec -T adlaire-git-repo /opt/backup.sh || true
-
-          # コンテナ再起動
-          docker-compose down
-          docker-compose up -d
-
-          # ヘルスチェック
-          sleep 3
-          curl -f http://localhost:8080/health || exit 1
-          EOF
-```
-
----
-
-### Docker デプロイ手順（Phase別）
-
-**Phase 1-2: Single binary（推奨）**
-```
-VPS で deno compile バイナリを直接実行
-理由: シンプル・追加導入なし
-```
-
-**Phase 2: Docker へ移行（オプション）**
-```
-docker-compose で管理開始
-メリット: ログ/ボリューム管理が標準化
-```
-
-**Phase 3: 複数インスタンス**
-```
-【Option A】Single binary × 複数 VPS
-  各 VPS で deno compile バイナリ実行
-  NAS で共有ストレージ
-
-【Option B】Docker × 複数コンテナ
-  各 VPS で docker-compose 実行
-  ボリュームで NAS マウント
-  推奨: 運用自動化重視の場合
-```
-
----
-
-## Single Binary vs Docker 選択ガイド
-
-```
-【Single Binary を選ぶ】
-  ✅ シンプルさ重視
-  ✅ 追加導入・学習コスト削減
-  ✅ 小規模運用
-  ✅ Deno + bash で十分
-  推奨: Phase 1-2
-
-【Docker を選ぶ】
-  ✅ 環境統一（開発 ↔ 本番）
-  ✅ 複数インスタンス管理簡素化
-  ✅ ログ・ボリューム標準化
-  ✅ CI/CD パイプライン統一
-  ✅ コンテナオーケストレーション準備
-  推奨: Phase 3 / 運用自動化重視
-```
+Docker は全用途で例外なく採用禁止とする。標準デプロイは、Deno single binary を VPS または専用サーバーへ配置し、ホストOS上で直接実行する方式に限定する。
+
+標準構成は以下を基本とする。
+
+- `deno compile` による single binary 生成
+- release directory への成果物配置
+- `current` symlink による稼働版切り替え
+- systemd または同等のサービス管理
+- SQLite database、Git repository、log のホストOSファイルシステム上での永続保存
+- 配置前バックアップ
+- `/health` による health check
+- 直前 release directory への rollback
+
+開発、検証、本番、デプロイのいずれでも、コンテナ前提の成果物、設定、手順、検証を追加してはならない。
 
 ---
 

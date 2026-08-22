@@ -68,7 +68,7 @@
 - リポジトリ整合性確認では、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、マスター実装機能候補リスト、README、実装、テスト、検証導線、バージョン表記、Pull Request 説明の矛盾や古い表記を確認する。
 - リポジトリ整合性確認で矛盾が見つかった場合、補正が完了するまでフェーズを完了扱いにしてはならない。
 - リポジトリ整合性が取れていない状態で、次のフェーズに進んではならない。
-- Adlaire Git Repository 本体の標準運用基盤は、self-host、Docker、VPS、専用サーバーを前提とする。
+- Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用サーバーを前提とする。
 - Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
 - Turso Cloud 等のクラウドDBサービスを検討する場合も、Database Gateway と内製 `libsql` driver の接続先差し替えとして扱い、アプリケーション上位層へサービス固有APIやサービス名を露出してはならない。
 
@@ -89,7 +89,7 @@
 | フェーズ | 基準バージョン | ステータス | 扱い |
 |---|---:|---|---|
 | Phase 0 | v.0.1 | 完了 | 実装前の文書整備、設計整理、計画策定 |
-| Phase 1 | v.0.2 | 実装完了・開発検証段階 | Git 基本機能、認証、Repository CRUD、SQLite 基盤、Docker/Deno 実行環境 |
+| Phase 1 | v.0.2 | 実装完了・開発検証段階 | Git 基本機能、認証、Repository CRUD、SQLite 基盤、Deno single binary 実行環境 |
 | Phase 2 | v.0.3 | 完了 | GitHub 互換の Pull Request、Code Review、Issue、Wiki、Webhook、Release、REST API 基本機能 |
 | Phase 3 | v.0.4 | 完了 | Organizations 最小運用、Teams 最小運用、Projects 最小運用、Adlaire 内製 Deno Module Registry 最小実装、運用基盤拡張 |
 | Phase 4 | v.0.5 | 完了 | Phase 1 から Phase 3 までの統合、仕様整合、移行準備、検証導線整理 |
@@ -119,11 +119,13 @@ v.0.8 -> v.1.8
 
 ### 4.1 採用バージョン決定方針
 
-開発言語、ランタイム、データベース、Git、Docker、外部コマンド、外部ライブラリ、フレームワーク、採用バージョン、固定バージョンは、ユーザーが決定する。
+開発言語、ランタイム、データベース、Git、外部コマンド、外部ライブラリ、フレームワーク、採用バージョン、固定バージョンは、ユーザーが決定する。
 
 採用バージョンの基本方針は、各技術の **最新の安定版** とする。
 
-Deno、SQLite、libSQL、Git、Docker、Docker Compose、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリ、その他ユーザー承認を得て採用する技術は、採用または更新の時点で公式情報を確認し、最新の安定版を採用候補とする。
+Deno、SQLite、libSQL、Git、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリ、その他ユーザー承認を得て採用する技術は、採用または更新の時点で公式情報を確認し、最新の安定版を採用候補とする。
+
+Docker は、開発、検証、本番、デプロイ、調査、一時確認、補助用途を含む全用途で例外なく採用禁止とする。
 
 Deno 標準ライブラリを最優先候補とする。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 
@@ -144,9 +146,6 @@ TypeScript は **6系の最新安定版** を採用方針とする。Deno に同
 | SQLite | `v3.53.4` | Phase 1 標準データベース |
 | libSQL | `libsql-server v0.24.32` | 将来移行候補。Phase 1 の実装対象外 |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
-| Docker Engine | `v29.7.2` | 開発・検証用コンテナ基盤 |
-| Docker Compose | `v5.4.0` | 開発・検証用 compose |
-
 エージェントは、候補提示、比較、調査、リスク整理、推奨案の提示を行ってよい。ただし、ユーザーの明示承認なしに採用決定、バージョン固定、方針確定、実装反映を行ってはならない。
 
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定として扱う。
@@ -263,8 +262,8 @@ Phase 1 は安定版リリースフェーズではない。Phase 1 では例外�
 - SQLite driver
 - Database Gateway
 - SQLite から libSQL へ移行しやすい永続化境界
-- Deno ランタイムによる実行環境
-- Dockerfile / compose による Docker 上の Deno 実行環境
+- Deno ランタイムによるホストOS実行環境
+- Deno single binary による実行環境
 - 基本テスト
 
 ### 6.4 対象外
@@ -277,7 +276,7 @@ Phase 1 は安定版リリースフェーズではない。Phase 1 では例外�
 - Webhook
 - Organizations / Teams
 - 複数インスタンス運用
-- Docker 前提の本番運用固定化
+- コンテナ前提の本番運用固定化
 
 ### 6.5 必須検証
 
@@ -291,7 +290,8 @@ Phase 1 は安定版リリースフェーズではない。Phase 1 では例外�
 - Node.js ランタイム非依存
 - 外部フレームワーク非採用
 - Deno ランタイム上での `fmt` / `lint` / `test` / `compile`
-- Docker 上の Deno ランタイム起動と `/health`
+- ホストOS上の Deno ランタイム起動と `/health`
+- Deno single binary の起動と `/health`
 
 ### 6.6 完了条件
 
@@ -315,7 +315,8 @@ Phase 1 では、以下を実装済みとする。
 - Branch / Tag / README / commit / tree / blob 参照 API
 - 最小 Web UI
 - 監査ログ記録
-- Docker 上の Deno ランタイム環境、永続データ volume、healthcheck
+- ホストOS上の Deno ランタイム環境、永続データディレクトリ、healthcheck
+- Deno single binary 実行環境
 - 意味のある単体テスト、統合テスト、E2E 検証
 
 ### 6.8 検証結果
@@ -326,9 +327,8 @@ Phase 1 の完了判定では、以下の検証を必須結果として扱う。
 - `deno task lint`
 - `deno task test`
 - `deno task compile`
-- Docker build
-- Docker コンテナ内の Deno / Git / SQLite / Git Smart HTTP backend 確認
-- Docker コンテナ起動後の `/health` 確認
+- ホストOS上の Deno / Git / SQLite / Git Smart HTTP backend 確認
+- Deno single binary 起動後の `/health` 確認
 - Personal Access Token 認証付き Git `push` / `clone` / `fetch` / `pull`
 - private repository の匿名 API / Git アクセス拒否
 - HTTP Basic 認証による API アクセス
@@ -578,7 +578,6 @@ Phase 3 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` �
 
 検証結果は以下とする。
 
-- Docker build 成功
 - `deno fmt --check` 成功
 - `deno lint` 成功
 - `deno test`: 22 passed / 0 failed
@@ -979,7 +978,7 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | バージョン | 対象フェーズ | 基準バージョン | 内容 |
 |---:|---|---:|---|
 | v.0.1 | Phase 0 | v.0.1 | マスター開発計画の初期策定 |
-| v.0.2 | Phase 1 | v.0.2 | Phase 1 実装完了、Docker 上の Deno ランタイム環境、主要検証結果、Phase 2 着手条件を反映 |
+| v.0.2 | Phase 1 | v.0.2 | Phase 1 実装完了、Deno ランタイム環境、主要検証結果、Phase 2 着手条件を反映 |
 | v.0.3 | Phase 2 | v.0.3 | 計画バージョンとフェーズ基準バージョンを分離し、Phase 2 着手前仕様、実装順序、必須検証を追加 |
 | v.0.4 | 全フェーズ共通 | - | 開発計画は3類マスター仕様書に基づいて策定される原則を明記 |
 | v.0.5 | Phase 2 | v.0.3 | 仕様未確定項目をPhase 2計画から分離 |
@@ -1008,7 +1007,7 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.28 | Phase 5 | v.0.6 | Phase 5 にデザイン関連の改良・改修方針を追加 |
 | v.0.29 | Phase 5 / Phase 6 | v.0.6 / v.0.7 | 5系フェーズを安定版リリース対象外とし、6系フェーズを大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズとして定義 |
 | v.0.30 | Phase 3 / Phase 4 / Phase 8 | v.0.4 / v.0.5 / v.0.9 | マスター実装機能候補リストに合わせ、Phase 3 を最小運用と内製 Deno Module Registry、Phase 4 を統合・仕様整合・移行準備、Phase 8 を長期運用準備と保留解除候補再評価へ再編 |
-| v.0.31 | 全フェーズ共通 | - | Adlaire Git Repository 本体は self-host、Docker、VPS、専用サーバーを標準運用基盤とし、Deno Deploy、Turso Cloud、libSQL 系クラウドDBサービスは将来候補として保留する方針を反映 |
+| v.0.31 | 全フェーズ共通 | - | Adlaire Git Repository 本体は self-host、VPS、専用サーバーを標準運用基盤とし、Deno Deploy、Turso Cloud、libSQL 系クラウドDBサービスは将来候補として保留する方針を反映 |
 | v.0.32 | Phase 3 | v.0.4 | Phase 3 を実装中へ更新し、Organizations 最小運用の実装済み範囲、未実装範囲、検証範囲を反映 |
 | v.0.33 | Phase 3 | v.0.4 | Teams、Projects、Adlaire 内製 Deno Module Registry、Webhook event dispatch、Audit log 参照、Operations status、libSQL 再評価参照の最小運用を実装し、Phase 3 完了へ更新 |
 | v.0.34 | Phase 4 | v.0.5 | Phase 1 から Phase 3 までの統合として Organization 所有 private repository の権限境界を Issue、Pull Request、Code Review、Wiki、Webhook、Release へ統合し、仕様整合、移行境界、検証導線を整理して Phase 4 完了へ更新 |
@@ -1021,3 +1020,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.41 | Phase 6 | v.0.7 | Phase 6 バグ精査で確認した認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧漏えいを修正し、再発防止テストと標準検証結果を反映 |
 | v.0.42 | Phase 6 | v.0.7 | Phase 6 追加バグ精査で確認した管理者追加、JSON Content-Type、HTTP Authorization scheme、Webhook secret API 露出、Team member の Organization member 境界漏れを修正し、再発防止テストを追加 |
 | v.0.43 | Phase 6 | v.0.7 | Phase 6 追加バグ精査後のドキュメント整合性向上として、仕様書の既知バグ修正範囲、プロジェクト構成、Document Index の状態表記を整合 |
+| v.0.44 | 全フェーズ共通 | - | Docker を全用途で例外なく採用禁止とし、開発・検証・本番・デプロイをホストOS実行と Deno single binary 方針へ統一 |
