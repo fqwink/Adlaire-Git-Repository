@@ -18,6 +18,14 @@
 /
 ├── AGENTS.md
 ├── README.md
+├── scripts/
+│   └── deploy/
+│       ├── deploy.env.example
+│       ├── deploy.sh
+│       ├── rollback.sh
+│       ├── backup.sh
+│       ├── verify-server.sh
+│       └── verify-release.sh
 └── docs/
     ├── DOCUMENT_INDEX.md
     ├── plans/
@@ -49,5 +57,7 @@
 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は [docs/policies/DEPLOYMENT_POLICY.md](./docs/policies/DEPLOYMENT_POLICY.md) を参照する。
 
 デプロイ実行方式は、shell script + SSH + systemd を標準採用し、`gh` と systemd timer を補助採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS または承認済み検証サーバで行う。
+
+標準デプロイ雛形は [scripts/deploy/](./scripts/deploy/) で管理する。`deploy.env.example` を基準に環境固有値を定義し、`deploy.sh`、`backup.sh`、`verify-server.sh`、`verify-release.sh`、`rollback.sh` を承認済み範囲で実行する。`deploy.env` には接続先や環境固有値を含めるため、コミットしてはならない。
 
 Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして扱う。

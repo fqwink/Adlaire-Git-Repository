@@ -46,7 +46,24 @@ Docker は、開発、検証、本番、デプロイ、調査、一時確認、�
 - release directory と `current` symlink による稼働版切り替え
 - deploy manifest の記録
 
-## 4. 標準自動化範囲
+## 4. 標準デプロイスクリプト
+
+標準デプロイ雛形は `scripts/deploy/` 配下で管理する。
+
+| ファイル | 責務 |
+|---|---|
+| `scripts/deploy/deploy.env.example` | 環境固有値の雛形。実値を入れた `deploy.env` はコミットしてはならない |
+| `scripts/deploy/deploy.sh` | 成果物転送、バックアップ、release directory 作成、`current` symlink 切替、service restart、検証の全体実行 |
+| `scripts/deploy/backup.sh` | SQLite database、Git bare repository 保存領域、設定、現行 release のバックアップ |
+| `scripts/deploy/verify-server.sh` | SSH 接続先、本番サーバ必須コマンド、標準ディレクトリの事前確認 |
+| `scripts/deploy/verify-release.sh` | service 状態、`/health`、SQLite quick check、Git repository 保存領域の配置後確認 |
+| `scripts/deploy/rollback.sh` | `current` symlink を指定 release へ戻し、service restart と配置後確認を行う |
+
+標準デプロイスクリプトは、初回本番デプロイ、デプロイ先サーバ決定、SSH 接続方式、systemd unit 作成、バックアップ保存先決定、ロールバック実行、データ復元を自動承認するものではない。
+
+`deploy.sh` は通常デプロイの自動化雛形であり、本番データ復元を行ってはならない。SQLite database 復元、Git bare repository 復元、設定復元を伴うロールバックは、必ず別承認を得る。
+
+## 5. 標準自動化範囲
 
 ユーザー承認後に限り、以下を自動実行してよい。
 
@@ -65,7 +82,7 @@ Docker は、開発、検証、本番、デプロイ、調査、一時確認、�
 - 主要APIまたは最小workflow検証
 - deploy log、manifest、検証結果の記録
 
-## 5. バックアップ方針
+## 6. バックアップ方針
 
 本番デプロイ前には、必ずバックアップを取得する。
 
@@ -79,7 +96,7 @@ Docker は、開発、検証、本番、デプロイ、調査、一時確認、�
 
 バックアップは、復元可能性を検証できる形式で保存する。保存先、保持世代、暗号化、外部退避の有無は、デプロイ先決定時にユーザー承認を得る。
 
-## 6. 検証方針
+## 7. 検証方針
 
 デプロイ自動化には、デプロイ前検証とデプロイ後検証を含める。
 
@@ -113,7 +130,7 @@ VPS で実施する実行系検証は、最低限以下を含む。
 
 VPS 接続先、接続方式、配置パス、検証対象バージョン、検証データ、検証後の削除または保持方針は、実行前にユーザー承認を得る。
 
-## 7. ロールバック方針
+## 8. ロールバック方針
 
 デプロイに失敗した場合、またはデプロイ後検証に失敗した場合は、ロールバックを実行できる状態にしておく。
 
@@ -121,7 +138,7 @@ VPS 接続先、接続方式、配置パス、検証対象バージョン、検�
 
 本番データへ影響するロールバック、SQLite database 復元、Git bare repository 復元は、必ずユーザー承認を得てから実行する。
 
-## 8. 別承認が必要な範囲
+## 9. 別承認が必要な範囲
 
 以下は、デプロイ自動化の対象としてまとめて扱わず、必ず別途承認を得る。
 
@@ -136,7 +153,7 @@ VPS 接続先、接続方式、配置パス、検証対象バージョン、検�
 - ロールバック実行
 - 公開経路、ドメイン、TLS 設定変更
 
-## 9. リリースポリシーとの関係
+## 10. リリースポリシーとの関係
 
 `docs/policies/RELEASE_POLICY.md` は、tag、GitHub Releases、release notes、manifest、checksum、成果物公開を管理する。
 

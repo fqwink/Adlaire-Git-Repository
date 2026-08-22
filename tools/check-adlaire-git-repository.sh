@@ -31,6 +31,12 @@ check_required_paths() {
     README.md \
     deno.json \
     tools/check-adlaire-git-repository.sh \
+    scripts/deploy/deploy.env.example \
+    scripts/deploy/deploy.sh \
+    scripts/deploy/rollback.sh \
+    scripts/deploy/backup.sh \
+    scripts/deploy/verify-server.sh \
+    scripts/deploy/verify-release.sh \
     dist/.gitkeep \
     docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md \
     docs/policies/DOCUMENT_CHARTER.md \
@@ -78,7 +84,7 @@ check_forbidden_docker_artifacts() {
   if find "$ROOT_DIR" \
     -path "$ROOT_DIR/.git" -prune -o \
     -path "$ROOT_DIR/.check-work" -prune -o \
-    \( -name 'Dockerfile' -o -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yaml' \) \
+    \( -name 'Dockerfile' -o -name '.dockerignore' -o -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yaml' \) \
     -print | grep . >/dev/null 2>&1; then
     echo "Adlaire Git Repository must not include Docker artifacts." >&2
     exit 1
@@ -162,6 +168,17 @@ run_step "forbidden Docker artifact check" check_forbidden_docker_artifacts
 run_step "forbidden Node.js project file check" check_forbidden_node_files
 run_step "forbidden unapproved registry dependency check" check_forbidden_unapproved_registries
 run_step "deno task definition check" check_deno_tasks
+
+run_step "deploy script syntax check" \
+  sh -n scripts/deploy/deploy.sh
+run_step "rollback script syntax check" \
+  sh -n scripts/deploy/rollback.sh
+run_step "backup script syntax check" \
+  sh -n scripts/deploy/backup.sh
+run_step "server verification script syntax check" \
+  sh -n scripts/deploy/verify-server.sh
+run_step "release verification script syntax check" \
+  sh -n scripts/deploy/verify-release.sh
 
 require_command deno
 require_command git
