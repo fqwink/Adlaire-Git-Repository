@@ -1565,113 +1565,15 @@ Phase 別の実装対象、対象外、完了条件、検証範囲は `docs/plan
 
 ### 基本方針
 
-**短期**: GitHub Actions 採用
-- 効率優先
-- GitHub でコード管理 → 自動ビルド・デプロイ
-- SSH で VPS へ転送・実行
+CI/CD とデプロイ自動化は、`docs/policies/DEPLOYMENT_POLICY.md` を正本として扱う。
 
-**長期**: 内製化方針は検討段階
-- 自社製 CI/CD ツール開発検討中
-- 実装タイミング未定
+短期の標準デプロイ実行方式は、shell script + SSH + systemd とする。成果物配置、環境確認、バックアップ、service restart、health check、主要workflow検証、deploy manifest 記録を、承認済み範囲で自動化する。
 
----
+`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
 
-## CI/CD 自動化ツール比較
+Deno製 内製デプロイツールは中期候補とする。shell script 運用で固まった要件を内製化する場合は、別途ユーザー承認を得る。
 
-### クラウド型
-
-**GitHub Actions（推奨）**
-```
-利点:
-  ✅ GitHub 標準機能
-  ✅ public repo なら無料
-  ✅ SSH デプロイ可能
-  ✅ Deno サポート
-  ✅ 追加セットアップ不要
-
-欠点:
-  ❌ GitHub 依存
-  ❌ ネットワークレイテンシー（小）
-
-価格: 無料（public repo）
-推奨度: ⭐⭐⭐⭐⭐ (最適)
-```
-
-**GitLab CI/CD**
-```
-利点:
-  ✅ GitLab 標準
-  ✅ 無料プラン充実
-  ✅ SSH デプロイ可能
-
-欠点:
-  ❌ GitHub でコード管理する場合は非適
-
-価格: 無料（基本機能）
-推奨度: ⭐⭐⭐ (GitHub 使用時は不推奨)
-```
-
-**CircleCI**
-```
-利点:
-  ✅ クラウドホスト型
-  ✅ SSH デプロイ可能
-  ✅ 高機能
-
-欠点:
-  ❌ 有料（フリープランあり）
-
-価格: 有料（月 $30-）
-推奨度: ⭐⭐ (有料・代替手段あり)
-```
-
----
-
-### 自ホスト型
-
-**Jenkins**
-```
-利点:
-  ✅ 完全自由度・高機能
-  ✅ VPS 上で実行可能
-  ✅ 拡張性高い
-
-欠点:
-  ❌ セットアップ複雑
-  ❌ 管理負荷高い
-  ❌ 学習コスト高い
-
-価格: 無料（OSS）
-推奨度: ⭐⭐ (エンタープライズ向け)
-```
-
-**DroneCI**
-```
-利点:
-  ✅ 軽量・シンプル
-  ✅ 小規模チーム向け
-
-欠点:
-  ❌ 現行の Docker 採用禁止方針と衝突する
-  ❌ カスタマイズ性は Jenkins より低い
-
-価格: 無料（OSS）
-推奨度: 採用不可
-```
-
-**Gitea Actions / Forgejo CI**
-```
-利点:
-  ✅ セルフホスト型 Git 統合
-  ✅ GitHub Actions 互換
-  ✅ Adlaire Git Repository との親和性高い
-
-欠点:
-  ❌ まだ検討段階（内製化時）
-
-価格: 無料（OSS）
-推奨度: ⭐⭐⭐⭐ (内製化時に有力候補)
-```
+GitHub Actions と外部デプロイフレームワークは保留とする。Docker と Node.js系は不採用とする。
 
 ---
 
@@ -1696,7 +1598,13 @@ Phase 別の実装対象、対象外、完了条件、検証範囲は `docs/plan
 
 初回本番デプロイ、デプロイ先サーバ、SSH接続方式、接続ユーザー、配置パス、systemd unit、バックアップ保存先、保持世代、暗号化方針、ロールバック実行、本番データへ影響する操作は、必ず別途ユーザー承認を得る。
 
-GitHub Actions、内製CI、手元端末からのSSH実行などの自動化実行基盤は未固定とする。採用する場合は、Node.js runtime、npm ecosystem、Docker、未承認外部依存を前提にせず、3類マスター仕様書、2類ポリシー、マスター開発計画に反映し、ユーザー承認を得る。
+デプロイ実行方式は、shell script + SSH + systemd を標準採用とする。`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
+
+Deno製 内製デプロイツールは中期候補とする。GitHub Actions と外部デプロイフレームワークは保留とし、必要性、依存関係、運用リスクを整理し、ユーザー承認を得るまで標準採用しない。
+
+Docker と Node.js系は不採用とする。Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。
+
+ローカルに Deno が存在しない場合、実行系検証はローカルで完了扱いにしない。この場合は、Deno 固定採用バージョンを満たす VPS または承認済み検証サーバで、Deno task、内製検証スクリプト、`/health`、主要workflow確認を実施する。
 
 ---
 

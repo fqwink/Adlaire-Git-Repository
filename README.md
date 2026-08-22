@@ -48,4 +48,6 @@
 
 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は [docs/policies/DEPLOYMENT_POLICY.md](./docs/policies/DEPLOYMENT_POLICY.md) を参照する。
 
+デプロイ実行方式は、shell script + SSH + systemd を標準採用し、`gh` と systemd timer を補助採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS または承認済み検証サーバで行う。
+
 Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして扱う。
