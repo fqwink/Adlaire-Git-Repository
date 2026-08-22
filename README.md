@@ -60,4 +60,6 @@
 
 標準デプロイ雛形は [scripts/deploy/](./scripts/deploy/) で管理する。`deploy.env.example` を基準に環境固有値を定義し、`deploy.sh`、`backup.sh`、`verify-server.sh`、`verify-release.sh`、`rollback.sh` を承認済み範囲で実行する。`deploy.env` には接続先や環境固有値を含めるため、コミットしてはならない。
 
+安定版リリースの標準 Linux バイナリは、ARM64 と x86_64 の2種類を配置対象とする。VPS デプロイ時は `uname -m` で `aarch64` または `x86_64` を確認し、`deploy.env` の `ARTIFACT_PATH` で対象アーキテクチャの成果物を指定する。
+
 Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして扱う。

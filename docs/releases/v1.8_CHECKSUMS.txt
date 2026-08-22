@@ -2,3 +2,6 @@
 # Generated on 2026-08-21 during the v.1.8 release process.
 
 a2879f34c00d3457add6bbaba8000bfc3701a2188d0502a824b07cb81484f1ce  adlaire-git-repo-v1.8-aarch64-unknown-linux-gnu
+
+# The Linux x86_64 artifact is part of the approved standard release artifact set.
+# Add its SHA-256 after generating adlaire-git-repo-v1.8-x86_64-unknown-linux-gnu.

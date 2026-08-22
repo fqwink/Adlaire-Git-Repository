@@ -125,6 +125,9 @@ VPS で実施する実行系検証は、最低限以下を含む。
 - `deno task lint`
 - `deno task test`
 - `deno task compile`
+- `deno task compile:linux-arm64`
+- `deno task compile:linux-x86_64`
+- `deno task compile:release`
 - `tools/check-adlaire-git-repository.sh` または同等の内製検証スクリプト
 - `/health` と主要workflowの確認
 

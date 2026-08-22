@@ -69,6 +69,8 @@
 
 GitHub Releases には、リリースごとの成果物、release notes、必要な checksum、manifest を配置する方針とする。
 
+Linux 向け Deno single binary を安定版リリース成果物とする場合は、ARM64 と x86_64 の2種類を標準配置対象とする。
+
 リポジトリ内には、リリース配置記録、release notes の元資料、manifest、checksum、運用手順など、履歴として追跡すべき軽量なリリース関連ファイルを配置できる。
 
 大きなバイナリ成果物をリポジトリへ継続的に直接配置してはならない。大きな成果物は GitHub Releases を優先する。
