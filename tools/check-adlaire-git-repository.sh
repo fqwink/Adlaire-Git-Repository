@@ -158,6 +158,21 @@ check_deno_tasks() {
     echo "deno.json must define the compile task." >&2
     exit 1
   fi
+
+  if ! grep -F '"compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.8-aarch64-unknown-linux-gnu src/main.ts"' deno.json >/dev/null 2>&1; then
+    echo "deno.json must define the Linux ARM64 release compile task." >&2
+    exit 1
+  fi
+
+  if ! grep -F '"compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.8-x86_64-unknown-linux-gnu src/main.ts"' deno.json >/dev/null 2>&1; then
+    echo "deno.json must define the Linux x86_64 release compile task." >&2
+    exit 1
+  fi
+
+  if ! grep -F '"compile:release": "deno task compile:linux-arm64 && deno task compile:linux-x86_64"' deno.json >/dev/null 2>&1; then
+    echo "deno.json must define the release compile task." >&2
+    exit 1
+  fi
 }
 
 trap cleanup EXIT INT HUP TERM

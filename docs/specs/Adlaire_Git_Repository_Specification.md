@@ -612,7 +612,10 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
     "fmt": "deno fmt deno.json src/ tests/",
     "lint": "deno lint",
     "test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/",
-    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo src/main.ts"
+    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo src/main.ts",
+    "compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.8-aarch64-unknown-linux-gnu src/main.ts",
+    "compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.8-x86_64-unknown-linux-gnu src/main.ts",
+    "compile:release": "deno task compile:linux-arm64 && deno task compile:linux-x86_64"
   },
   "compilerOptions": {
     "strict": true,
@@ -1566,6 +1569,7 @@ Docker は全用途で例外なく採用禁止とする。標準デプロイは�
 標準構成は以下を基本とする。
 
 - `deno compile` による single binary 生成
+- 安定版リリースでは ARM64 Linux と x86_64 Linux の2種類の single binary 生成
 - release directory への成果物配置
 - `current` symlink による稼働版切り替え
 - systemd または同等のサービス管理
@@ -1603,6 +1607,8 @@ Docker は全用途で例外なく採用禁止とする。標準デプロイは�
 - [ ] Security audit
 - [ ] Performance test
 - [ ] Binary compile
+- [ ] ARM64 Linux binary compile
+- [ ] x86_64 Linux binary compile
 - [ ] リリースドキュメント
 
 ---
