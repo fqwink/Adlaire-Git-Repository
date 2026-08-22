@@ -156,6 +156,8 @@
 
 バージョン表記と累積方式は `docs/policies/VERSION_POLICY.md` を正本として参照する。
 
+AdlaireGroup 共通ガバナンス雛形の正本は `docs/tpl-governance/` とする。共通方針に該当する変更を行う場合は、同ディレクトリの更新要否を判定する。
+
 ---
 
 ## 3. バージョンポリシー
