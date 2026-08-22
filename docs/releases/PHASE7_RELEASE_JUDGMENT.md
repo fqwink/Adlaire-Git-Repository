@@ -34,7 +34,7 @@
 
 Phase 6 までに、以下の成果が main へ取り込まれている。
 
-- Git 基本機能、認証、Repository CRUD、SQLite 基盤、Docker / Deno 実行環境
+- Git 基本機能、認証、Repository CRUD、SQLite 基盤、Deno single binary 実行環境
 - Pull Request、Code Review、Issue、Wiki、Webhook、Release、REST API 基本機能
 - Organizations、Teams、Projects、Adlaire 内製 Deno Module Registry 最小実装
 - Phase 1 から Phase 3 までの統合確認、仕様整合、移行準備、検証導線整理
@@ -92,7 +92,8 @@ adlaire-git-repository-check-ok
 現時点の既知制約は以下である。
 
 - 本プロジェクトはクローズドライセンスである。
-- 標準運用基盤は self-host / Docker / VPS / 専用サーバーを前提とする。
+- 標準運用基盤は self-host / VPS / 専用サーバーを前提とする。
+- Docker は現行方針として全用途で採用禁止である。
 - Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく将来候補として保留する。
 - SQLite を標準データベースとし、libSQL は将来移行候補として保持する。
 - Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` 前提の構成は採用禁止である。

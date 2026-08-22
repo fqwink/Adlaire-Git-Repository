@@ -51,6 +51,7 @@
 | `docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` | 採用技術、ランタイム、依存関係、固定採用バージョン、技術承認 |
 | `docs/policies/VERSION_POLICY.md` | バージョン表記、累積方式、Major / Minor 更新条件 |
 | `docs/policies/RELEASE_POLICY.md` | 安定版リリース、リリース対象、リリース禁止条件、リリース配置、自動化方針 |
+| `docs/policies/DEPLOYMENT_POLICY.md` | デプロイ、運用基盤、本番サーバ反映、バックアップ、検証、ロールバック |
 | `docs/policies/TEST_POLICY.md` | 意味のあるテスト、テストピラミッド、テスト追加・削除判断 |
 | `docs/policies/LICENSE_POLICY.md` | クローズドライセンス、権利帰属、外部公開、ライセンス変更 |
 
