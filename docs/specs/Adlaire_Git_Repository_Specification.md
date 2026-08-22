@@ -773,8 +773,10 @@ deno task compile
 
 **構成**
 ```
-SQLite: /home/gitrepo/db/gitrepo.db
-Git repos: /home/gitrepo/repos/
+SQLite: /opt/adlaire-git-repository/shared/data/database/adlaire.sqlite3
+Git repos: /opt/adlaire-git-repository/shared/data/repositories/
+ログ: /opt/adlaire-git-repository/shared/logs/
+バックアップ: /opt/adlaire-git-repository/shared/backups/
 ローカルディスク: 50GB SSD
 ```
 
@@ -785,13 +787,11 @@ Git repos: /home/gitrepo/repos/
 - 合計: ~20GB（十分な余裕）
 
 **バックアップ戦略**
-```bash
-# 日次バックアップ（cron で夜間実行）
-$ sqlite3 /home/gitrepo/db/gitrepo.db ".dump" > /backup/gitrepo_$(date +\%Y\%m\%d).sql
-$ tar -czf /backup/repos_$(date +\%Y\%m\%d).tar.gz /home/gitrepo/repos/
+標準バックアップ雛形は `scripts/deploy/backup.sh` とする。
 
-保持期間: 7日分
-```
+バックアップ対象は SQLite database、Git bare repository、設定、現行 release、backup manifest とする。
+
+定期実行は systemd timer を補助採用候補とし、実行間隔、保持期間、外部保管、暗号化、復元手順は `docs/policies/DEPLOYMENT_POLICY.md` に従い、ユーザー承認後に確定する。
 
 ---
 
@@ -799,8 +799,10 @@ $ tar -czf /backup/repos_$(date +\%Y\%m\%d).tar.gz /home/gitrepo/repos/
 
 **構成**
 ```
-SQLite: /home/gitrepo/db/gitrepo.db
-Git repos: /home/gitrepo/repos/
+SQLite: /opt/adlaire-git-repository/shared/data/database/adlaire.sqlite3
+Git repos: /opt/adlaire-git-repository/shared/data/repositories/
+ログ: /opt/adlaire-git-repository/shared/logs/
+バックアップ: /opt/adlaire-git-repository/shared/backups/
 ローカルディスク: 50GB SSD
 ```
 
@@ -812,10 +814,10 @@ Git repos: /home/gitrepo/repos/
 
 **バックアップ戦略**
 ```
-頻度: 1日 1回（夜間）
-方法: SQLite dump + Git repos tar
-保管: /backup（ローカル or 外部）
-保持期間: 7日分
+標準雛形: scripts/deploy/backup.sh
+対象: SQLite database + Git bare repository + 設定 + 現行 release + manifest
+定期実行候補: systemd timer
+保持期間・外部保管・暗号化: ユーザー承認後に確定
 ```
 
 **リソース監視**
@@ -863,45 +865,33 @@ VPS: Xserver 2GB プラン × 3台
 
 ### バックアップ・リカバリ
 
-**Phase 1-2**
+バックアップは `docs/policies/DEPLOYMENT_POLICY.md` を正本とし、標準雛形は `scripts/deploy/backup.sh` で管理する。
 
-```bash
-# 自動バックアップ設定
-$ crontab -e
+標準バックアップは、最低限以下を対象とする。
 
-# 毎日 02:00 に実行
-0 2 * * * /opt/adlaire-git-repo/backup.sh
+- SQLite database
+- Git bare repository 保存領域
+- 設定ファイル
+- 現行 release
+- backup manifest
 
-# backup.sh の内容
-#!/bin/bash
-DATE=$(date +\%Y\%m\%d)
-BACKUP_DIR="/backup"
-
-# SQLite バックアップ
-sqlite3 /home/gitrepo/db/gitrepo.db ".dump" > $BACKUP_DIR/gitrepo_$DATE.sql
-
-# Git repos バックアップ
-tar -czf $BACKUP_DIR/repos_$DATE.tar.gz /home/gitrepo/repos/
-
-# 7日以上前のバックアップを削除
-find $BACKUP_DIR -mtime +7 -delete
-```
+`cron` ではなく、systemd timer を補助採用候補として扱う。定期バックアップの有効化、実行間隔、保存先、保持世代、暗号化、外部退避は、デプロイ先決定時にユーザー承認を得る。
 
 **リカバリ手順**
-```bash
-# 1. サービス停止
-$ systemctl stop adlaire-git-repo
 
-# 2. バックアップから復元
-$ sqlite3 /home/gitrepo/db/gitrepo.db < /backup/gitrepo_YYYYMMDD.sql
-$ tar -xzf /backup/repos_YYYYMMDD.tar.gz -C /home/gitrepo/
+データ復元を伴うリカバリは、通常デプロイ自動化の対象外とする。
 
-# 3. サービス起動
-$ systemctl start adlaire-git-repo
+SQLite database 復元、Git bare repository 復元、設定復元は本番データへ影響するため、必ず別途ユーザー承認を得る。
 
-# 4. ヘルスチェック
-$ curl http://localhost:8080/health
-```
+リカバリ時の標準確認項目は以下とする。
+
+- `adlaire-git-repository.service` の停止または保護状態確認
+- 復元対象 backup manifest の確認
+- SQLite database 復元可否の確認
+- Git bare repository 保存領域の復元可否確認
+- service restart
+- `/health` 確認
+- SQLite database と Git bare repository の参照確認
 
 **Phase 3（NAS 利用時）**
 ```
@@ -913,85 +903,44 @@ NAS は自動複製機能 or スナップショット機能を活用
 
 ### アップグレード手順
 
-**Phase 1-2（ダウンタイムあり）**
+標準アップグレードは、`scripts/deploy/deploy.sh` を用いた Deno single binary の release directory 配置、`current` symlink 切替、`adlaire-git-repository.service` restart、配置後検証を基本とする。
 
 ```bash
 # 1. 新バイナリの compile
 $ deno task compile
 
-# 2. バックアップ実行
-$ /opt/adlaire-git-repo/backup.sh
+# 2. デプロイ環境設定を確認
+$ cp scripts/deploy/deploy.env.example scripts/deploy/deploy.env
+# deploy.env へ接続先、配置先、service 名などを設定する。
+# deploy.env はコミットしてはならない。
 
-# 3. サービス停止
-$ systemctl stop adlaire-git-repo
+# 3. 事前確認
+$ scripts/deploy/verify-server.sh
 
-# 4. 新バイナリへ置き換え
-$ cp ./dist/adlaire-git-repo /opt/adlaire-git-repo/adlaire-git-repo
+# 4. バックアップ、成果物配置、service restart、配置後検証
+$ scripts/deploy/deploy.sh
 
-# 5. SQLite マイグレーション（必要な場合のみ）
-# ドキュメントで指定あれば実行
-
-# 6. サービス起動
-$ systemctl start adlaire-git-repo
-
-# 7. ヘルスチェック
-$ curl http://localhost:8080/health
-
-所要時間: 5-10分
-推奨: 月1回深夜に実施
+# 5. 必要に応じて配置後検証を再実行
+$ scripts/deploy/verify-release.sh
 ```
 
-**Phase 3（複数インスタンス・ダウンタイムなし）**
+初回本番デプロイ、デプロイ先サーバ、SSH接続方式、接続ユーザー、配置パス、systemd unit、バックアップ保存先、保持世代、暗号化方針は、必ず別途ユーザー承認を得る。
 
-```bash
-# ロードバランサー（nginx等）を使用
-
-# 各インスタンスを順番にアップグレード
-for INSTANCE in server1 server2 server3; do
-  # 1. ロードバランサーから切離し
-  nginx_remove_upstream $INSTANCE
-
-  # 2. アップグレード実行（Phase 1-2と同じ手順）
-  ssh $INSTANCE
-    systemctl stop adlaire-git-repo
-    cp ./dist/adlaire-git-repo /opt/adlaire-git-repo/
-    systemctl start adlaire-git-repo
-    curl http://localhost:8080/health
-
-  # 3. ロードバランサーに復帰
-  nginx_add_upstream $INSTANCE
-
-  # 4. 次のインスタンスへ（5分待機）
-  sleep 300
-done
-
-ダウンタイム: なし
-所要時間: 各インスタンス 5分 × 3 = 順次実施
-```
+複数インスタンス、ロードバランサー切替、ダウンタイムなしアップグレードは将来候補とし、採用時に3類マスター仕様書、マスター開発計画、デプロイポリシーへ反映する。
 
 ---
 
 ### ロールバック手順
 
-**問題発生時**
+通常ロールバックは、`scripts/deploy/rollback.sh` により `current` symlink を指定 release へ戻し、`adlaire-git-repository.service` restart と配置後検証を行う。
 
 ```bash
-# 1. サービス停止
-$ systemctl stop adlaire-git-repo
-
-# 2. 前日のバックアップから復元
-$ sqlite3 /home/gitrepo/db/gitrepo.db < /backup/gitrepo_YYYYMMDD.sql
-
-# 3. 旧バイナリで起動
-$ cp /opt/adlaire-git-repo/adlaire-git-repo.old /opt/adlaire-git-repo/adlaire-git-repo
-$ systemctl start adlaire-git-repo
-
-# 4. ヘルスチェック
-$ curl http://localhost:8080/health
-
-# 5. 問題原因を調査・修正
-# 修正完了後に新バイナリで再度デプロイ
+TARGET_RELEASE=v.1.8-YYYYMMDD-HHMMSS scripts/deploy/rollback.sh
 ```
+
+ロールバック実行は、必ず別途ユーザー承認を得る。
+
+SQLite database 復元、Git bare repository 復元、設定復元を伴うロールバックは、通常ロールバックとは分離し、本番データへ影響する操作として別承認を必須とする。
 
 ---
 
@@ -999,7 +948,7 @@ $ curl http://localhost:8080/health
 
 **ログ保管**
 ```
-場所: /var/log/adlaire-git-repo/
+場所: /opt/adlaire-git-repository/shared/logs/
 内容:
   - HTTP アクセスログ
   - Git 操作ログ
@@ -1007,28 +956,10 @@ $ curl http://localhost:8080/health
 ```
 
 **ログローテーション**
-```bash
-# logrotate 設定
-$ cat /etc/logrotate.d/adlaire-git-repo
 
-/var/log/adlaire-git-repo/*.log {
-    daily
-    rotate 7
-    compress
-    delaycompress
-    notifempty
-    create 0640 gitrepo gitrepo
-}
+ログローテーションは、標準運用基盤決定時に systemd、logrotate、または同等のホストOS標準機能で具体化する。
 
-# 毎日ローテーション、7日分保持
-```
-
-**ログ削除**
-```bash
-# 7日以上前のログを自動削除
-$ crontab -e
-0 3 * * * find /var/log/adlaire-git-repo -mtime +7 -delete
-```
+保持期間、圧縮、削除条件、外部退避の有無は、デプロイ先決定時にユーザー承認を得る。
 
 ---
 
