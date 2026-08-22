@@ -90,7 +90,7 @@
 |---|---:|---|---|
 | Phase 0 | v.0.1 | 完了 | 実装前の文書整備、設計整理、計画策定 |
 | Phase 1 | v.0.2 | 実装完了・開発検証段階 | Git 基本機能、認証、Repository CRUD、SQLite 基盤、Docker/Deno 実行環境 |
-| Phase 2 | v.0.3 | 完了 | GitHub 互換の Pull Request、Code Review、Issue、Wiki、Webhook、Release、REST API 基本機能。WYSIWYG エディター実装時期は未定 |
+| Phase 2 | v.0.3 | 完了 | GitHub 互換の Pull Request、Code Review、Issue、Wiki、Webhook、Release、REST API 基本機能 |
 | Phase 3 | v.0.4 | 完了 | Organizations 最小運用、Teams 最小運用、Projects 最小運用、Adlaire 内製 Deno Module Registry 最小実装、運用基盤拡張 |
 | Phase 4 | v.0.5 | 完了 | Phase 1 から Phase 3 までの統合、仕様整合、移行準備、検証導線整理 |
 | Phase 5 | v.0.6 | 完了 | 補助的リリース判定、デザイン関連の改良・改修。安定版リリース対象外 |
@@ -414,8 +414,6 @@ Phase 2 最小完了では、以下を対象とする。
 - 複数インスタンス運用
 - libSQL driver の正式採用
 - クラウドDBホスティング採用
-- WYSIWYG エディター本体の実装
-- WYSIWYG エディター連携の正式採用
 - Pull Request の実 Git 差分計算、自動マージ、競合検出、CI 連携
 - Wiki page の過去本文履歴、添付ファイル、Markdown レンダリング
 - Webhook の任意 event 自動発火、配送キュー、再送管理、更新・削除
@@ -449,8 +447,6 @@ Phase 2 に着手する前に、最低限以下の仕様を3類マスター仕�
 - GitHub 互換対象外として扱うUI、画面デザイン、画面レイアウト、視覚表現
 
 仕様が未確定の項目は、Phase 2 の実装対象に含めてはならない。
-
-WYSIWYG エディターは、実装時期、採用Phase、連携範囲が未定である。Phase 2 の実装対象へ含める場合は、事前に3類マスター仕様書、マスター開発計画、検証範囲を改訂し、ユーザー承認を得る。
 
 ### 7.4.3 実装順序
 
@@ -986,7 +982,7 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.0.2 | Phase 1 | v.0.2 | Phase 1 実装完了、Docker 上の Deno ランタイム環境、主要検証結果、Phase 2 着手条件を反映 |
 | v.0.3 | Phase 2 | v.0.3 | 計画バージョンとフェーズ基準バージョンを分離し、Phase 2 着手前仕様、実装順序、必須検証を追加 |
 | v.0.4 | 全フェーズ共通 | - | 開発計画は3類マスター仕様書に基づいて策定される原則を明記 |
-| v.0.5 | Phase 2 | v.0.3 | WYSIWYG エディターの実装時期、採用Phase、連携範囲を未定としてPhase 2計画から分離 |
+| v.0.5 | Phase 2 | v.0.3 | 仕様未確定項目をPhase 2計画から分離 |
 | v.0.6 | 全フェーズ共通 | - | GitHub 互換方針の対象となる機能体系、用語、主要ワークフローを反映 |
 | v.0.7 | 全フェーズ共通 | - | UI、画面デザイン、画面レイアウト、視覚表現を GitHub 互換対象外として明記 |
 | v.0.8 | 全フェーズ共通 | - | 機能互換は GitHub 互換方針とする表現へ統一 |

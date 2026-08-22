@@ -33,8 +33,7 @@
     │   └── LICENSE_POLICY.md
     ├── specs/
     │   ├── Auris_System_Design.md
-    │   ├── Adlaire_Git_Repository_Specification.md
-    │   └── WYSIWYG_Editor_Specification.md
+    │   └── Adlaire_Git_Repository_Specification.md
     └── tpl-governance/
         ├── core/
         └── policy-slots/

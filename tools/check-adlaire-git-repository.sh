@@ -92,7 +92,6 @@ check_required_paths() {
     docs/policies/LICENSE_POLICY.md \
     docs/specs/Auris_System_Design.md \
     docs/specs/Adlaire_Git_Repository_Specification.md \
-    docs/specs/WYSIWYG_Editor_Specification.md \
     docs/plans/DEVELOPMENT_PLAN.md \
     docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md \
     src/main.ts \

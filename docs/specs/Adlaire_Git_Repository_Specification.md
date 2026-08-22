@@ -340,7 +340,7 @@ POST   /api/repositories/{owner}/{name}/wiki
 GET    /api/repositories/{owner}/{name}/wiki/{slug}
 ```
 
-Phase 2 最小実装では、Wiki page の過去本文履歴、添付ファイル、ページ間リンク解決、Markdown レンダリング、WYSIWYG エディター連携は対象外とする。API は JSON として本文を返すため、HTML レンダリング時の XSS 対策は、Web UI 実装フェーズで別途検証対象とする。
+Phase 2 最小実装では、Wiki page の過去本文履歴、添付ファイル、ページ間リンク解決、Markdown レンダリングは対象外とする。API は JSON として本文を返すため、HTML レンダリング時の XSS 対策は、Web UI 実装フェーズで別途検証対象とする。
 
 ### Webhook 最小仕様
 
