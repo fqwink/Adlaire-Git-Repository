@@ -168,7 +168,6 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 | ドキュメント | 役割 |
 |---|---|
 | `docs/specs/Adlaire_Git_Repository_Specification.md` | Git ホスティング基盤本体の仕様 |
-| `docs/specs/WYSIWYG_Editor_Specification.md` | ブロックベース WYSIWYG エディターの仕様 |
 
 ---
 
@@ -202,8 +201,6 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - Webhook
 - Release 管理
 - REST API 基本機能
-
-WYSIWYG エディターの実装時期、採用Phase、連携範囲は未定とする。採用する場合は、3類マスター仕様書、マスター開発計画、検証範囲を改訂し、ユーザー承認を得てから実装対象へ含める。
 
 ### 6.3 Phase 3
 

@@ -131,8 +131,7 @@
 |---:|---|---|
 | 1 | `docs/specs/Auris_System_Design.md` | システム全体のマスター仕様書。機能範囲、アーキテクチャ、非機能要件、セキュリティ方針の基準 |
 | 2 | `docs/specs/Adlaire_Git_Repository_Specification.md` | Adlaire Git Repository 本体のマスター仕様書 |
-| 3 | `docs/specs/WYSIWYG_Editor_Specification.md` | ブロックベース WYSIWYG エディターのマスター仕様書 |
-| 4 | `README.md` | 利用者向け手順、開発・デプロイ補足 |
+| 3 | `README.md` | 利用者向け手順、開発・デプロイ補足 |
 
 3類ドキュメント間に矛盾がある場合は、優先順位の高いマスター仕様書を正とする。
 
@@ -317,7 +316,6 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 移行対象の例:
 
 - `Adlaire-Git-Repository.md` -> `docs/specs/Adlaire_Git_Repository_Specification.md`
-- `WYSIWYG_Editor_Specification.md` -> `docs/specs/WYSIWYG_Editor_Specification.md`
 
 移行後は、ルート直下に重複する仕様書を残さない。必要であれば README から正式ドキュメントへリンクする。
 
@@ -483,7 +481,6 @@ Phase 9、Phase 19、Phase 29 のような 9系フェーズは、補助的なリ
 - SQLite schema / migration
 - Webhook
 - Audit log
-- WYSIWYG JSON validation / rendering
 - XSS 対策
 
 ### 6.3 検証コマンド
@@ -518,10 +515,9 @@ deno task compile
 - パストラバーサルを禁止する。
 - bare repository と作業ディレクトリの境界を明確にする。
 
-### 7.3 Web UI / WYSIWYG
+### 7.3 Web UI
 
 - HTML 出力は必ずエスケープまたはサニタイズする。
-- WYSIWYG の JSON は schema validation を通す。
 - 画像、リンク、埋め込み URL は許可スキームを制限する。
 - Markdown / README 表示時の XSS を防止する。
 

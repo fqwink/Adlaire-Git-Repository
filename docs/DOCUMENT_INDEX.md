@@ -62,7 +62,6 @@
 |---|---|
 | `docs/specs/Auris_System_Design.md` | システム全体のマスター仕様書。機能範囲、アーキテクチャ、非機能要件、セキュリティ方針の基準 |
 | `docs/specs/Adlaire_Git_Repository_Specification.md` | Adlaire Git Repository 本体のマスター仕様書 |
-| `docs/specs/WYSIWYG_Editor_Specification.md` | ブロックベース WYSIWYG エディターのマスター仕様書 |
 
 ---
 
