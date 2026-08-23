@@ -12,7 +12,9 @@
 
 自動化は、承認工程を省略するためのものではない。デプロイ先、対象バージョン、成果物、バックアップ範囲、検証範囲、ロールバック条件、自動実行範囲を提示し、ユーザー承認を得てから実行する。
 
-Docker は、開発、検証、本番、デプロイ、調査、一時確認、補助用途を含む全用途で例外なく採用禁止とする。
+Docker は、本番、デプロイ、運用基盤、公開経路、永続データ管理では採用禁止とする。
+
+Docker は、検証、テスト、ビルド、Deno single binary 生成に限り利用できる。Docker を利用する場合も、本番サーバへ Docker image、container、volume、registry、Dockerfile、Compose 設定を持ち込んではならない。
 
 標準デプロイは、Deno single binary を self-host、VPS、専用サーバーへ配置し、ホストOS上で直接実行する方式とする。
 
@@ -25,10 +27,11 @@ Docker は、開発、検証、本番、デプロイ、調査、一時確認、�
 | 採用 | shell script + SSH + systemd | 標準デプロイ実行方式。承認済み範囲で、成果物転送、配置、service restart、検証、manifest 記録を自動化する |
 | 補助採用 | `gh` | Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って利用する |
 | 補助採用 | systemd timer | バックアップ、定期検証、保守系の定期実行候補として利用する |
+| 補助採用 | Docker | 検証、テスト、ビルド、Deno single binary 生成に限って利用する。標準 image は `denoland/deno:2.9.5` とし、本番、デプロイ、運用基盤、永続データ管理には利用しない |
 | 中期候補 | Deno製 内製デプロイツール | shell script 運用で固まった要件を内製化する候補。採用時は別途ユーザー承認を得る |
 | 保留 | GitHub Actions | 標準採用しない。外部CIとしての採用可否は保留し、必要時に別途提案と承認を要する |
 | 保留 | 外部デプロイフレームワーク | 標準採用しない。必要性、依存関係、運用リスクを整理し、別途承認を得るまで採用しない |
-| 不採用 | Docker | 全用途で例外なく採用禁止 |
+| 不採用 | Docker 本番利用 | 本番、デプロイ、運用基盤、公開経路、永続データ管理での Docker 利用は禁止 |
 | 不採用 | Node.js系 | Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とする方式は採用禁止 |
 
 `gh` は GitHub 上のリリース、Pull Request、tag、成果物配置を補助するためのツールとして扱い、本番サーバ上のアプリケーション実行基盤、依存関係管理、デプロイフレームワークとして扱ってはならない。
@@ -128,6 +131,7 @@ VPS で実施する実行系検証は、最低限以下を含む。
 - `deno task compile:linux-arm64`
 - `deno task compile:linux-x86_64`
 - `deno task compile:release`
+- `scripts/docker/verify-build.sh` による Docker 上の検証、テスト、ビルド、binary 生成
 - `tools/check-adlaire-git-repository.sh` または同等の内製検証スクリプト
 - `/health` と主要workflowの確認
 

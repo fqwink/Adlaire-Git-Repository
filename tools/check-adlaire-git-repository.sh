@@ -37,6 +37,8 @@ check_required_paths() {
     scripts/deploy/backup.sh \
     scripts/deploy/verify-server.sh \
     scripts/deploy/verify-release.sh \
+    scripts/docker/deno.sh \
+    scripts/docker/verify-build.sh \
     dist/.gitkeep \
     docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md \
     docs/policies/DOCUMENT_CHARTER.md \
@@ -80,13 +82,13 @@ check_required_paths() {
   done
 }
 
-check_forbidden_docker_artifacts() {
+check_forbidden_production_docker_artifacts() {
   if find "$ROOT_DIR" \
     -path "$ROOT_DIR/.git" -prune -o \
     -path "$ROOT_DIR/.check-work" -prune -o \
     \( -name 'Dockerfile' -o -name '.dockerignore' -o -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yaml' \) \
     -print | grep . >/dev/null 2>&1; then
-    echo "Adlaire Git Repository must not include Docker artifacts." >&2
+    echo "Adlaire Git Repository must not include production Docker artifacts." >&2
     exit 1
   fi
 }
@@ -173,13 +175,18 @@ check_deno_tasks() {
     echo "deno.json must define the release compile task." >&2
     exit 1
   fi
+
+  if ! grep -F '"docker:verify-build": "sh scripts/docker/verify-build.sh"' deno.json >/dev/null 2>&1; then
+    echo "deno.json must define the Docker verify build task." >&2
+    exit 1
+  fi
 }
 
 trap cleanup EXIT INT HUP TERM
 
 run_step "required path check" check_required_paths
 run_step "version policy check" check_version_policy
-run_step "forbidden Docker artifact check" check_forbidden_docker_artifacts
+run_step "forbidden production Docker artifact check" check_forbidden_production_docker_artifacts
 run_step "forbidden Node.js project file check" check_forbidden_node_files
 run_step "forbidden unapproved registry dependency check" check_forbidden_unapproved_registries
 run_step "deno task definition check" check_deno_tasks
@@ -194,6 +201,10 @@ run_step "server verification script syntax check" \
   sh -n scripts/deploy/verify-server.sh
 run_step "release verification script syntax check" \
   sh -n scripts/deploy/verify-release.sh
+run_step "docker Deno wrapper syntax check" \
+  sh -n scripts/docker/deno.sh
+run_step "docker verify build script syntax check" \
+  sh -n scripts/docker/verify-build.sh
 
 require_command deno
 require_command git

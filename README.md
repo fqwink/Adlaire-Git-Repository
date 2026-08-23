@@ -19,13 +19,16 @@
 ├── AGENTS.md
 ├── README.md
 ├── scripts/
-│   └── deploy/
-│       ├── deploy.env.example
-│       ├── deploy.sh
-│       ├── rollback.sh
-│       ├── backup.sh
-│       ├── verify-server.sh
-│       └── verify-release.sh
+│   ├── deploy/
+│   │   ├── deploy.env.example
+│   │   ├── deploy.sh
+│   │   ├── rollback.sh
+│   │   ├── backup.sh
+│   │   ├── verify-server.sh
+│   │   └── verify-release.sh
+│   └── docker/
+│       ├── deno.sh
+│       └── verify-build.sh
 └── docs/
     ├── DOCUMENT_INDEX.md
     ├── plans/
@@ -56,7 +59,9 @@
 
 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は [docs/policies/DEPLOYMENT_POLICY.md](./docs/policies/DEPLOYMENT_POLICY.md) を参照する。
 
-デプロイ実行方式は、shell script + SSH + systemd を標準採用し、`gh` と systemd timer を補助採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS または承認済み検証サーバで行う。
+デプロイ実行方式は、shell script + SSH + systemd を標準採用し、`gh` と systemd timer を補助採用とする。Docker は検証、テスト、ビルド、Deno single binary 生成に限り補助採用し、本番、デプロイ、運用基盤、公開経路、永続データ管理では利用しない。
+
+ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。Docker で検証、テスト、ビルド、binary 生成をまとめて実行する場合は、`scripts/docker/verify-build.sh` を使う。
 
 標準デプロイ雛形は [scripts/deploy/](./scripts/deploy/) で管理する。`deploy.env.example` を基準に環境固有値を定義し、`deploy.sh`、`backup.sh`、`verify-server.sh`、`verify-release.sh`、`rollback.sh` を承認済み範囲で実行する。`deploy.env` には接続先や環境固有値を含めるため、コミットしてはならない。
 
