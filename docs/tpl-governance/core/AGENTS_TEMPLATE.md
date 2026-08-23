@@ -10,6 +10,8 @@
 
 `AGENTS.md` を読んだ後、`docs/DOCUMENT_INDEX.md` を参照索引として確認し、作業に必要な2類ポリシー、3類マスター仕様書、計画文書を読む。
 
+新しい作業指示を受けた場合は、最上位ドキュメント読了工程と同時に、直前作業の Pull Request merge 状態、作業ブランチのクローズ状態、ローカルとリモートの整合性を確認する。
+
 `docs/DOCUMENT_INDEX.md` は参照索引であり、`AGENTS.md`、2類ポリシー、3類マスター仕様書の代替ではない。
 
 `docs/tpl-governance/` を導入しているプロジェクトでは、同ディレクトリを AdlaireGroup 共通ガバナンス雛形の正本として扱う。
@@ -80,7 +82,11 @@ Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modu
 
 すべての変更は作業ブランチから Pull Request を作成し、Pull Request 経由で `{PRIMARY_BRANCH}` に取り込む。
 
-Pull Request merge、`{PRIMARY_BRANCH}` 反映、作業ブランチ削除は、必ず別途承認を得る。
+リモート、ローカルの状態に関係なく、変更を `{PRIMARY_BRANCH}` に取り込む正式経路は Pull Request のみとする。
+
+Pull Request の確認とマージ作業はユーザーが行う。作業者は、Pull Request 作成後、ユーザーからマージ完了通知がない場合でも、後続作業の最上位ドキュメント読了工程と同時に Pull Request のマージ完了を確認し、マージ済みであれば作業ブランチのクローズとローカル・リモート整合性確認を行う。
+
+Pull Request merge、`{PRIMARY_BRANCH}` 反映、未 merge 作業ブランチ削除、破壊的 Git 操作は、必ず別途承認を得る。
 
 ---
 
