@@ -18,7 +18,8 @@
 - 標準言語は TypeScript とする。
 - TypeScript は 6系の最新安定版を採用方針とする。
 - Node.js ランタイムは採用禁止とする。
-- Docker は、開発、検証、本番、デプロイ、調査、一時確認、補助用途を含む全用途で例外なく採用禁止とする。
+- Docker は、本番、デプロイ、運用基盤、公開経路、永続データ管理では採用禁止とする。
+- Docker は、検証、テスト、ビルド、Deno single binary 生成に限り採用を許可する。
 - フレームワークは、内製したもの以外の採用を禁止する。
 - Deno 標準ライブラリを最優先候補とする。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 - JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする。
@@ -65,36 +66,44 @@ Adlaire 内製 Deno Module Registry は、npm registry 互換レジストリで�
 
 npm registry 互換レジストリ、`npm:` specifier、`package.json` 前提運用、`node_modules` 前提運用は、Node.js / npm ecosystem リスクと衝突するため標準採用しない。採用検討が必要な場合は、例外採用ではなく方針変更候補として扱い、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
-## 3.2 Docker 採用禁止方針
+## 3.2 Docker 限定採用方針
 
-Docker は、本プロジェクトおよび AdlaireGroup 共通方針として採用禁止とする。
+Docker は、本プロジェクトおよび AdlaireGroup 共通方針として、検証、テスト、ビルド、Deno single binary 生成に限定して採用を許可する。
 
-この禁止は、開発環境、検証環境、本番環境、デプロイ、調査、一時確認、補助用途、CI補助、ローカル再現環境、外部ツール実行を含む全用途へ適用する。
+Docker は実行系検証・ビルド用の隔離環境であり、本番サーバ上のアプリケーション実行基盤、デプロイ方式、永続データ管理方式として扱ってはならない。
+
+許可対象は、最低限以下に限定する。
+
+- `docker run`
+- 固定 Deno Docker image による `deno task fmt`
+- 固定 Deno Docker image による `deno task lint`
+- 固定 Deno Docker image による `deno task test`
+- 固定 Deno Docker image による `deno task compile`
+- 固定 Deno Docker image による `deno task compile:linux-arm64`
+- 固定 Deno Docker image による `deno task compile:linux-x86_64`
+- 固定 Deno Docker image による `deno task compile:release`
+
+標準 Docker image は `denoland/deno:2.9.5` とする。これは固定採用バージョン Deno `v2.9.5` を満たすための検証・ビルド専用 image であり、アプリケーションの本番実行基盤ではない。
 
 禁止対象には、最低限以下を含む。
 
-- Docker Desktop
-- Docker Engine
-- Docker Compose
-- Dockerfile
-- docker-compose.yml / docker-compose.yaml / compose.yaml
-- Docker image
-- Docker container
-- Docker volume
-- Docker registry
-- `docker build`
-- `docker run`
-- `docker compose`
+- 本番サーバ上の Docker Desktop、Docker Engine、Docker Compose
+- 本番サーバ上の Docker image、Docker container、Docker volume、Docker registry
+- 本番デプロイでの `docker build`
+- 本番デプロイでの `docker run`
+- 本番デプロイでの `docker compose`
+- Dockerfile を本番成果物または本番運用手順として扱うこと
+- docker-compose.yml / docker-compose.yaml / compose.yaml を本番成果物または本番運用手順として扱うこと
 - `docker pull`
 - `docker push`
 
-Docker 採用禁止は例外なしとする。個別承認による例外採用、補助用途としての一時利用、検証だけの利用、他プロジェクトの慣習を理由にした利用を認めない。
+Docker を利用する場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
 
-開発と検証は、ホストOS上に固定採用バージョンの Deno、Git、SQLite を導入し、Deno task、内製検証スクリプト、必要最小限の外部コマンドで実行する。
+検証、テスト、ビルド、Deno single binary 生成は、ホストOS上の固定採用バージョン Deno、または承認済み固定 Deno Docker image のいずれかで実行できる。
 
 本番とデプロイは、Deno single binary、ホストOSのファイルシステム、systemd または同等のサービス管理、release directory、`current` symlink、事前バックアップ、health check、rollback 手順を基本構成とする。デプロイ、検証、バックアップ、ロールバックの詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-Docker に依存する成果物、手順、検証、仕様、計画、テンプレートを追加してはならない。既存の Docker 参照を発見した場合は、技術要件ポリシー違反として整理し、ホストOS実行またはDeno single binary運用へ置き換える。
+本番、デプロイ、運用基盤、公開経路、永続データ管理に Docker 依存する成果物、手順、検証、仕様、計画、テンプレートを追加してはならない。既存の本番向け Docker 参照を発見した場合は、技術要件ポリシー違反として整理し、ホストOS実行または Deno single binary 運用へ置き換える。
 
 ## 4. データベース方針
 

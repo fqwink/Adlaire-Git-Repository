@@ -479,7 +479,8 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 - 外部ライブラリは内製ラッパー、内製driver、または Database Gateway の内部に閉じ込める
 - Deno、SQLite、libSQL、Git、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリは、各技術の最新の安定版を採用方針とする
 - TypeScript は 6系の最新安定版を採用方針とする
-- Docker は、開発、検証、本番、デプロイ、調査、一時確認、補助用途を含む全用途で例外なく採用禁止とする
+- Docker は、本番、デプロイ、運用基盤、公開経路、永続データ管理では採用禁止とする
+- Docker は、検証、テスト、ビルド、Deno single binary 生成に限り補助採用する
 - 承認済み固定採用バージョンは、下表に従う
 
 | 技術 | 固定採用バージョン | 扱い |
@@ -615,7 +616,8 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
     "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo src/main.ts",
     "compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.8-aarch64-unknown-linux-gnu src/main.ts",
     "compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.8-x86_64-unknown-linux-gnu src/main.ts",
-    "compile:release": "deno task compile:linux-arm64 && deno task compile:linux-x86_64"
+    "compile:release": "deno task compile:linux-arm64 && deno task compile:linux-x86_64",
+    "docker:verify-build": "sh scripts/docker/verify-build.sh"
   },
   "compilerOptions": {
     "strict": true,
@@ -1507,7 +1509,7 @@ CI/CD とデプロイ自動化は、`docs/policies/DEPLOYMENT_POLICY.md` を正�
 
 Deno製 内製デプロイツールは中期候補とする。shell script 運用で固まった要件を内製化する場合は、別途ユーザー承認を得る。
 
-GitHub Actions と外部デプロイフレームワークは保留とする。Docker と Node.js系は不採用とする。
+GitHub Actions と外部デプロイフレームワークは保留とする。Docker は検証、テスト、ビルド、Deno single binary 生成に限り補助採用し、本番、デプロイ、運用基盤、公開経路、永続データ管理では不採用とする。Node.js系は不採用とする。
 
 ---
 
@@ -1536,9 +1538,9 @@ GitHub Actions と外部デプロイフレームワークは保留とする。Do
 
 Deno製 内製デプロイツールは中期候補とする。GitHub Actions と外部デプロイフレームワークは保留とし、必要性、依存関係、運用リスクを整理し、ユーザー承認を得るまで標準採用しない。
 
-Docker と Node.js系は不採用とする。Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。
+Docker は、本番、デプロイ、運用基盤、公開経路、永続データ管理では不採用とする。Node.js系は不採用とする。Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。
 
-ローカルに Deno が存在しない場合、実行系検証はローカルで完了扱いにしない。この場合は、Deno 固定採用バージョンを満たす VPS または承認済み検証サーバで、Deno task、内製検証スクリプト、`/health`、主要workflow確認を実施する。
+ローカルに Deno が存在しない場合、実行系検証はローカルで完了扱いにしない。この場合は、Deno 固定採用バージョンを満たす VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で、Deno task、内製検証スクリプト、`/health`、主要workflow確認を実施する。
 
 ---
 
@@ -1564,12 +1566,13 @@ Docker と Node.js系は不採用とする。Node.js runtime、npm ecosystem、`
 
 ### 基本方針
 
-Docker は全用途で例外なく採用禁止とする。標準デプロイは、Deno single binary を VPS または専用サーバーへ配置し、ホストOS上で直接実行する方式に限定する。
+Docker は、本番、デプロイ、運用基盤、公開経路、永続データ管理では採用禁止とする。検証、テスト、ビルド、Deno single binary 生成に限り、承認済み固定 Deno Docker image を利用できる。標準デプロイは、Deno single binary を VPS または専用サーバーへ配置し、ホストOS上で直接実行する方式に限定する。
 
 標準構成は以下を基本とする。
 
 - `deno compile` による single binary 生成
 - 安定版リリースでは ARM64 Linux と x86_64 Linux の2種類の single binary 生成
+- 承認済み固定 Deno Docker image による検証、テスト、ビルド、Deno single binary 生成
 - release directory への成果物配置
 - `current` symlink による稼働版切り替え
 - systemd または同等のサービス管理
@@ -1578,7 +1581,7 @@ Docker は全用途で例外なく採用禁止とする。標準デプロイは�
 - `/health` による health check
 - 直前 release directory への rollback
 
-開発、検証、本番、デプロイのいずれでも、コンテナ前提の成果物、設定、手順、検証を追加してはならない。
+本番、デプロイ、運用基盤、公開経路、永続データ管理では、コンテナ前提の成果物、設定、手順、検証を追加してはならない。
 
 ---
 

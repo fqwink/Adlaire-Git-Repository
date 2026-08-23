@@ -1,7 +1,5 @@
 # SHA-256 checksums for Adlaire Git Repository v.1.8
-# Generated on 2026-08-21 during the v.1.8 release process.
+# Generated on 2026-08-23 during Docker-based verification build.
 
-a2879f34c00d3457add6bbaba8000bfc3701a2188d0502a824b07cb81484f1ce  adlaire-git-repo-v1.8-aarch64-unknown-linux-gnu
-
-# The Linux x86_64 artifact is part of the approved standard release artifact set.
-# Add its SHA-256 after generating adlaire-git-repo-v1.8-x86_64-unknown-linux-gnu.
+4d8b71286b56968e534cee7e9614e013d9a97899549800e40dd2063f33bf4bfb  adlaire-git-repo-v1.8-aarch64-unknown-linux-gnu
+a42d363508727715c8cf6949d06250420aa60a016cb6b7c9ecbd7751399eb71a  adlaire-git-repo-v1.8-x86_64-unknown-linux-gnu
