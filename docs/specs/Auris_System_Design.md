@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.1.16
-**ステータス**: Phase 8 長期運用準備 / マスター仕様完成版
+**文書バージョン**: v.1.17
+**ステータス**: Phase 8 長期運用準備 / Adlaire Deploy 仕様策定
 
 ---
 
@@ -160,7 +160,7 @@ Git ホスティング本体は、Git bare repository の永続保存、`git` �
 
 本番サーバ環境へのデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Deno single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。Deno製 内製デプロイツールは中期候補、GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
+標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Deno single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。Adlaire Deploy は公式付随システムとして段階的に内製化する。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。採用を検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
 
@@ -175,6 +175,7 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 | ドキュメント | 役割 |
 |---|---|
 | `docs/specs/Adlaire_Git_Repository_Specification.md` | Git ホスティング基盤本体の仕様 |
+| `docs/specs/Adlaire_Deploy_Specification.md` | 公式付随システム Adlaire Deploy の仕様 |
 
 ---
 
@@ -183,6 +184,9 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 現行正本仕様は以下とする。
 
 - Adlaire Git Repository は、Adlaire Group 内部向けのセルフホスト型 Git ホスティング基盤である。
+- Adlaire Deploy は、Adlaire Git Repository の公式付随システムであり、本体へ統合しない。
+- Adlaire Deploy は同一リポジトリ内に同居し、デプロイ、検証、バックアップ、ロールバック、deploy manifest 記録を扱う。
+- Adlaire Deploy が停止、未導入、未設定であっても、Adlaire Git Repository 本体の既存機能が停止してはならない。
 - 基本的な機能互換は GitHub 互換基準とする。
 - UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換対象外とする。
 - 標準ランタイムは Deno、標準言語は TypeScript とする。
@@ -196,6 +200,14 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - 標準運用基盤は self-host、VPS、専用サーバーを前提とする。
 - Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく将来候補として保留する。
 - Node.js runtime、npm ecosystem、外部フレームワーク、無承認外部ライブラリは採用しない。
+
+## 6.1 公式付随システム
+
+Adlaire Deploy は、Adlaire Git Repository の公式付随システムである。
+
+Adlaire Deploy は本体へ統合せず、同一リポジトリ内に同居する。Adlaire Git Repository 本体は Git ホスティング、認証、権限、Repository、Issue、Pull Request、Release、Audit 等を扱い、Adlaire Deploy は本番デプロイ、検証、バックアップ、ロールバック、deploy manifest 記録を扱う。
+
+Adlaire Deploy の詳細仕様は `docs/specs/Adlaire_Deploy_Specification.md` を正本とする。
 
 ## 7. 完成判定
 
@@ -324,18 +336,20 @@ Phase 7 を初回安定版リリースとして承認する場合は、安定版
 
 ### 8.8 Phase 8
 
-基準バージョン: `v.0.9`
+基準バージョン: `v.1.9`
 
 - 7系安定版判定後の長期運用準備
+- マスター仕様完成
+- Adlaire Deploy 仕様策定
 - 移行性確認
 - 監査、保守、運用手順整理
 - 保留解除候補の再評価
 
-Phase 8 は安定版リリースフェーズとして扱わない。保留解除候補の再評価は実装承認ではなく、正式な実装対象にする場合は、3類マスター仕様書、マスター開発計画、検証範囲へ反映し、ユーザー承認を得る。
+Phase 8 は、Phase 7 の初回安定版リリース `v.1.8` 後の長期運用準備フェーズである。Phase 8 は安定版リリースフェーズとして扱わない。保留解除候補の再評価および Adlaire Deploy 仕様策定は実装承認ではなく、正式な実装対象にする場合は、3類マスター仕様書、マスター開発計画、検証範囲へ反映し、ユーザー承認を得る。
 
 ### 8.9 Phase 9
 
-基準バージョン: `v.0.10`
+基準バージョン: `v.1.10`
 
 - 補助的リリース判定
 - 9系フェーズを安定版対象にするかどうかの判断

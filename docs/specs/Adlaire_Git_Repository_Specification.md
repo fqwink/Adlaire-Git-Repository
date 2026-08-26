@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.1.16
-**ステータス**: Phase 8 長期運用準備 / マスター仕様完成版
+**文書バージョン**: v.1.17
+**ステータス**: Phase 8 長期運用準備 / Adlaire Deploy 仕様策定
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -69,6 +69,8 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - data 側は host filesystem を正本とし、libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
 - Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。
 - Node.js runtime、npm ecosystem、外部フレームワーク、無承認外部ライブラリは採用しない。
+- Adlaire Deploy は公式付随システムとして同一リポジトリ内に同居するが、Adlaire Git Repository 本体へ統合しない。
+- Adlaire Deploy の詳細仕様は `docs/specs/Adlaire_Deploy_Specification.md` を正本とする。
 
 ## マスター仕様完成条件
 
@@ -569,6 +571,8 @@ Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用
 最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Docker 使用時も非 Docker の binary 直実行時も、この構成を変えてはならない。Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、data 側は container lifecycle に依存させず、host filesystem 上で直接保全できる構成を基準にする。
 
 本番サーバ環境へのデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
+
+Adlaire Deploy は、上記デプロイ自動化を扱う公式付随システムである。Adlaire Git Repository 本体は、Release manifest、checksum、health check endpoint、Audit log 連携余地を提供する。Adlaire Deploy は本体の必須起動要件ではなく、停止または未導入であっても本体の Git ホスティング機能を停止させてはならない。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
 
@@ -1560,7 +1564,7 @@ CI/CD とデプロイ自動化は、`docs/policies/DEPLOYMENT_POLICY.md` を正�
 
 shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とする。`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
 
-Deno製 内製デプロイツールは中期候補とする。shell script 運用で固まった要件を内製化する場合は、別途ユーザー承認を得る。
+Adlaire Deploy は公式付随システムとして段階的に内製化する。shell script 運用で固まった要件を内製化する場合は、別途ユーザー承認を得る。
 
 GitHub Actions と外部デプロイフレームワークは保留とする。Docker は運用選択肢の一つとし、正本成果物は Deno single binary とする。Node.js系は不採用とする。
 
@@ -1594,7 +1598,7 @@ GitHub Actions と外部デプロイフレームワークは保留とする。Do
 
 デプロイ実行方式は、Deno single binary 正本成果物の配置を基準とする。Docker は標準運用選択肢の一つであり、Docker Compose は Docker 運用選択時の 1 VPS 最小構成起動方式とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とする。`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
 
-Deno製 内製デプロイツールは中期候補とする。GitHub Actions と外部デプロイフレームワークは保留とし、必要性、依存関係、運用リスクを整理し、ユーザー承認を得るまで標準採用しない。
+Adlaire Deploy は公式付随システムとして段階的に内製化する。GitHub Actions と外部デプロイフレームワークは保留とし、必要性、依存関係、運用リスクを整理し、ユーザー承認を得るまで標準採用しない。
 
 Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Node.js系は不採用とする。Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。
 

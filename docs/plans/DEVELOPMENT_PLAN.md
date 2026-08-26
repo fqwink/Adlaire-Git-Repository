@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.1.16
+**計画バージョン**: v.1.17
 **現行フェーズ基準バージョン**: v.1.8
-**ステータス**: Phase 8 長期運用準備 / マスター仕様完成
+**ステータス**: Phase 8 長期運用準備 / Adlaire Deploy 仕様策定
 
 ---
 
@@ -62,7 +62,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 - 9系フェーズを安定版リリースフェーズとして扱う場合は、マスター開発計画と2類ポリシーに明記し、ユーザー承認を得る。
 - リリース提案、リリース配置、リリース成果物、リリース自動化は `docs/policies/RELEASE_POLICY.md` に従う。リリース配置は GitHub Releases を主配置とし、リポジトリ内には軽量な配置記録、release notes 元資料、manifest、checksum、運用手順を必要に応じて配置する。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` に従う。
-- Deno single binary 形式を正本成果物とする。Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、1 VPS 上の差し替え可能な system 側と host filesystem data 側を分離する同じ構成にする。shell script + SSH は binary または image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer を補助採用とする。Deno製 内製デプロイツールは中期候補、GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
+- Deno single binary 形式を正本成果物とする。Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、1 VPS 上の差し替え可能な system 側と host filesystem data 側を分離する同じ構成にする。shell script + SSH は binary または image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer を補助採用とする。Adlaire Deploy は公式付随システムとして段階的に内製化する。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
 - 標準データベースは libSQL とする。SQLite は廃止せず、互換・移行元・最小ローカル検証用データベースとして保持する。
 - ローカルに Deno が存在しない場合、実行系検証は停止ではなく VPS または承認済み検証サーバで実施する方針とする。
 - ドキュメント参照導線は `docs/DOCUMENT_INDEX.md` を索引として確認する。AdlaireGroup 共通ガバナンス雛形の正本は `docs/tpl-governance/` 配下で管理し、現行プロジェクト固有の正本とは分離する。
@@ -106,7 +106,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 | Phase 6 | v.0.7 | 完了 | 大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズ |
 | Phase 7 | v.1.8 | 完了 | 初回安定版リリース |
 | Phase 8 | v.1.9 | 進行中 | 7系安定版判定後の長期運用準備、マスター仕様完成、保留解除候補の再評価、検証 |
-| Phase 9 | v.0.10 / 初回安定版済みの場合 v.1.10 | 未着手 | 補助的リリース判定フェーズ。ケースバイケースで安定版対象 |
+| Phase 9 | v.1.10 | 未着手 | 補助的リリース判定フェーズ。ケースバイケースで安定版対象 |
 
 上記は各フェーズの基準バージョンである。表の `Major` は安定版リリース系列であり、累積フェーズ番号ではない。初回安定版リリース前は `v.0.x` 系を維持する。
 
@@ -932,7 +932,9 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 - 移行性確認
 - 監査、保守、運用手順の整理
 - 本番サーバ環境向けの標準デプロイ自動化、バックアップ、検証、ロールバック手順の具体化
-- Deno single binary 正本成果物、Docker 運用選択肢、host filesystem data 領域、shell script + SSH 補助による標準デプロイ実行方式、`gh` と systemd timer の補助採用範囲、Deno製 内製デプロイツールへの中期移行候補の具体化
+- Deno single binary 正本成果物、Docker 運用選択肢、host filesystem data 領域、shell script + SSH 補助による標準デプロイ実行方式、`gh` と systemd timer の補助採用範囲、Adlaire Deploy への段階移行方針の具体化
+- Adlaire Deploy を公式付随システムとして定義し、Adlaire Git Repository 本体と同一リポジトリ内に同居させる方針の具体化
+- Adlaire Deploy と Adlaire Git Repository 本体の連携境界、責務分離、既存 `scripts/deploy/` 雛形との関係整理
 - libSQL 標準DB化、SQLite 互換・移行元・最小ローカル検証用DBとしての保持、Database Gateway 境界の維持
 - ローカル Deno 不在時に VPS または承認済み検証サーバで実行系検証を行う手順の具体化
 - 保留解除候補の再評価
@@ -940,6 +942,8 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 標準デプロイ雛形は `scripts/deploy/` 配下で管理する。Phase 8 では、`deploy.sh`、`backup.sh`、`verify-server.sh`、`verify-release.sh`、`rollback.sh`、`deploy.env.example` を標準構成として扱う。
 
 標準デプロイ雛形は、承認済み範囲で Deno single binary 配置、必要に応じた Docker image 配置、起動定義更新、バックアップ、検証、通常ロールバックを自動化するためのものであり、初回本番デプロイ、デプロイ先サーバ決定、SSH 接続方式、binary 直実行または Docker 運用の選択、Docker Engine / Docker Compose 導入または更新、起動管理定義作成、バックアップ保存先決定、ロールバック実行、データ復元を自動承認するものではない。
+
+Adlaire Deploy は、Phase 8 では仕様策定対象であり、ソースコード実装承認ではない。実装へ進む場合は、CLI、設定形式、manifest 形式、検証範囲、既存 shell script からの移行範囲を提示し、別途ユーザー承認を得る。
 
 Phase 8 で保留解除を検討できる候補は、`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` の保留候補を基準とする。ただし、保留解除候補の再評価は実装承認ではない。正式な実装対象にする場合は、3類マスター仕様書、本書、検証範囲へ反映し、ユーザー承認を得る。
 
@@ -1052,3 +1056,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.1.14 | 全フェーズ共通 / Phase 8 | v.1.9 | Deno single binary を正本成果物とし、Docker は正本 binary を image に同梱して実行する運用選択肢の一つへ再整理。Docker 使用時も非 Docker の binary 直実行時も同じ system / data 分離構成に統一 |
 | v.1.15 | 全フェーズ共通 / Phase 8 | v.1.9 | 標準データベースを libSQL へ変更し、SQLite は互換・移行元・最小ローカル検証用として保持する方針へ整理 |
 | v.1.16 | Phase 8 | v.1.9 | 3類マスター仕様書を現行正本仕様、フェーズ別履歴、保留候補、対象外範囲に分離し、マスター仕様完成版として整合 |
+| v.1.17 | Phase 8 | v.1.9 | Adlaire Deploy を公式付随システムとして定義し、個別マスター仕様書、連携境界、既存デプロイ雛形との関係を整理 |

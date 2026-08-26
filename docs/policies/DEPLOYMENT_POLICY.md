@@ -18,6 +18,8 @@ Docker は正本成果物ではなく、Deno single binary を Docker image に�
 
 Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。
 
+Adlaire Deploy は、Adlaire Git Repository の公式付随デプロイメントシステムとする。Adlaire Deploy は本体へ統合せず、同一リポジトリ内に同居し、デプロイ、検証、バックアップ、ロールバック、deploy manifest 記録を扱う。詳細仕様は `docs/specs/Adlaire_Deploy_Specification.md` を正本とする。
+
 最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱い、libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として host filesystem を正本にする。
 
 標準デプロイは、Deno single binary 正本成果物を self-host、VPS、専用サーバーへ配置する方式を基準とする。Docker を利用する場合は、正本成果物である Deno single binary を Docker image に同梱し、host filesystem 上の data 領域を bind mount して実行する。
@@ -35,7 +37,7 @@ Docker を使用する場合も、Docker を使用せず Deno single binary を 
 | 採用 | shell script + SSH | 標準デプロイ補助方式。承認済み範囲で、binary または image 転送、起動定義更新、backup、再起動、検証、manifest 記録を自動化する |
 | 補助採用 | `gh` | Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って利用する |
 | 補助採用 | systemd timer | バックアップ、定期検証、保守系の定期実行候補として利用する。アプリケーション本体の標準起動方式ではない |
-| 中期候補 | Deno製 内製デプロイツール | shell script 運用で固まった binary / Docker 共通要件を内製化する候補。採用時は別途ユーザー承認を得る |
+| 採用方針 | Adlaire Deploy | Deno製の内製デプロイメントシステム。Adlaire Git Repository の公式付随システムとして同一リポジトリ内に同居し、shell script 運用で固まった binary / Docker 共通要件を段階的に内製化する |
 | 保留 | GitHub Actions | 標準採用しない。外部CIとしての採用可否は保留し、必要時に別途提案と承認を要する |
 | 保留 | 外部デプロイフレームワーク | 標準採用しない。必要性、依存関係、運用リスクを整理し、別途承認を得るまで採用しない |
 | 採用 | systemd または同等の起動管理 | binary 直実行を選択する場合の起動管理候補。作成または変更は別途承認を得る |
@@ -101,6 +103,8 @@ Docker 運用を選択する場合の container 内配置は以下を基準と�
 
 標準デプロイ雛形は `scripts/deploy/` 配下で管理する。
 
+Adlaire Deploy は、`scripts/deploy/` 配下の shell script 雛形を初期仕様元および移行元として扱う。既存 shell script の削除、置換、実行方式変更は、別途ユーザー承認を得る。
+
 | ファイル | 責務 |
 |---|---|
 | `scripts/deploy/deploy.env.example` | 環境固有値の雛形。実値を入れた `deploy.env` はコミットしてはならない |
@@ -109,6 +113,8 @@ Docker 運用を選択する場合の container 内配置は以下を基準と�
 | `scripts/deploy/verify-server.sh` | SSH 接続先、本番サーバ必須コマンド、binary または Docker 実行基盤、標準ディレクトリの事前確認 |
 | `scripts/deploy/verify-release.sh` | process または container 状態、`/health`、DB quick check、Git repository 保存領域の配置後確認 |
 | `scripts/deploy/rollback.sh` | 直前 binary または Docker image / tag へ戻し、再起動と配置後確認を行う |
+
+Adlaire Deploy へ段階移行する場合も、上記 script 群は移行完了まで標準デプロイ雛形として維持する。
 
 標準デプロイスクリプトは、初回本番デプロイ、デプロイ先サーバ決定、SSH 接続方式、binary 直実行または Docker 運用の選択、Docker Engine / Docker Compose 導入、起動管理定義作成、バックアップ保存先決定、ロールバック実行、データ復元を自動承認するものではない。
 
