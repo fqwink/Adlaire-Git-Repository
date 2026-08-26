@@ -12,11 +12,15 @@
 
 自動化は、承認工程を省略するためのものではない。デプロイ先、対象バージョン、成果物、バックアップ範囲、検証範囲、ロールバック条件、自動実行範囲を提示し、ユーザー承認を得てから実行する。
 
-Docker は、本番、デプロイ、運用基盤、公開経路、永続データ管理では採用禁止とする。
+Deno single binary を正本成果物とする。
 
-Docker は、検証、テスト、ビルド、Deno single binary 生成に限り利用できる。Docker を利用する場合も、本番サーバへ Docker image、container、volume、registry、Dockerfile、Compose 設定を持ち込んではならない。
+Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
 
-標準デプロイは、Deno single binary を self-host、VPS、専用サーバーへ配置し、ホストOS上で直接実行する方式とする。
+Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。
+
+最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱い、libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として host filesystem を正本にする。
+
+標準デプロイは、Deno single binary 正本成果物を self-host、VPS、専用サーバーへ配置する方式を基準とする。Docker を利用する場合は、正本成果物である Deno single binary を Docker image に同梱し、host filesystem 上の data 領域を bind mount して実行する。
 
 ## 2. デプロイ実行方式の採用区分
 
@@ -24,14 +28,18 @@ Docker は、検証、テスト、ビルド、Deno single binary 生成に限り
 
 | 区分 | 対象 | 扱い |
 |---|---|---|
-| 採用 | shell script + SSH + systemd | 標準デプロイ実行方式。承認済み範囲で、成果物転送、配置、service restart、検証、manifest 記録を自動化する |
+| 採用 | Deno single binary | 正本成果物。Docker 使用有無に関係なく system 側の基準成果物とする |
+| 採用 | host OS 上の binary 直実行 | Docker を使用しない標準運用選択肢。data 側は Docker 使用時と同じ host filesystem 構成にする |
+| 採用 | Docker | 標準運用選択肢の一つ。Deno single binary を Docker image に同梱して実行する |
+| 採用 | Docker Compose | Docker 運用選択時の 1 VPS 最小構成起動方式。compose 設定は system 側として扱い、data 側は host bind mount で接続する |
+| 採用 | shell script + SSH | 標準デプロイ補助方式。承認済み範囲で、binary または image 転送、起動定義更新、backup、再起動、検証、manifest 記録を自動化する |
 | 補助採用 | `gh` | Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って利用する |
-| 補助採用 | systemd timer | バックアップ、定期検証、保守系の定期実行候補として利用する |
-| 補助採用 | Docker | 検証、テスト、ビルド、Deno single binary 生成に限って利用する。標準 image は `denoland/deno:2.9.5` とし、本番、デプロイ、運用基盤、永続データ管理には利用しない |
-| 中期候補 | Deno製 内製デプロイツール | shell script 運用で固まった要件を内製化する候補。採用時は別途ユーザー承認を得る |
+| 補助採用 | systemd timer | バックアップ、定期検証、保守系の定期実行候補として利用する。アプリケーション本体の標準起動方式ではない |
+| 中期候補 | Deno製 内製デプロイツール | shell script 運用で固まった binary / Docker 共通要件を内製化する候補。採用時は別途ユーザー承認を得る |
 | 保留 | GitHub Actions | 標準採用しない。外部CIとしての採用可否は保留し、必要時に別途提案と承認を要する |
 | 保留 | 外部デプロイフレームワーク | 標準採用しない。必要性、依存関係、運用リスクを整理し、別途承認を得るまで採用しない |
-| 不採用 | Docker 本番利用 | 本番、デプロイ、運用基盤、公開経路、永続データ管理での Docker 利用は禁止 |
+| 採用 | systemd または同等の起動管理 | binary 直実行を選択する場合の起動管理候補。作成または変更は別途承認を得る |
+| 不採用 | Docker named volume 標準運用 | data 正本を Docker named volume に丸投げする運用は禁止 |
 | 不採用 | Node.js系 | Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とする方式は採用禁止 |
 
 `gh` は GitHub 上のリリース、Pull Request、tag、成果物配置を補助するためのツールとして扱い、本番サーバ上のアプリケーション実行基盤、依存関係管理、デプロイフレームワークとして扱ってはならない。
@@ -40,14 +48,54 @@ Docker は、検証、テスト、ビルド、Deno single binary 生成に限り
 
 標準デプロイは、最低限以下を対象とする。
 
-- Deno single binary の配置
+- Deno single binary 正本成果物の配置
+- Docker 運用を選択する場合の Docker image 配置または読み込み
+- Docker 運用を選択する場合の Docker Compose 設定の配置または確認
+- binary 直実行を選択する場合の起動管理定義の配置または確認
 - 設定ファイルの配置または確認
-- SQLite database の保全
+- libSQL / SQLite database の保全
 - Git bare repository 保存領域の保全
 - log 保存領域の確認
-- systemd または同等のサービス管理
-- release directory と `current` symlink による稼働版切り替え
+- Docker 運用を選択する場合の host bind mount による data 領域の接続
+- binary 直実行または Docker による稼働版切り替え
 - deploy manifest の記録
+
+標準配置は以下を基準とする。
+
+```text
+/opt/adlaire-git-repository/
+├── system/
+│   ├── bin/
+│   │   └── adlaire-git-repo
+│   ├── docker/
+│   │   ├── compose.yml
+│   │   └── images/
+│   │       └── adlaire-git-repo-v1.8.tar
+│   └── service/
+│       └── adlaire-git-repository.service
+├── env/
+│   └── production.env
+└── shared/
+    ├── data/
+    ├── repositories/
+    ├── config/
+    ├── secrets/
+    ├── logs/
+    ├── backups/
+    └── manifests/
+```
+
+Docker 運用を選択する場合の container 内配置は以下を基準とする。
+
+```text
+/app/adlaire-git-repo
+/data
+/repositories
+/config
+/secrets
+/logs
+/manifests
+```
 
 ## 4. 標準デプロイスクリプト
 
@@ -56,31 +104,34 @@ Docker は、検証、テスト、ビルド、Deno single binary 生成に限り
 | ファイル | 責務 |
 |---|---|
 | `scripts/deploy/deploy.env.example` | 環境固有値の雛形。実値を入れた `deploy.env` はコミットしてはならない |
-| `scripts/deploy/deploy.sh` | 成果物転送、バックアップ、release directory 作成、`current` symlink 切替、service restart、検証の全体実行 |
-| `scripts/deploy/backup.sh` | SQLite database、Git bare repository 保存領域、設定、現行 release のバックアップ |
-| `scripts/deploy/verify-server.sh` | SSH 接続先、本番サーバ必須コマンド、標準ディレクトリの事前確認 |
-| `scripts/deploy/verify-release.sh` | service 状態、`/health`、SQLite quick check、Git repository 保存領域の配置後確認 |
-| `scripts/deploy/rollback.sh` | `current` symlink を指定 release へ戻し、service restart と配置後確認を行う |
+| `scripts/deploy/deploy.sh` | binary または Docker image 転送、バックアップ、起動定義確認、再起動、検証の全体実行 |
+| `scripts/deploy/backup.sh` | libSQL / SQLite database、Git bare repository 保存領域、設定、secrets、logs、manifests のバックアップ |
+| `scripts/deploy/verify-server.sh` | SSH 接続先、本番サーバ必須コマンド、binary または Docker 実行基盤、標準ディレクトリの事前確認 |
+| `scripts/deploy/verify-release.sh` | process または container 状態、`/health`、DB quick check、Git repository 保存領域の配置後確認 |
+| `scripts/deploy/rollback.sh` | 直前 binary または Docker image / tag へ戻し、再起動と配置後確認を行う |
 
-標準デプロイスクリプトは、初回本番デプロイ、デプロイ先サーバ決定、SSH 接続方式、systemd unit 作成、バックアップ保存先決定、ロールバック実行、データ復元を自動承認するものではない。
+標準デプロイスクリプトは、初回本番デプロイ、デプロイ先サーバ決定、SSH 接続方式、binary 直実行または Docker 運用の選択、Docker Engine / Docker Compose 導入、起動管理定義作成、バックアップ保存先決定、ロールバック実行、データ復元を自動承認するものではない。
 
-`deploy.sh` は通常デプロイの自動化雛形であり、本番データ復元を行ってはならない。SQLite database 復元、Git bare repository 復元、設定復元を伴うロールバックは、必ず別承認を得る。
+`deploy.sh` は通常デプロイの自動化雛形であり、本番データ復元を行ってはならない。libSQL / SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元を伴うロールバックは、必ず別承認を得る。
 
 ## 5. 標準自動化範囲
 
 ユーザー承認後に限り、以下を自動実行してよい。
 
 - 本番サーバ環境の前提確認
-- Deno single binary の取得または転送
+- Deno single binary 正本成果物の取得または転送
+- Docker 運用を選択する場合の Docker image の取得または転送
+- Docker 運用を選択する場合の Docker Compose 設定の確認
+- binary 直実行を選択する場合の起動管理定義の確認
 - 配置前検証
-- SQLite database のバックアップ
+- libSQL / SQLite database のバックアップ
 - Git bare repository 保存領域のバックアップ
 - 設定ファイルのバックアップ
+- secrets のバックアップ
 - log 保存領域の確認
-- release directory 作成
-- 成果物配置
-- `current` symlink 切り替え
-- service restart
+- manifests のバックアップ
+- Docker 運用を選択する場合の Docker image 読み込み
+- process または container の再起動
 - `/health` 検証
 - 主要APIまたは最小workflow検証
 - deploy log、manifest、検証結果の記録
@@ -91,10 +142,14 @@ Docker は、検証、テスト、ビルド、Deno single binary 生成に限り
 
 バックアップ対象は最低限以下とする。
 
-- SQLite database
+- libSQL / SQLite database
 - Git bare repository 保存領域
 - 設定ファイル
+- secrets
+- logs
+- manifests
 - 現行 Deno single binary
+- Docker 運用を選択している場合の現行 Docker image または image tag 情報
 - deploy manifest
 
 バックアップは、復元可能性を検証できる形式で保存する。保存先、保持世代、暗号化、外部退避の有無は、デプロイ先決定時にユーザー承認を得る。
@@ -113,12 +168,12 @@ Docker は、検証、テスト、ビルド、Deno single binary 生成に限り
 
 デプロイ後検証は最低限以下を含む。
 
-- service 起動状態確認
+- process または container 起動状態確認
 - `/health` 確認
 - トップページ確認
 - Repository 一覧または主要API確認
 - Git clone / fetch / push の代表確認
-- SQLite database と Git bare repository の参照確認
+- libSQL / SQLite database と Git bare repository の参照確認
 
 ローカル環境に Deno が存在しない場合、実行系検証はローカルで完了扱いにしてはならない。この場合は、Deno 固定採用バージョンを満たす VPS または承認済み検証サーバ上で、実行系検証とテストを実施する。
 
@@ -141,9 +196,9 @@ VPS 接続先、接続方式、配置パス、検証対象バージョン、検�
 
 デプロイに失敗した場合、またはデプロイ後検証に失敗した場合は、ロールバックを実行できる状態にしておく。
 
-標準ロールバックは、直前の release directory、直前の Deno single binary、直前バックアップ、`current` symlink を用いる。
+標準ロールバックは、直前の Deno single binary、Docker 運用を選択している場合の直前 Docker image または image tag、直前起動定義、直前バックアップ、host filesystem data 領域を用いる。
 
-本番データへ影響するロールバック、SQLite database 復元、Git bare repository 復元は、必ずユーザー承認を得てから実行する。
+system rollback は旧 Deno single binary または旧 Docker image / tag へ戻す操作とする。data rollback は別承認を必須とする。本番データへ影響するロールバック、libSQL / SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元は、必ずユーザー承認を得てから実行する。
 
 ## 9. 別承認が必要な範囲
 
@@ -152,10 +207,12 @@ VPS 接続先、接続方式、配置パス、検証対象バージョン、検�
 - 初回本番デプロイ
 - デプロイ先サーバ決定
 - SSH 接続方式、接続ユーザー、配置パス決定
-- systemd unit または同等のサービス定義作成・変更
+- binary 直実行または Docker 運用の選択
+- Docker Engine / Docker Compose 導入または更新
+- systemd または同等の起動管理定義の作成または変更
 - バックアップ保存先、保持世代、暗号化方針決定
 - 本番データへ影響する操作
-- SQLite database 復元
+- libSQL / SQLite database 復元
 - Git bare repository 復元
 - ロールバック実行
 - 公開経路、ドメイン、TLS 設定変更

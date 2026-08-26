@@ -234,7 +234,7 @@ GitHub 互換はマスター仕様書に定義された範囲に限る。GitHub 
 | Runtime | Deno |
 | Language | TypeScript |
 | HTTP | `Deno.serve` |
-| Database | SQLite |
+| Database | libSQL |
 | Git 操作 | `Deno.Command` |
 | Frontend | HTML / CSS / Vanilla JavaScript |
 | Packaging | Deno single binary |
@@ -251,8 +251,8 @@ TypeScript は **6系の最新安定版** を採用方針とする。Deno に同
 |---|---:|---|
 | Deno | `v2.9.5` | 標準ランタイム |
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
-| SQLite | `v3.53.4` | Phase 1 標準データベース |
-| libSQL | `libsql-server v0.24.32` | 将来移行候補。Phase 1 の実装対象外 |
+| SQLite | `v3.53.4` | 互換・移行元・検証用データベース |
+| libSQL | `libsql-server v0.24.32` | 標準データベース |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
@@ -260,9 +260,11 @@ TypeScript は **6系の最新安定版** を採用方針とする。Deno に同
 
 Node.js ランタイムは、セキュリティ上のリスクによるプロジェクト方針として採用を禁止する。
 
-Docker は、本番、デプロイ、運用基盤、公開経路、永続データ管理では採用禁止とする。
+本番サーバ運用、デプロイ、運用基盤では、Deno single binary 形式と Docker 形式の双方を標準化対象とする。
 
-Docker の利用を許可する範囲は、検証、テスト、ビルド、Deno single binary 生成に限定する。Docker は実行系検証・ビルド用の隔離環境であり、本番サーバ上のアプリケーション実行基盤、デプロイ方式、永続データ管理方式として扱ってはならない。
+Deno single binary を正本成果物とする。Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
+
+Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として扱い、host filesystem を正本として system 側から分離する。
 
 Docker を利用する場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
 
@@ -272,7 +274,7 @@ Docker を利用する場合も、Node.js runtime、npm ecosystem、`npm:` speci
 
 Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用サーバーを前提とする。
 
-Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、本体の標準運用基盤は、これらを直接管理しやすい self-host / VPS / 専用サーバーを基準にする。
+最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Docker を使用する場合も、Docker を使用しない binary 直実行の場合も、この構成を変えてはならない。Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、data 側は container lifecycle に依存させず、host filesystem 上で直接保全できる構成を基準にする。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。採用を検討する場合は、3類マスター仕様書とマスター開発計画へ採用理由、対象範囲、対象外、リスク、検証範囲を反映し、ユーザー承認を得る。
 
@@ -449,7 +451,7 @@ Phase 9、Phase 19、Phase 29 のような 9系フェーズは、補助的なリ
 - Web UI は外部フレームワークを使わず、HTML / CSS / Vanilla JavaScript を基本とする。
 - Web UI は GitHub 互換の対象外とし、本プロジェクト独自のUIとして設計する。
 - フレームワークが必要な場合は内製のみとし、外部ライブラリが必要な場合は例外採用としてユーザー承認を得る。
-- Git リポジトリの実データと SQLite メタデータの整合性を壊す変更を行わない。
+- Git リポジトリの実データと libSQL / SQLite メタデータの整合性を壊す変更を行わない。
 
 ### 5.4 禁止事項
 
@@ -500,7 +502,7 @@ Phase 9、Phase 19、Phase 29 のような 9系フェーズは、補助的なリ
 - API token
 - Repository CRUD
 - Visibility / permission
-- SQLite schema / migration
+- libSQL / SQLite schema / migration
 - Webhook
 - Audit log
 - XSS 対策

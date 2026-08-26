@@ -18,8 +18,10 @@
 - 標準言語は TypeScript とする。
 - TypeScript は 6系の最新安定版を採用方針とする。
 - Node.js ランタイムは採用禁止とする。
-- Docker は、本番、デプロイ、運用基盤、公開経路、永続データ管理では採用禁止とする。
-- Docker は、検証、テスト、ビルド、Deno single binary 生成に限り採用を許可する。
+- Deno single binary 形式を正本成果物とする。
+- Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。
+- Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成にする。
+- libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として分離する。
 - フレームワークは、内製したもの以外の採用を禁止する。
 - Deno 標準ライブラリを最優先候補とする。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 - JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする。
@@ -36,8 +38,8 @@
 |---|---:|---|
 | Deno | `v2.9.5` | 標準ランタイム |
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
-| SQLite | `v3.53.4` | Phase 1 標準データベース |
-| libSQL | `libsql-server v0.24.32` | 将来移行候補。Phase 1 の実装対象外 |
+| SQLite | `v3.53.4` | 互換・移行元・検証用データベース |
+| libSQL | `libsql-server v0.24.32` | 標準データベース |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
@@ -66,15 +68,27 @@ Adlaire 内製 Deno Module Registry は、npm registry 互換レジストリで�
 
 npm registry 互換レジストリ、`npm:` specifier、`package.json` 前提運用、`node_modules` 前提運用は、Node.js / npm ecosystem リスクと衝突するため標準採用しない。採用検討が必要な場合は、例外採用ではなく方針変更候補として扱い、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
-## 3.2 Docker 限定採用方針
+## 3.2 Binary / Docker 標準採用方針
 
-Docker は、本プロジェクトおよび AdlaireGroup 共通方針として、検証、テスト、ビルド、Deno single binary 生成に限定して採用を許可する。
+Deno single binary 形式を、本プロジェクトおよび AdlaireGroup 共通方針における正本成果物とする。
 
-Docker は実行系検証・ビルド用の隔離環境であり、本番サーバ上のアプリケーション実行基盤、デプロイ方式、永続データ管理方式として扱ってはならない。
+Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
 
-許可対象は、最低限以下に限定する。
+Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。
 
+Deno single binary 形式、Docker 形式のいずれでも、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
+
+標準対象は、最低限以下とする。
+
+- Deno single binary
+- host OS 上での Deno single binary 直実行
 - `docker run`
+- `docker compose`
+- Dockerfile
+- Docker image
+- Docker container
+- Deno single binary を含む Docker image
+- 1 VPS 上での system 側と host filesystem data 側の同居構成
 - 固定 Deno Docker image による `deno task fmt`
 - 固定 Deno Docker image による `deno task lint`
 - 固定 Deno Docker image による `deno task test`
@@ -83,37 +97,35 @@ Docker は実行系検証・ビルド用の隔離環境であり、本番サー�
 - 固定 Deno Docker image による `deno task compile:linux-x86_64`
 - 固定 Deno Docker image による `deno task compile:release`
 
-標準 Docker image は `denoland/deno:2.9.5` とする。これは固定採用バージョン Deno `v2.9.5` を満たすための検証・ビルド専用 image であり、アプリケーションの本番実行基盤ではない。
+検証・ビルド用の標準 Docker image は `denoland/deno:2.9.5` とする。本番用 Docker image は、承認済み Deno single binary を同梱する最小 image とし、実行時に Node.js / npm ecosystem を含めてはならない。
 
 禁止対象には、最低限以下を含む。
 
-- 本番サーバ上の Docker Desktop、Docker Engine、Docker Compose
-- 本番サーバ上の Docker image、Docker container、Docker volume、Docker registry
-- 本番デプロイでの `docker build`
-- 本番デプロイでの `docker run`
-- 本番デプロイでの `docker compose`
-- Dockerfile を本番成果物または本番運用手順として扱うこと
-- docker-compose.yml / docker-compose.yaml / compose.yaml を本番成果物または本番運用手順として扱うこと
-- `docker pull`
-- `docker push`
+- 本番サーバ上の Docker Desktop
+- Docker named volume を標準の data 正本として扱うこと
+- libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を container lifecycle に依存させること
+- Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を含む Docker image
+- 外部 Docker デプロイフレームワーク
 
-Docker を利用する場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
+Docker Desktop は本番サーバ標準構成として採用しない。Docker 運用を選択する場合、本番サーバでは Docker Engine と Docker Compose または同等の Docker 実行基盤を用いる。
 
 検証、テスト、ビルド、Deno single binary 生成は、ホストOS上の固定採用バージョン Deno、または承認済み固定 Deno Docker image のいずれかで実行できる。
 
-本番とデプロイは、Deno single binary、ホストOSのファイルシステム、systemd または同等のサービス管理、release directory、`current` symlink、事前バックアップ、health check、rollback 手順を基本構成とする。デプロイ、検証、バックアップ、ロールバックの詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
+本番とデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、事前バックアップ、health check、rollback 手順を基本構成とする。デプロイ、検証、バックアップ、ロールバックの詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-本番、デプロイ、運用基盤、公開経路、永続データ管理に Docker 依存する成果物、手順、検証、仕様、計画、テンプレートを追加してはならない。既存の本番向け Docker 参照を発見した場合は、技術要件ポリシー違反として整理し、ホストOS実行または Deno single binary 運用へ置き換える。
+system 側と data 側を分離する。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側とし、libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として扱う。Docker 運用を選択する場合、data 側は原則として host bind mount で container へ接続し、Docker named volume へ丸投げしてはならない。
 
 ## 4. データベース方針
 
 採用対象のデータベースエンジンは SQLite と libSQL のみに限定する。
 
-Phase 1 は SQLite を標準データベースとして進める。libSQL は SQLite からの将来移行候補として保持する。
+標準データベースは libSQL とする。
 
-SQLite を直接触る設計は、将来の libSQL 移行計画の弊害になるため禁止する。アプリケーションコードは、必ず Database Gateway と専用 driver 層を経由して永続化処理を行う。
+SQLite は廃止せず、互換・移行元・最小ローカル検証用データベースとして保持する。
 
-クラウドDBホスティングを採用するかどうかは未定とする。採用する場合は、libSQL の接続先または運用形態の候補として扱い、ユーザー承認を得る。
+SQLite または libSQL を直接触る設計は禁止する。アプリケーションコードは、必ず Database Gateway と専用 driver 層を経由して永続化処理を行う。
+
+標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は互換・移行元・最小ローカル検証用として扱う。クラウドDBホスティングを採用するかどうかは未定とする。採用する場合は、libSQL の接続先または運用形態の候補として扱い、ユーザー承認を得る。
 
 ---
 
@@ -121,7 +133,7 @@ SQLite を直接触る設計は、将来の libSQL 移行計画の弊害にな�
 
 Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用サーバーを前提とする。
 
-Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を直接管理できることを、本体運用基盤の前提条件とする。
+最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Docker 使用時も非 Docker の binary 直実行時も、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を host filesystem 基準で直接確認できることを、本体運用基盤の前提条件とする。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、3類マスター仕様書とマスター開発計画へ採用理由、対象範囲、対象外、リスク、検証範囲を反映し、ユーザー承認を得る。
 

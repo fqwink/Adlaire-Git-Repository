@@ -24,30 +24,30 @@
 - 固定採用バージョン
 - 更新方針
 
-## 3. 共通 Docker 方針
+データベースを採用するプロジェクトは、標準データベース、互換・移行元データベース、検証用データベース、クラウドDBホスティング採用可否、driver 名、上位層へ露出してよい抽象境界を明記する。
 
-Docker は、本番、デプロイ、運用基盤、公開経路、永続データ管理では採用禁止とする。
+アプリケーション上位層は、標準データベースまたは互換データベースの固有APIへ直接依存してはならない。必要な場合は、Database Gateway、driver 層、repository 層など、プロジェクトで定義した内製境界を経由する。
 
-Docker は、検証、テスト、ビルド、single binary 生成など、プロジェクトで承認された実行系検証・ビルド用途に限り補助採用できる。
+## 3. 共通 Binary / Docker 方針
 
-Docker を利用する場合も、プロジェクトの禁止ランタイム、禁止 package ecosystem、依存関係方針に違反してはならない。
+Deno single binary 形式を正本成果物とする。
 
-本番禁止対象には、最低限以下を含める。
+Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
 
-- Docker Desktop
-- Docker Engine
-- Docker Compose
-- Dockerfile
-- docker-compose.yml / docker-compose.yaml / compose.yaml
-- Docker image
-- Docker container
-- Docker volume
-- Docker registry
-- `docker build`
-- `docker run`
-- `docker compose`
-- `docker pull`
-- `docker push`
+Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成にする。
+
+Deno single binary 形式、Docker 形式のいずれでも、プロジェクトの禁止ランタイム、禁止 package ecosystem、依存関係方針に違反してはならない。
+
+保護対象 data 側は host filesystem を正本として system 側から分離する。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。
+
+Docker named volume を標準の data 正本として扱ってはならない。data 側は原則として host bind mount で container へ接続する。
+
+禁止対象には、最低限以下を含める。
+
+- Docker Desktop の本番サーバ標準採用
+- Docker named volume への data 正本の丸投げ
+- Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を含む Docker image
+- 外部 Docker デプロイフレームワーク
 
 ## 4. 承認
 
