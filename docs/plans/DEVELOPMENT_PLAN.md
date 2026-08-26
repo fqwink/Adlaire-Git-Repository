@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.1.19
+**計画バージョン**: v.1.20
 **現行フェーズ基準バージョン**: v.1.8
-**ステータス**: Phase 8 DB / libSQL 標準化
+**ステータス**: Phase 8 / Phase 9 仕様完成
 
 ---
 
@@ -16,7 +16,7 @@
 
 実装は、1類ルールブック、2類ポリシー、3類マスター仕様書に従い、本書で定義したフェーズ計画に基づいて進める。
 
-Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB フェーズとして libSQL 標準化を扱うが、`deno.json` の内部バージョン更新は実装設定変更に該当するため、別途ユーザー承認を得るまで現行フェーズ基準バージョンは `v.1.8` を維持する。Phase 8 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
+Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱うが、`deno.json` の内部バージョン更新は実装設定変更に該当するため、別途ユーザー承認を得るまで現行フェーズ基準バージョンは `v.1.8` を維持する。Phase 8 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
 
 本計画における「マスター仕様完成」は、実装承認ではない。仕様完成後にソースコード実装、DB driver 実装、schema 変更、テスト変更、デプロイ実行を行う場合は、対象範囲と検証方法を提示し、別途ユーザー承認を得る。
 
@@ -913,7 +913,7 @@ Phase 7 初回安定版リリースでは、`deno.json` の内部バージョン
 
 ---
 
-## 13. Phase 8: 長期運用準備
+## 13. Phase 8: DB仕様完成
 
 ### 13.1 基準バージョン
 
@@ -921,7 +921,7 @@ Phase 8 の基準バージョンは `v.1.9` とする。Phase 7 で初回安定�
 
 ### 13.2 目的
 
-libSQL 標準化を中心に DB 方針を整理する。SQLite 互換維持は行わない。
+libSQL 標準化を中心に DB 仕様を完成させる。SQLite 互換維持は行わない。
 
 ### 13.3 リリース方針
 
@@ -929,22 +929,123 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 
 ### 13.4 実施対象
 
-- DB
-- libSQL 標準化
-- SQLite 互換維持なし
-- DB 方針整理
+- libSQL 標準DB仕様の確定
+- `DB_DRIVER=libsql` を標準 driver とする接続仕様
+- `DB_URL` と `DB_AUTH_TOKEN` による接続先・認証情報の扱い
+- Database Gateway、Repository 層、driver 層の責務境界
+- libSQL 前提の schema、migration、seed 管理方針
+- 既存データ移行元確認用 SQLite の取扱境界
+- DB backup、restore、rollback の責務境界
+- DB 関連テストと検証導線の整理
+- 3類マスター仕様書、2類ポリシー、README との整合性確認
+
+### 13.4.1 対象外
+
+- SQLite 互換維持
+- SQLite 標準DB運用
+- SQLite 最小ローカル検証用運用
+- `DB_DRIVER=sqlite` の標準運用化
+- `DB_DRIVER=turso` 等のクラウドDBホスティング名を driver 名にすること
+- Turso Cloud、Deno Deploy、その他クラウドDBホスティングの標準採用
+- Database Gateway を経由しない DB 直接アクセス
+- 承認なしの libSQL 外部ライブラリ導入
+- 承認なしの schema、migration、seed、テストコード、実装設定変更
+
+### 13.4.2 必須検証
+
+- 標準 driver が `DB_DRIVER=libsql` として定義されていること
+- SQLite が既存データ移行元確認用に限定されていること
+- Database Gateway、Repository 層、driver 層の責務境界が仕様書と矛盾していないこと
+- DB driver 固有 API が上位層へ漏れない構成になっていること
+- DB backup、restore、rollback の責務境界がデプロイポリシーと矛盾していないこと
+- リポジトリ全体に旧 SQLite 互換維持、SQLite 標準運用、libSQL 将来候補扱いの古い表記が残っていないこと
+
+### 13.4.3 完了条件
+
+- Phase 8 の DB 仕様が3類マスター仕様書と本書に具体化されている。
+- libSQL 標準DB方針、SQLite 互換維持なし方針、Database Gateway 境界が矛盾していない。
+- 実装変更へ進む場合の対象、対象外、検証範囲、承認条件を説明できる。
+- リポジトリ整合性確認を実施し、矛盾または古い表記を補正している。
 
 ### 13.5 Phase 8.1: 本体整合性
 
 DB 方針変更に合わせて、Adlaire Git Repository 本体の仕様、計画、実装、検証導線を整合する。
 
+#### 13.5.1 実施対象
+
+- 1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画の DB 方針整合
+- マスター実装機能候補リストと正式仕様の責務分離確認
+- README と実際のファイル構成、運用導線の整合
+- 実装と DB schema が Database Gateway 境界に従っていることの確認
+- テストと検証導線が libSQL 標準DB方針を説明できることの確認
+- Pull Request 説明へ整合性確認結果を反映
+
+#### 13.5.2 完了条件
+
+- 旧 SQLite 標準運用、SQLite 互換維持、libSQL 将来候補扱いの表記が判断基準として残っていない。
+- Phase 8 の仕様、計画、実装、検証導線が矛盾していない。
+- リポジトリ整合性確認を完了している。
+
 ### 13.6 Phase 8.5: システム分割
 
 Adlaire Git Repository 本体とデータ領域を分割する。本体は差し替え可能な system 側、DB、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として扱う。
 
+#### 13.6.1 実施対象
+
+- system 側と data 側の責務整理
+- Docker 運用と binary 直実行で共通する data 側構成の整理
+- host filesystem を data 正本とする運用方針の確認
+- Docker named volume を data 正本にしない禁止事項の確認
+- deploy、backup、verify、rollback の対象整理
+
+#### 13.6.2 system 側
+
+- Deno single binary
+- Docker image
+- Docker container
+- docker compose
+- systemd service または同等の起動管理定義
+- deploy script
+
+#### 13.6.3 data 側
+
+- libSQL database
+- 移行元 SQLite database
+- Git bare repositories
+- config
+- secrets
+- logs
+- backups
+- manifests
+
+#### 13.6.4 完了条件
+
+- system 側と data 側の保存対象、責務、バックアップ対象を説明できる。
+- Docker 運用と binary 直実行で同じ data 側構成を維持できる。
+- data 側が container lifecycle に依存していない。
+- デプロイポリシー、技術要件ポリシー、3類マスター仕様書と矛盾していない。
+
 ### 13.7 Phase 8.7: 安定化
 
 バグ修正、検証強化、ドキュメント整合性を行う。
+
+#### 13.7.1 実施対象
+
+- DB 標準化に関するバグ精査
+- Database Gateway 境界に関するバグ精査
+- system / data 分離に関するバグ精査
+- backup、restore、rollback の説明可能性確認
+- 主要 workflow の検証強化
+- 意味のあるテストまたは代替検証の整理
+- ドキュメント整合性向上
+
+#### 13.7.2 完了条件
+
+- DB 標準化、Database Gateway 境界、system / data 分離に関する既知バグが残っていない。
+- 主要 workflow と DB 永続化境界を、意味のあるテストまたは代替検証により説明できる。
+- 確信にも説明にも寄与しない冗長なテストを追加していない。
+- Phase 9 の安定版判定へ進むための既知制約、対象外、リスク、検証未完了項目を説明できる。
+- リポジトリ全体の整合性確認と整合性向上を完了している。
 
 ---
 
@@ -961,6 +1062,50 @@ Phase 8 までの成果を対象に、安定版判定を行う。
 ### 14.3 リリース方針
 
 Phase 9 は安定版判定フェーズである。安定版リリース対象にする場合は、リリース提案、検証範囲、成果物、配置先を提示し、ユーザー承認を得る。
+
+Phase 9 はリリース実行を自動承認しない。tag 作成、GitHub Releases 作成、成果物配置、release notes 公開、`main` 反映は、別途ユーザー承認を得るまで行わない。
+
+### 14.4 判定対象
+
+- Phase 8 の libSQL 標準DB仕様
+- Phase 8.1 の本体整合性
+- Phase 8.5 の system / data 分離
+- Phase 8.7 の安定化
+- Database Gateway、Repository 層、driver 層の責務境界
+- backup、restore、rollback の説明可能性
+- 主要 workflow の検証結果
+- 既知バグ、既知制約、対象外機能
+- リポジトリ全体の整合性
+
+### 14.5 リリース禁止条件
+
+以下に該当する場合、Phase 9 で安定版リリースしてはならない。
+
+- Phase 8 系の完了条件を満たしていない。
+- 既知バグが残っている。
+- DB 標準化、Database Gateway 境界、system / data 分離に矛盾がある。
+- backup、restore、rollback の説明可能性が不足している。
+- 主要 workflow の検証結果を説明できない。
+- 3類マスター仕様書、2類ポリシー、マスター開発計画、README、実装、テスト、検証導線、バージョン表記、Pull Request 説明に矛盾が残っている。
+- リリース提案、検証範囲、成果物、配置先、自動実行範囲を提示していない。
+- ユーザー承認を得ていない。
+
+### 14.6 成果物と配置
+
+安定版リリースを行う場合、成果物の主配置は GitHub Releases とする。
+
+標準 Linux binary は ARM64 と x86_64 の2種類を対象とする。Deno single binary を正本成果物とし、Docker image は正本 binary を同梱する運用選択肢として扱う。
+
+リリース履歴の正本は GitHub Releases とする。リポジトリ内に変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
+
+### 14.7 完了条件
+
+- Phase 8 系の完了条件を満たしている。
+- リリース禁止条件に該当しないことを説明できる。
+- 安定版リリースを行う場合は、別途ユーザー承認を得ている。
+- GitHub Releases をリリース履歴の正本とする方針に従っている。
+- Deno single binary、必要な checksum、manifest、release notes、Docker image の扱いを説明できる。
+- リポジトリ整合性確認と整合性向上を完了している。
 
 ---
 
@@ -1056,3 +1201,4 @@ Phase 9 は安定版判定フェーズである。安定版リリース対象に
 | v.1.17 | Phase 8 | v.1.9 | Adlaire Deploy を公式付随システムとして定義し、個別マスター仕様書、連携境界、既存デプロイ雛形との関係を整理 |
 | v.1.18 | Phase 8 | v.1.9 | Adlaire Deploy を仕様未定の将来候補へ戻し、当面は Adlaire Git Repository 本体優先の長期運用準備へ整理 |
 | v.1.19 | Phase 8 / Phase 9 | v.1.9 / v.2.10 | Phase 8 をDBフェーズへ再定義し、Phase 8.1本体整合性、Phase 8.5システム分割、Phase 8.7安定化、Phase 9安定版判定へ整理 |
+| v.1.20 | Phase 8 / Phase 9 | v.1.9 / v.2.10 | Phase 8 をDB仕様完成、Phase 8.1を本体整合性、Phase 8.5をsystem/data分離、Phase 8.7を安定化、Phase 9を安定版判定として、対象、対象外、検証範囲、完了条件まで具体化 |
