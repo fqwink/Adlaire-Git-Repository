@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.1.16
-**ステータス**: Phase 8 長期運用準備 / マスター仕様完成版
+**文書バージョン**: v.1.19
+**ステータス**: Phase 8 DB / libSQL 標準化
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -24,7 +24,7 @@
 - オープンソース Git プロバイダーはサブの機能互換インスパイア対象とする
 - Git 基本操作と開発支援機能を段階的に実装する
 - UI は GitHub 互換の対象外とし、本プロジェクト独自の利用体験として段階的に拡張する
-- 外部依存は必要最小限とし、Deno 標準ライブラリ、標準DBの libSQL、互換・移行元の SQLite を中心に扱う
+- 外部依存は必要最小限とし、Deno 標準ライブラリ、標準DBの libSQL、既存データ移行元確認用の SQLite を中心に扱う
 - ワンバイナリで起動
 
 **対象ユーザー**
@@ -59,16 +59,17 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換対象外とする。
 - 標準ランタイムは Deno、標準言語は TypeScript とする。
 - 標準データベースは libSQL とする。
-- SQLite は互換・移行元・最小ローカル検証用データベースとして保持する。
+- SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。
 - DBアクセスは Database Gateway、Repository 層、driver 層を経由し、SQLite または libSQL を上位層から直接触らない。
 - `DB_DRIVER=libsql` を標準 driver とする。
-- `DB_DRIVER=sqlite` は互換・移行元・最小ローカル検証用 driver とする。
+- `DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行元確認が必要な場合に限って別途承認を得て扱う。
 - Deno single binary を正本成果物とする。
 - Docker は正本成果物である Deno single binary を image に同梱して実行する運用選択肢の一つとする。
 - Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成とする。
-- data 側は host filesystem を正本とし、libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
+- data 側は host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
 - Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。
 - Node.js runtime、npm ecosystem、外部フレームワーク、無承認外部ライブラリは採用しない。
+- Adlaire Deploy は仕様未定の将来候補であり、現行正本仕様、3類マスター仕様書、実装対象として扱わない。
 
 ## マスター仕様完成条件
 
@@ -77,7 +78,7 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - 現行正本仕様、フェーズ別履歴、保留候補、対象外範囲を分離している。
 - GitHub 機能互換方針と GitHub UI 非互換方針を同時に定義している。
 - Repository、User、Auth、Git Smart HTTP、Issue、Pull Request、Code Review、Wiki、Webhook、Release、Organizations、Teams、Projects、Adlaire 内製 Deno Module Registry、Audit、Operations、REST API、Web UI、Deployment、Database の主要境界を追跡できる。
-- libSQL 標準DB方針と SQLite 互換・移行元・検証用方針が矛盾していない。
+- libSQL 標準DB方針と SQLite 互換維持なし方針が矛盾していない。
 - Deno single binary 正本成果物方針、Docker 運用選択肢、host filesystem data 正本方針が矛盾していない。
 - 保留候補は、保留解除とユーザー承認なしに実装対象へ戻らない。
 - 仕様書、マスター開発計画、マスター実装機能候補リスト、README の参照関係が整合している。
@@ -286,7 +287,7 @@ GET    /api/operations/status
 GET    /api/operations/libsql-evaluation
 ```
 
-Phase 3 時点の libSQL 再評価では、SQLite を当時の現行 driver として維持し、Database Gateway 境界を保ったまま将来の libSQL 移行可能性を保持した。現行正本仕様では libSQL を標準DB、SQLite を互換・移行元・最小ローカル検証用DBとして扱う。
+Phase 3 時点の libSQL 再評価では、SQLite を当時の現行 driver として維持し、Database Gateway 境界を保ったまま将来の libSQL 移行可能性を保持した。現行正本仕様では libSQL を標準DB、SQLite を既存データ移行元確認用として扱い、SQLite 互換維持は行わない。
 
 ## Phase 2 開発支援機能最小仕様
 
@@ -532,35 +533,35 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 - Deno single binary 形式を正本成果物とする
 - Docker は正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする
 - Docker 使用時も非 Docker の binary 直実行時も同じ system / data 分離構成にする
-- libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として system 側から分離する
+- libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として system 側から分離する
 - 承認済み固定採用バージョンは、下表に従う
 
 | 技術 | 固定採用バージョン | 扱い |
 |---|---:|---|
 | Deno | `v2.9.5` | 標準ランタイム |
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
-| SQLite | `v3.53.4` | 互換・移行元・検証用データベース |
+| SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
 ### データベース採用方針
 
-採用対象のデータベースエンジンは SQLite と libSQL のみに限定する。
+標準採用するデータベースエンジンは libSQL とする。
 
-SQLite と libSQL は、本プロジェクトで許容する必要最小限の外部依存とする。
+SQLite は既存データ移行元確認用としてのみ扱う。
 
 標準データベースは libSQL とする。
 
-SQLite は廃止せず、互換・移行元・最小ローカル検証用データベースとして保持する。
+SQLite 互換維持、SQLite 最小ローカル検証用運用、SQLite 標準DB運用は行わない。
 
-libSQL は必要最小限の外部依存に該当するが、SQLite 互換、DB抽象化設計との相性、将来の同期・分散構成への拡張余地という採用メリットが高いため、標準データベースとして扱う。
+libSQL は必要最小限の外部依存に該当するが、DB抽象化設計との相性、将来の同期・分散構成への拡張余地という採用メリットが高いため、標準データベースとして扱う。
 
 libSQL driver の実装は、Phase 計画、移行計画、検証計画、ユーザー承認を揃えてから行う。libSQL を採用する場合も、外部ライブラリAPIは内製 `libsql` driver と Database Gateway の内部に閉じ込め、サービス層やRepository層へ直接露出させない。
 
 Turso Cloud 等のクラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングは新しいデータベースエンジンではなく、libSQL の接続先または運用形態の候補として扱う。採用する場合は、外部サービス依存、データ所在、認証トークン管理、バックアップ、障害時の復旧、運用費用を評価し、例外採用としてユーザー承認を得る。
 
-SQLite 互換性を維持するため、DBアクセスは Database Gateway と専用 driver 層に集約する。SQL は可能な限り SQLite 標準互換に保ち、libSQL 固有機能へ直接依存する場合はマスター仕様書に明記する。
+libSQL 標準化のため、DBアクセスは Database Gateway と専用 driver 層に集約する。SQLite 互換維持は行わず、libSQL 固有機能へ依存する場合はマスター仕様書に明記する。
 
 ### 標準運用基盤方針
 
@@ -569,6 +570,8 @@ Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用
 最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Docker 使用時も非 Docker の binary 直実行時も、この構成を変えてはならない。Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、data 側は container lifecycle に依存させず、host filesystem 上で直接保全できる構成を基準にする。
 
 本番サーバ環境へのデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
+
+Adlaire Deploy は仕様未定の将来候補であり、仕様確定まで公式付随システム、3類マスター仕様書、実装対象として扱わない。Adlaire Git Repository 本体は、将来の内製デプロイ支援システムと連携できる余地として、Release manifest、checksum、health check endpoint、Audit log の境界を保持する。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
 
@@ -591,7 +594,7 @@ Repository 層
     ↓
 Database Gateway
     ↓
-libSQL driver（標準） / SQLite driver（互換・移行元・検証用）
+libSQL driver（標準） / SQLite driver（移行元確認用）
 ```
 
 各層の責務は以下とする。
@@ -602,7 +605,7 @@ libSQL driver（標準） / SQLite driver（互換・移行元・検証用）
 | Repository 層 | エンティティ単位の保存・取得・検索 |
 | Database Gateway | 接続、SQL 実行、トランザクション、driver 差し替え境界 |
 | libSQL driver | 標準DBアクセス実装 |
-| SQLite driver | 互換・移行元・最小ローカル検証用DBアクセス実装 |
+| SQLite driver | 既存データ移行元確認用。標準運用、互換維持、最小ローカル検証用として扱わない |
 
 禁止事項:
 
@@ -612,17 +615,17 @@ libSQL driver（標準） / SQLite driver（互換・移行元・検証用）
 - migration をアプリケーション各所に分散させること
 - SQLite / libSQL 固有機能を Repository 層より上位へ漏らすこと
 
-標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は互換・移行元・最小ローカル検証用として扱う。クラウドDBホスティングを採用する場合も、`DB_DRIVER=libsql` の接続先設定として扱い、`DB_DRIVER=turso` 等のホスティングサービス名を driver 名にしてはならない。
+標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行元確認が必要な場合に限って別途承認を得て扱う。クラウドDBホスティングを採用する場合も、`DB_DRIVER=libsql` の接続先設定として扱い、`DB_DRIVER=turso` 等のホスティングサービス名を driver 名にしてはならない。
 
 移行計画を立てやすくするため、初期実装時点から以下を固定する。
 
 - `DB_DRIVER` による driver 選択
 - `DB_URL` による接続先指定
 - `DB_AUTH_TOKEN` による認証情報指定
-- SQLite 標準互換 SQL を優先するクエリ方針
+- libSQL 前提の schema と query 方針
 - Repository 層より上位へ driver 固有 API を漏らさない境界
 - 外部ライブラリAPIを Database Gateway より上位へ漏らさない境界
-- libSQL 標準運用と SQLite 互換・移行元運用を比較検証しやすいテスト構成
+- libSQL 標準運用と既存データ移行元 SQLite 確認を分離したテスト構成
 
 schema、migration、seed は専用ディレクトリに集約し、Database Gateway からのみ適用する。
 
@@ -640,10 +643,10 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
   ├─ Auth (SSH / Basic)
   ├─ Web UI handler
   └─ Database Gateway
-      └─ libSQL driver / SQLite driver
+      └─ libSQL driver / SQLite migration source reader
     ↓
 [Storage]
-  ├─ libSQL / SQLite Database (metadata)
+  ├─ libSQL Database (metadata)
   └─ Bare Git Repos (FS)
 ```
 
@@ -847,7 +850,7 @@ Git repos: /opt/adlaire-git-repository/shared/data/repositories/
 **バックアップ戦略**
 標準バックアップ雛形は `scripts/deploy/backup.sh` とする。
 
-バックアップ対象は libSQL / SQLite database、Git bare repository、設定、現行 release、backup manifest とする。
+バックアップ対象は libSQL database、移行元 SQLite database、Git bare repository、設定、現行 release、backup manifest とする。
 
 定期実行は systemd timer を補助採用候補とし、実行間隔、保持期間、外部保管、暗号化、復元手順は `docs/policies/DEPLOYMENT_POLICY.md` に従い、ユーザー承認後に確定する。
 
@@ -873,7 +876,7 @@ Git repos: /opt/adlaire-git-repository/shared/data/repositories/
 **バックアップ戦略**
 ```
 標準雛形: scripts/deploy/backup.sh
-対象: libSQL / SQLite database + Git bare repository + 設定 + 現行 release + manifest
+対象: libSQL database + 移行元 SQLite database + Git bare repository + 設定 + 現行 release + manifest
 定期実行候補: systemd timer
 保持期間・外部保管・暗号化: ユーザー承認後に確定
 ```
@@ -927,7 +930,7 @@ VPS: Xserver 2GB プラン × 3台
 
 標準バックアップは、最低限以下を対象とする。
 
-- libSQL / SQLite database
+- libSQL database
 - Git bare repository 保存領域
 - 設定ファイル
 - 現行 release
@@ -939,17 +942,17 @@ VPS: Xserver 2GB プラン × 3台
 
 データ復元を伴うリカバリは、通常デプロイ自動化の対象外とする。
 
-libSQL / SQLite database 復元、Git bare repository 復元、設定復元は本番データへ影響するため、必ず別途ユーザー承認を得る。
+libSQL database 復元、移行元 SQLite database 復元、Git bare repository 復元、設定復元は本番データへ影響するため、必ず別途ユーザー承認を得る。
 
 リカバリ時の標準確認項目は以下とする。
 
 - Docker container の停止または保護状態確認
 - 復元対象 backup manifest の確認
-- libSQL / SQLite database 復元可否の確認
+- libSQL database 復元可否の確認
 - Git bare repository 保存領域の復元可否確認
 - Docker container 再作成
 - `/health` 確認
-- libSQL / SQLite database と Git bare repository の参照確認
+- libSQL database と Git bare repository の参照確認
 
 **Phase 3（NAS 利用時）**
 ```
@@ -998,7 +1001,7 @@ TARGET_IMAGE=adlaire-git-repo:v.1.8-YYYYMMDD-HHMMSS scripts/deploy/rollback.sh
 
 ロールバック実行は、必ず別途ユーザー承認を得る。
 
-libSQL / SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元を伴うロールバックは、通常ロールバックとは分離し、本番データへ影響する操作として別承認を必須とする。
+libSQL database 復元、移行元 SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元を伴うロールバックは、通常ロールバックとは分離し、本番データへ影響する操作として別承認を必須とする。
 
 ---
 
@@ -1161,7 +1164,7 @@ Phase 6 は、Phase 7 のデフォルト安定版リリース判定へ進むた�
 
 Phase 6 では、database schema、Database Gateway、Repository 層、Service 層の責務境界を維持する。既存 API と既存ドメイン機能は維持しつつ、認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧制御、HTTP Authorization scheme の大小文字処理、Webhook secret API 非露出、Team member の Organization member 境界等の既知バグ修正、ドキュメント整合性向上、移行・ロールバック前提整理、主要 workflow 検証を行う。
 
-Phase 6 から Phase 5 相当へ戻す場合、データ構造の migration は不要である。ロールバックは、libSQL / SQLite database、bare repository、設定、配布 binary のバックアップを前提に行う。
+Phase 6 から Phase 5 相当へ戻す場合、データ構造の migration は不要である。ロールバックは、libSQL database、移行元 SQLite database、bare repository、設定、配布 binary のバックアップを前提に行う。
 
 ## Phase 7 安定版リリース判定仕様
 
@@ -1560,7 +1563,7 @@ CI/CD とデプロイ自動化は、`docs/policies/DEPLOYMENT_POLICY.md` を正�
 
 shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とする。`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
 
-Deno製 内製デプロイツールは中期候補とする。shell script 運用で固まった要件を内製化する場合は、別途ユーザー承認を得る。
+Adlaire Deploy は仕様未定の将来候補とし、仕様確定まで採用・実装計画化しない。shell script 運用で固まった要件を内製化する場合は、別途ユーザー承認を得る。
 
 GitHub Actions と外部デプロイフレームワークは保留とする。Docker は運用選択肢の一つとし、正本成果物は Deno single binary とする。Node.js系は不採用とする。
 
@@ -1578,7 +1581,7 @@ GitHub Actions と外部デプロイフレームワークは保留とする。Do
 - Docker 運用を選択する場合の Docker Compose 設定の確認
 - binary 直実行を選択する場合の起動管理定義の確認
 - 配置前検証
-- libSQL / SQLite database のバックアップ
+- libSQL database のバックアップ
 - Git bare repository 保存領域のバックアップ
 - 設定ファイルのバックアップ
 - secrets のバックアップ
@@ -1594,7 +1597,7 @@ GitHub Actions と外部デプロイフレームワークは保留とする。Do
 
 デプロイ実行方式は、Deno single binary 正本成果物の配置を基準とする。Docker は標準運用選択肢の一つであり、Docker Compose は Docker 運用選択時の 1 VPS 最小構成起動方式とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とする。`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
 
-Deno製 内製デプロイツールは中期候補とする。GitHub Actions と外部デプロイフレームワークは保留とし、必要性、依存関係、運用リスクを整理し、ユーザー承認を得るまで標準採用しない。
+Adlaire Deploy は仕様未定の将来候補とし、仕様確定まで採用・実装計画化しない。GitHub Actions と外部デプロイフレームワークは保留とし、必要性、依存関係、運用リスクを整理し、ユーザー承認を得るまで標準採用しない。
 
 Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Node.js系は不採用とする。Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。
 
@@ -1634,7 +1637,7 @@ Deno single binary 形式を正本成果物とする。Docker は、正本成果
 - 承認済み固定 Deno Docker image による検証、テスト、ビルド、Deno single binary 生成
 - binary 直実行または Docker Compose による起動
 - Docker 運用を選択する場合の host bind mount による data 領域接続
-- libSQL / SQLite database、Git repository、config、secrets、log、backups、manifests の host filesystem 上での永続保存
+- libSQL database、移行元 SQLite database、Git repository、config、secrets、log、backups、manifests の host filesystem 上での永続保存
 - 配置前バックアップ
 - `/health` による health check
 - 直前 binary または Docker image / tag への system rollback
@@ -1655,7 +1658,7 @@ Docker named volume を標準の data 正本として扱ってはならない。
 
 ### 開発
 
-- [ ] libSQL / SQLite schema 設計
+- [ ] libSQL schema 設計
 - [ ] HTTP server 実装
 - [ ] Git Smart HTTP 実装
 - [ ] Authentication 実装
