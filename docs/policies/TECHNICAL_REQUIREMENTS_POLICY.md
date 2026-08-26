@@ -18,8 +18,9 @@
 - 標準言語は TypeScript とする。
 - TypeScript は 6系の最新安定版を採用方針とする。
 - Node.js ランタイムは採用禁止とする。
-- Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式とする。
-- Deno single binary 形式は維持し、Docker image 内で実行する。
+- Deno single binary 形式を正本成果物とする。
+- Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。
+- Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成にする。
 - SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として分離する。
 - フレームワークは、内製したもの以外の採用を禁止する。
 - Deno 標準ライブラリを最優先候補とする。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
@@ -67,21 +68,27 @@ Adlaire 内製 Deno Module Registry は、npm registry 互換レジストリで�
 
 npm registry 互換レジストリ、`npm:` specifier、`package.json` 前提運用、`node_modules` 前提運用は、Node.js / npm ecosystem リスクと衝突するため標準採用しない。採用検討が必要な場合は、例外採用ではなく方針変更候補として扱い、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
-## 3.2 Docker 標準採用方針
+## 3.2 Binary / Docker 標準採用方針
 
-Docker は、本プロジェクトおよび AdlaireGroup 共通方針として、本番サーバ運用、デプロイ、運用基盤の標準方式とする。
+Deno single binary 形式を、本プロジェクトおよび AdlaireGroup 共通方針における正本成果物とする。
 
-Docker は system 側の実行基盤であり、Deno single binary を Docker image 内で実行する。Deno single binary 形式は維持し、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
+Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
+
+Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。
+
+Deno single binary 形式、Docker 形式のいずれでも、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
 
 標準対象は、最低限以下とする。
 
+- Deno single binary
+- host OS 上での Deno single binary 直実行
 - `docker run`
 - `docker compose`
 - Dockerfile
 - Docker image
 - Docker container
 - Deno single binary を含む Docker image
-- 1 VPS 上での Docker system 側と host filesystem data 側の同居構成
+- 1 VPS 上での system 側と host filesystem data 側の同居構成
 - 固定 Deno Docker image による `deno task fmt`
 - 固定 Deno Docker image による `deno task lint`
 - 固定 Deno Docker image による `deno task test`
@@ -90,7 +97,7 @@ Docker は system 側の実行基盤であり、Deno single binary を Docker im
 - 固定 Deno Docker image による `deno task compile:linux-x86_64`
 - 固定 Deno Docker image による `deno task compile:release`
 
-検証・ビルド用の標準 Docker image は `denoland/deno:2.9.5` とする。本番用 Docker image は、承認済み Deno single binary を含む最小 image とし、実行時に Node.js / npm ecosystem を含めてはならない。
+検証・ビルド用の標準 Docker image は `denoland/deno:2.9.5` とする。本番用 Docker image は、承認済み Deno single binary を同梱する最小 image とし、実行時に Node.js / npm ecosystem を含めてはならない。
 
 禁止対象には、最低限以下を含む。
 
@@ -100,13 +107,13 @@ Docker は system 側の実行基盤であり、Deno single binary を Docker im
 - Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を含む Docker image
 - 外部 Docker デプロイフレームワーク
 
-Docker Desktop は本番サーバ標準構成として採用しない。本番サーバでは Docker Engine と Docker Compose または同等の Docker 実行基盤を用いる。
+Docker Desktop は本番サーバ標準構成として採用しない。Docker 運用を選択する場合、本番サーバでは Docker Engine と Docker Compose または同等の Docker 実行基盤を用いる。
 
 検証、テスト、ビルド、Deno single binary 生成は、ホストOS上の固定採用バージョン Deno、または承認済み固定 Deno Docker image のいずれかで実行できる。
 
-本番とデプロイは、Docker、Deno single binary inside Docker image、host filesystem data 領域、事前バックアップ、health check、rollback 手順を基本構成とする。デプロイ、検証、バックアップ、ロールバックの詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
+本番とデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、事前バックアップ、health check、rollback 手順を基本構成とする。デプロイ、検証、バックアップ、ロールバックの詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-system 側と data 側を分離する。Docker image と container は差し替え可能な system 側とし、SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として扱う。data 側は原則として host bind mount で container へ接続し、Docker named volume へ丸投げしてはならない。
+system 側と data 側を分離する。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側とし、SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として扱う。Docker 運用を選択する場合、data 側は原則として host bind mount で container へ接続し、Docker named volume へ丸投げしてはならない。
 
 ## 4. データベース方針
 
@@ -122,9 +129,9 @@ SQLite を直接触る設計は、将来の libSQL 移行計画の弊害にな�
 
 ## 5. 標準運用基盤方針
 
-Adlaire Git Repository 本体の標準運用基盤は、Docker を利用できる self-host、VPS、専用サーバーを前提とする。
+Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用サーバーを前提とする。
 
-最小本番構成は、1 VPS 上に Docker による system 側と host filesystem による data 側を同居させる構成とする。Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を host filesystem 基準で直接確認できることを、本体運用基盤の前提条件とする。
+最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Docker 使用時も非 Docker の binary 直実行時も、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を host filesystem 基準で直接確認できることを、本体運用基盤の前提条件とする。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、3類マスター仕様書とマスター開発計画へ採用理由、対象範囲、対象外、リスク、検証範囲を反映し、ユーザー承認を得る。
 

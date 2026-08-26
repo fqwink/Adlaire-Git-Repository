@@ -260,11 +260,11 @@ TypeScript は **6系の最新安定版** を採用方針とする。Deno に同
 
 Node.js ランタイムは、セキュリティ上のリスクによるプロジェクト方針として採用を禁止する。
 
-Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式とする。
+本番サーバ運用、デプロイ、運用基盤では、Deno single binary 形式と Docker 形式の双方を標準化対象とする。
 
-本番標準運用方式は Docker のみに統一する。Deno single binary 形式は維持し、Docker image 内で実行する。
+Deno single binary を正本成果物とする。Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
 
-Docker image と container は差し替え可能な system 側として扱う。SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として扱い、host filesystem を正本として system 側から分離する。
+Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として扱い、host filesystem を正本として system 側から分離する。
 
 Docker を利用する場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
 
@@ -272,9 +272,9 @@ Docker を利用する場合も、Node.js runtime、npm ecosystem、`npm:` speci
 
 ### 2.2.1 標準運用基盤
 
-Adlaire Git Repository 本体の標準運用基盤は、Docker を利用できる self-host、VPS、専用サーバーを前提とする。
+Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用サーバーを前提とする。
 
-最小本番構成は、1 VPS 上に Docker による system 側と host filesystem による data 側を同居させる構成とする。Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、data 側は container lifecycle に依存させず、host filesystem 上で直接保全できる構成を基準にする。
+最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Docker を使用する場合も、Docker を使用しない binary 直実行の場合も、この構成を変えてはならない。Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、data 側は container lifecycle に依存させず、host filesystem 上で直接保全できる構成を基準にする。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。採用を検討する場合は、3類マスター仕様書とマスター開発計画へ採用理由、対象範囲、対象外、リスク、検証範囲を反映し、ユーザー承認を得る。
 

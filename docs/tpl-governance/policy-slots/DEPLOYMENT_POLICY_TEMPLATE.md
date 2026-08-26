@@ -28,21 +28,21 @@
 
 ## 3. 共通デプロイ制約
 
-Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式とする。
+Deno single binary 形式を正本成果物とする。
 
-single binary 形式は維持し、Docker image 内で実行する。
+Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
 
-標準デプロイ方式は、各プロジェクトの技術要件ポリシーに従い、Docker による system 側と host filesystem による data 側を分離した構成として定義する。
+標準デプロイ方式は、各プロジェクトの技術要件ポリシーに従い、Docker 使用時も非 Docker の binary 直実行時も同じ system / data 分離構成として定義する。
 
 ## 4. 標準自動化
 
 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。
 
-自動化対象は、Docker image 配置、環境確認、バックアップ、Docker container 再作成、health check、主要workflow検証、deploy manifest 記録を最低限含める。
+自動化対象は、Deno single binary 配置、必要に応じた Docker image 配置、環境確認、バックアップ、process または container 再起動、health check、主要workflow検証、deploy manifest 記録を最低限含める。
 
 ## 5. 標準デプロイスクリプト
 
-各プロジェクトは、Docker 標準運用と Node.js 系禁止方針に従う標準デプロイスクリプトの配置、責務、実行条件を定義する。
+各プロジェクトは、Deno single binary 正本方針、Docker 運用選択肢、Node.js 系禁止方針に従う標準デプロイスクリプトの配置、責務、実行条件を定義する。
 
 最低限、以下の責務を分離する。
 

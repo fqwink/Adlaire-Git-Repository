@@ -128,7 +128,7 @@
 - ソースコード実装作業は、ユーザー承認を得てから着手する。
 - 開発言語、ランタイム、データベース、Git、外部コマンド、外部ライブラリ、フレームワーク、採用バージョン、固定バージョン、更新方針は、ユーザーが決定する。
 - エージェントは候補提示、比較、調査、リスク整理、推奨案の提示にとどめ、ユーザー承認なしに採用決定、バージョン固定、方針確定、実装反映をしてはならない。
-- Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式とする。Deno single binary 形式は維持し、Docker image 内で実行する。保護対象 data 側は host filesystem を正本として system 側から分離する。詳細は `docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` と `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
+- 本番サーバ運用、デプロイ、運用基盤では、Deno single binary 形式と Docker 形式の双方を標準化対象とする。Deno single binary を正本成果物とし、Docker は正本成果物を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、保護対象 data 側は host filesystem を正本として system 側から分離する。詳細は `docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` と `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 - Deno 標準ライブラリを最優先候補とし、JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認なしに採用してはならない。
 - JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。

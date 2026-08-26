@@ -93,7 +93,7 @@ adlaire-git-repository-check-ok
 
 - 本プロジェクトはクローズドライセンスである。
 - 標準運用基盤は self-host / VPS / 専用サーバーを前提とする。
-- Docker は現行方針として本番サーバ運用、デプロイ、運用基盤の標準方式である。
+- Deno single binary は現行方針として正本成果物であり、Docker は運用選択肢の一つである。
 - Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく将来候補として保留する。
 - SQLite を標準データベースとし、libSQL は将来移行候補として保持する。
 - Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` 前提の構成は採用禁止である。

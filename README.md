@@ -59,14 +59,14 @@
 
 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は [docs/policies/DEPLOYMENT_POLICY.md](./docs/policies/DEPLOYMENT_POLICY.md) を参照する。
 
-本番標準運用方式は Docker のみとする。Deno single binary 形式は維持し、Docker image 内で実行する。最小本番構成は、1 VPS 上に Docker による system 側と host filesystem による data 側を同居させる構成とする。
+Deno single binary を正本成果物とする。Docker は正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。Docker を使用する場合も、Docker を使用せず binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。
 
-SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として `shared/` 配下に分離し、host filesystem を正本とする。Docker image / container は差し替え可能な system 側として扱う。
+最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として `shared/` 配下に分離し、host filesystem を正本とする。Deno single binary、Docker image / container、起動管理定義は差し替え可能な system 側として扱う。
 
 ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。Docker で検証、テスト、ビルド、binary 生成をまとめて実行する場合は、`scripts/docker/verify-build.sh` を使う。
 
 標準デプロイ雛形は [scripts/deploy/](./scripts/deploy/) で管理する。`deploy.env.example` を基準に環境固有値を定義し、`deploy.sh`、`backup.sh`、`verify-server.sh`、`verify-release.sh`、`rollback.sh` を承認済み範囲で実行する。実値を含む環境設定、接続先、秘密情報はコミットしてはならない。
 
-安定版リリースの標準 Linux バイナリは、ARM64 と x86_64 の2種類を Docker image に含める対象とする。VPS デプロイ時は `uname -m` で `aarch64` または `x86_64` を確認し、対象アーキテクチャの Deno single binary を含む Docker image を配置する。
+安定版リリースの標準 Linux バイナリは、ARM64 と x86_64 の2種類を正本成果物とする。VPS デプロイ時は `uname -m` で `aarch64` または `x86_64` を確認し、対象アーキテクチャの Deno single binary を配置する。Docker を選択する場合は、その正本 binary を Docker image に同梱して配置する。
 
 Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして扱う。

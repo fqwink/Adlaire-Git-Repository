@@ -24,15 +24,17 @@
 - 固定採用バージョン
 - 更新方針
 
-## 3. 共通 Docker 方針
+## 3. 共通 Binary / Docker 方針
 
-Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式とする。
+Deno single binary 形式を正本成果物とする。
 
-single binary 形式は維持し、Docker image 内で実行する。
+Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
 
-Docker を利用する場合も、プロジェクトの禁止ランタイム、禁止 package ecosystem、依存関係方針に違反してはならない。
+Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成にする。
 
-保護対象 data 側は host filesystem を正本として system 側から分離する。Docker image と container は差し替え可能な system 側として扱う。
+Deno single binary 形式、Docker 形式のいずれでも、プロジェクトの禁止ランタイム、禁止 package ecosystem、依存関係方針に違反してはならない。
+
+保護対象 data 側は host filesystem を正本として system 側から分離する。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。
 
 Docker named volume を標準の data 正本として扱ってはならない。data 側は原則として host bind mount で container へ接続する。
 

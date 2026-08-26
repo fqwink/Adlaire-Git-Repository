@@ -58,9 +58,9 @@ AdlaireGroup 共通雛形を利用するプロジェクトでは、採用技術�
 
 ## 4. 技術禁止原則
 
-Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式とする。
+Deno single binary 形式を正本成果物とする。
 
-single binary 形式は維持し、Docker image 内で実行する。Docker image / container は差し替え可能な system 側として扱い、保護対象 data 側は host filesystem を正本として分離する。
+Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成にする。Deno single binary、Docker image / container、起動管理定義は差し替え可能な system 側として扱い、保護対象 data 側は host filesystem を正本として分離する。
 
 禁止対象と運用詳細は、2類の技術要件ポリシーを正本として定義する。
 

@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.1.13
+**計画バージョン**: v.1.14
 **現行フェーズ基準バージョン**: v.1.8
 **ステータス**: Phase 7 初回安定版リリース後のリポジトリ整合性向上
 
@@ -58,7 +58,7 @@
 - 9系フェーズを安定版リリースフェーズとして扱う場合は、マスター開発計画と2類ポリシーに明記し、ユーザー承認を得る。
 - リリース提案、リリース配置、リリース成果物、リリース自動化は `docs/policies/RELEASE_POLICY.md` に従う。リリース配置は GitHub Releases を主配置とし、リポジトリ内には軽量な配置記録、release notes 元資料、manifest、checksum、運用手順を必要に応じて配置する。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` に従う。
-- 本番標準運用方式は Docker のみとする。Deno single binary 形式は維持し、Docker image 内で実行する。最小本番構成は、1 VPS 上に Docker による system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は Docker image 転送、compose 更新、backup、container 再作成、検証の補助方式とし、`gh` と systemd timer を補助採用とする。Deno製 内製デプロイツールは中期候補、GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
+- Deno single binary 形式を正本成果物とする。Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、1 VPS 上の差し替え可能な system 側と host filesystem data 側を分離する同じ構成にする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer を補助採用とする。Deno製 内製デプロイツールは中期候補、GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
 - ローカルに Deno が存在しない場合、実行系検証は停止ではなく VPS または承認済み検証サーバで実施する方針とする。
 - ドキュメント参照導線は `docs/DOCUMENT_INDEX.md` を索引として確認する。AdlaireGroup 共通ガバナンス雛形の正本は `docs/tpl-governance/` 配下で管理し、現行プロジェクト固有の正本とは分離する。
 - `docs/tpl-governance/` は AdlaireGroup 共通ガバナンス雛形の正本とし、本プロジェクトの変更が共通方針に該当する場合は更新要否を判定し、必要な場合は同一変更範囲で雛形も整合させる。
@@ -72,7 +72,7 @@
 - リポジトリ整合性確認では、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、マスター実装機能候補リスト、README、実装、テスト、検証導線、バージョン表記、Pull Request 説明の矛盾や古い表記を確認する。
 - リポジトリ整合性確認で矛盾が見つかった場合、補正が完了するまでフェーズを完了扱いにしてはならない。
 - リポジトリ整合性が取れていない状態で、次のフェーズに進んではならない。
-- Adlaire Git Repository 本体の標準運用基盤は、Docker を利用できる self-host、VPS、専用サーバーを前提とする。保護対象 data 側は host filesystem を正本として system 側から分離する。
+- Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用サーバーを前提とする。Docker 使用時も非 Docker の binary 直実行時も、保護対象 data 側は host filesystem を正本として system 側から分離する。
 - Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
 - Turso Cloud 等のクラウドDBサービスを検討する場合も、Database Gateway と内製 `libsql` driver の接続先差し替えとして扱い、アプリケーション上位層へサービス固有APIやサービス名を露出してはならない。
 
@@ -129,7 +129,7 @@ v.0.8 -> v.1.8
 
 Deno、SQLite、libSQL、Git、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリ、その他ユーザー承認を得て採用する技術は、採用または更新の時点で公式情報を確認し、最新の安定版を採用候補とする。
 
-Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式とする。Deno single binary 形式は維持し、Docker image 内で実行する。SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として分離する。
+Deno single binary 形式を正本成果物とする。Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として分離する。
 
 Deno 標準ライブラリを最優先候補とする。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 
@@ -925,13 +925,13 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 - 移行性確認
 - 監査、保守、運用手順の整理
 - 本番サーバ環境向けの標準デプロイ自動化、バックアップ、検証、ロールバック手順の具体化
-- Docker image、Docker Compose、host filesystem data 領域、shell script + SSH 補助による標準デプロイ実行方式、`gh` と systemd timer の補助採用範囲、Deno製 内製デプロイツールへの中期移行候補の具体化
+- Deno single binary 正本成果物、Docker 運用選択肢、host filesystem data 領域、shell script + SSH 補助による標準デプロイ実行方式、`gh` と systemd timer の補助採用範囲、Deno製 内製デプロイツールへの中期移行候補の具体化
 - ローカル Deno 不在時に VPS または承認済み検証サーバで実行系検証を行う手順の具体化
 - 保留解除候補の再評価
 
 標準デプロイ雛形は `scripts/deploy/` 配下で管理する。Phase 8 では、`deploy.sh`、`backup.sh`、`verify-server.sh`、`verify-release.sh`、`rollback.sh`、`deploy.env.example` を標準構成として扱う。
 
-標準デプロイ雛形は、承認済み範囲で Docker image 配置、Docker Compose 更新、バックアップ、検証、通常ロールバックを自動化するためのものであり、初回本番デプロイ、デプロイ先サーバ決定、SSH 接続方式、Docker Engine / Docker Compose 導入または更新、バックアップ保存先決定、ロールバック実行、データ復元を自動承認するものではない。
+標準デプロイ雛形は、承認済み範囲で Deno single binary 配置、必要に応じた Docker image 配置、起動定義更新、バックアップ、検証、通常ロールバックを自動化するためのものであり、初回本番デプロイ、デプロイ先サーバ決定、SSH 接続方式、binary 直実行または Docker 運用の選択、Docker Engine / Docker Compose 導入または更新、起動管理定義作成、バックアップ保存先決定、ロールバック実行、データ復元を自動承認するものではない。
 
 Phase 8 で保留解除を検討できる候補は、`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` の保留候補を基準とする。ただし、保留解除候補の再評価は実装承認ではない。正式な実装対象にする場合は、3類マスター仕様書、本書、検証範囲へ反映し、ユーザー承認を得る。
 
@@ -1041,3 +1041,4 @@ Phase 9 は、ケースバイケースで安定版リリースフェーズにな
 | v.1.11 | Phase 8 | v.1.9 | 検証、テスト、ビルド、Deno single binary 生成に限定して Docker を補助採用し、本番、デプロイ、運用基盤、永続データ管理では Docker 不採用を維持する方針へ改訂 |
 | v.1.12 | 全フェーズ共通 | - | Pull Request 作成後のユーザー側 merge、後続作業開始時の merge 完了確認、作業ブランチクローズ、ローカル・リモート整合性確認を標準運用として明記 |
 | v.1.13 | 全フェーズ共通 / Phase 8 | v.1.9 | 本番標準運用方式を Docker のみに統一し、1 VPS 上で Docker system 側と host filesystem data 側を同居させる最小構成、Deno single binary 維持、保護対象 data 分離方針を明記 |
+| v.1.14 | 全フェーズ共通 / Phase 8 | v.1.9 | Deno single binary を正本成果物とし、Docker は正本 binary を image に同梱して実行する運用選択肢の一つへ再整理。Docker 使用時も非 Docker の binary 直実行時も同じ system / data 分離構成に統一 |

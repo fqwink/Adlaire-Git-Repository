@@ -12,13 +12,15 @@
 
 自動化は、承認工程を省略するためのものではない。デプロイ先、対象バージョン、成果物、バックアップ範囲、検証範囲、ロールバック条件、自動実行範囲を提示し、ユーザー承認を得てから実行する。
 
-Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式とする。
+Deno single binary を正本成果物とする。
 
-本番標準運用方式は Docker のみとする。Deno single binary 形式は維持し、Docker image 内で実行する。
+Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
 
-最小本番構成は、1 VPS 上に Docker による system 側と host filesystem による data 側を同居させる構成とする。Docker image / container は差し替え可能な system 側として扱い、SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として host filesystem を正本にする。
+Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。
 
-標準デプロイは、Deno single binary を含む Docker image を self-host、VPS、専用サーバーへ配置し、host filesystem 上の data 領域を bind mount して実行する方式とする。
+最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱い、SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として host filesystem を正本にする。
+
+標準デプロイは、Deno single binary 正本成果物を self-host、VPS、専用サーバーへ配置する方式を基準とする。Docker を利用する場合は、正本成果物である Deno single binary を Docker image に同梱し、host filesystem 上の data 領域を bind mount して実行する。
 
 ## 2. デプロイ実行方式の採用区分
 
@@ -26,15 +28,17 @@ Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式�
 
 | 区分 | 対象 | 扱い |
 |---|---|---|
-| 採用 | Docker | 本番標準運用方式。Deno single binary を Docker image 内で実行する |
-| 採用 | Docker Compose | 1 VPS 最小構成の標準起動方式。compose 設定は system 側として扱い、data 側は host bind mount で接続する |
-| 採用 | shell script + SSH | 標準デプロイ補助方式。承認済み範囲で、image 転送、compose 更新、backup、container 再作成、検証、manifest 記録を自動化する |
+| 採用 | Deno single binary | 正本成果物。Docker 使用有無に関係なく system 側の基準成果物とする |
+| 採用 | host OS 上の binary 直実行 | Docker を使用しない標準運用選択肢。data 側は Docker 使用時と同じ host filesystem 構成にする |
+| 採用 | Docker | 標準運用選択肢の一つ。Deno single binary を Docker image に同梱して実行する |
+| 採用 | Docker Compose | Docker 運用選択時の 1 VPS 最小構成起動方式。compose 設定は system 側として扱い、data 側は host bind mount で接続する |
+| 採用 | shell script + SSH | 標準デプロイ補助方式。承認済み範囲で、binary または image 転送、起動定義更新、backup、再起動、検証、manifest 記録を自動化する |
 | 補助採用 | `gh` | Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って利用する |
 | 補助採用 | systemd timer | バックアップ、定期検証、保守系の定期実行候補として利用する。アプリケーション本体の標準起動方式ではない |
-| 中期候補 | Deno製 内製デプロイツール | shell script + Docker 運用で固まった要件を内製化する候補。採用時は別途ユーザー承認を得る |
+| 中期候補 | Deno製 内製デプロイツール | shell script 運用で固まった binary / Docker 共通要件を内製化する候補。採用時は別途ユーザー承認を得る |
 | 保留 | GitHub Actions | 標準採用しない。外部CIとしての採用可否は保留し、必要時に別途提案と承認を要する |
 | 保留 | 外部デプロイフレームワーク | 標準採用しない。必要性、依存関係、運用リスクを整理し、別途承認を得るまで採用しない |
-| 非標準 | host OS + systemd 直接実行 | 本番標準運用方式から外す。必要時は例外運用として別途承認を得る |
+| 採用 | systemd または同等の起動管理 | binary 直実行を選択する場合の起動管理候補。作成または変更は別途承認を得る |
 | 不採用 | Docker named volume 標準運用 | data 正本を Docker named volume に丸投げする運用は禁止 |
 | 不採用 | Node.js系 | Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とする方式は採用禁止 |
 
@@ -44,25 +48,33 @@ Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式�
 
 標準デプロイは、最低限以下を対象とする。
 
-- Deno single binary を含む Docker image の配置または読み込み
-- Docker Compose 設定の配置または確認
+- Deno single binary 正本成果物の配置
+- Docker 運用を選択する場合の Docker image 配置または読み込み
+- Docker 運用を選択する場合の Docker Compose 設定の配置または確認
+- binary 直実行を選択する場合の起動管理定義の配置または確認
 - 設定ファイルの配置または確認
 - SQLite database の保全
 - Git bare repository 保存領域の保全
 - log 保存領域の確認
-- host bind mount による data 領域の接続
-- container 再作成による稼働版切り替え
+- Docker 運用を選択する場合の host bind mount による data 領域の接続
+- binary 直実行または Docker による稼働版切り替え
 - deploy manifest の記録
 
 標準配置は以下を基準とする。
 
 ```text
 /opt/adlaire-git-repository/
-├── compose.yml
+├── system/
+│   ├── bin/
+│   │   └── adlaire-git-repo
+│   ├── docker/
+│   │   ├── compose.yml
+│   │   └── images/
+│   │       └── adlaire-git-repo-v1.8.tar
+│   └── service/
+│       └── adlaire-git-repository.service
 ├── env/
 │   └── production.env
-├── images/
-│   └── adlaire-git-repo-v1.8.tar
 └── shared/
     ├── data/
     ├── repositories/
@@ -73,7 +85,7 @@ Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式�
     └── manifests/
 ```
 
-container 内配置は以下を基準とする。
+Docker 運用を選択する場合の container 内配置は以下を基準とする。
 
 ```text
 /app/adlaire-git-repo
@@ -92,13 +104,13 @@ container 内配置は以下を基準とする。
 | ファイル | 責務 |
 |---|---|
 | `scripts/deploy/deploy.env.example` | 環境固有値の雛形。実値を入れた `deploy.env` はコミットしてはならない |
-| `scripts/deploy/deploy.sh` | Docker image 転送または取得、バックアップ、compose 設定確認、container 再作成、検証の全体実行 |
+| `scripts/deploy/deploy.sh` | binary または Docker image 転送、バックアップ、起動定義確認、再起動、検証の全体実行 |
 | `scripts/deploy/backup.sh` | SQLite database、Git bare repository 保存領域、設定、secrets、logs、manifests のバックアップ |
-| `scripts/deploy/verify-server.sh` | SSH 接続先、本番サーバ必須コマンド、Docker 実行基盤、標準ディレクトリの事前確認 |
-| `scripts/deploy/verify-release.sh` | container 状態、`/health`、SQLite quick check、Git repository 保存領域の配置後確認 |
-| `scripts/deploy/rollback.sh` | 直前 Docker image / tag へ戻し、container 再作成と配置後確認を行う |
+| `scripts/deploy/verify-server.sh` | SSH 接続先、本番サーバ必須コマンド、binary または Docker 実行基盤、標準ディレクトリの事前確認 |
+| `scripts/deploy/verify-release.sh` | process または container 状態、`/health`、SQLite quick check、Git repository 保存領域の配置後確認 |
+| `scripts/deploy/rollback.sh` | 直前 binary または Docker image / tag へ戻し、再起動と配置後確認を行う |
 
-標準デプロイスクリプトは、初回本番デプロイ、デプロイ先サーバ決定、SSH 接続方式、Docker Engine / Docker Compose 導入、バックアップ保存先決定、ロールバック実行、データ復元を自動承認するものではない。
+標準デプロイスクリプトは、初回本番デプロイ、デプロイ先サーバ決定、SSH 接続方式、binary 直実行または Docker 運用の選択、Docker Engine / Docker Compose 導入、起動管理定義作成、バックアップ保存先決定、ロールバック実行、データ復元を自動承認するものではない。
 
 `deploy.sh` は通常デプロイの自動化雛形であり、本番データ復元を行ってはならない。SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元を伴うロールバックは、必ず別承認を得る。
 
@@ -107,8 +119,10 @@ container 内配置は以下を基準とする。
 ユーザー承認後に限り、以下を自動実行してよい。
 
 - 本番サーバ環境の前提確認
-- Docker image の取得または転送
-- Docker Compose 設定の確認
+- Deno single binary 正本成果物の取得または転送
+- Docker 運用を選択する場合の Docker image の取得または転送
+- Docker 運用を選択する場合の Docker Compose 設定の確認
+- binary 直実行を選択する場合の起動管理定義の確認
 - 配置前検証
 - SQLite database のバックアップ
 - Git bare repository 保存領域のバックアップ
@@ -116,8 +130,8 @@ container 内配置は以下を基準とする。
 - secrets のバックアップ
 - log 保存領域の確認
 - manifests のバックアップ
-- Docker image 読み込み
-- container 再作成
+- Docker 運用を選択する場合の Docker image 読み込み
+- process または container の再起動
 - `/health` 検証
 - 主要APIまたは最小workflow検証
 - deploy log、manifest、検証結果の記録
@@ -134,7 +148,8 @@ container 内配置は以下を基準とする。
 - secrets
 - logs
 - manifests
-- 現行 Docker image または image tag 情報
+- 現行 Deno single binary
+- Docker 運用を選択している場合の現行 Docker image または image tag 情報
 - deploy manifest
 
 バックアップは、復元可能性を検証できる形式で保存する。保存先、保持世代、暗号化、外部退避の有無は、デプロイ先決定時にユーザー承認を得る。
@@ -153,7 +168,7 @@ container 内配置は以下を基準とする。
 
 デプロイ後検証は最低限以下を含む。
 
-- container 起動状態確認
+- process または container 起動状態確認
 - `/health` 確認
 - トップページ確認
 - Repository 一覧または主要API確認
@@ -181,9 +196,9 @@ VPS 接続先、接続方式、配置パス、検証対象バージョン、検�
 
 デプロイに失敗した場合、またはデプロイ後検証に失敗した場合は、ロールバックを実行できる状態にしておく。
 
-標準ロールバックは、直前の Docker image または image tag、直前 compose 設定、直前バックアップ、host filesystem data 領域を用いる。
+標準ロールバックは、直前の Deno single binary、Docker 運用を選択している場合の直前 Docker image または image tag、直前起動定義、直前バックアップ、host filesystem data 領域を用いる。
 
-system rollback は旧 Docker image / 旧 tag へ戻す操作とする。data rollback は別承認を必須とする。本番データへ影響するロールバック、SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元は、必ずユーザー承認を得てから実行する。
+system rollback は旧 Deno single binary または旧 Docker image / tag へ戻す操作とする。data rollback は別承認を必須とする。本番データへ影響するロールバック、SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元は、必ずユーザー承認を得てから実行する。
 
 ## 9. 別承認が必要な範囲
 
@@ -192,7 +207,9 @@ system rollback は旧 Docker image / 旧 tag へ戻す操作とする。data ro
 - 初回本番デプロイ
 - デプロイ先サーバ決定
 - SSH 接続方式、接続ユーザー、配置パス決定
+- binary 直実行または Docker 運用の選択
 - Docker Engine / Docker Compose 導入または更新
+- systemd または同等の起動管理定義の作成または変更
 - バックアップ保存先、保持世代、暗号化方針決定
 - 本番データへ影響する操作
 - SQLite database 復元

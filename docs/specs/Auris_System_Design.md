@@ -98,7 +98,7 @@ npm registry 互換レジストリは、Node.js / npm ecosystem リスクと衝�
 
 採用バージョンは、各技術の最新の安定版を基本方針とする。Deno、SQLite、libSQL、Git、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリは、採用または更新の時点で公式情報を確認し、最新の安定版を採用候補とする。TypeScript は 6系の最新安定版を採用方針とする。
 
-Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式とする。Deno single binary 形式は維持し、Docker image 内で実行する。SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として system 側から分離する。
+Deno single binary 形式を正本成果物とする。Docker は正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。Docker 使用時も非 Docker の binary 直実行時も、SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として system 側から分離する。
 
 承認済み固定採用バージョンは以下とする。
 
@@ -154,9 +154,9 @@ Adlaire Git Repository 本体の標準運用方針は、self-host、VPS、専用
 
 Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、標準実行基盤は、これらを直接管理しやすい self-host / VPS / 専用サーバーを基準にする。
 
-本番サーバ環境へのデプロイは、Docker、Deno single binary inside Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
+本番サーバ環境へのデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-本番標準運用方式は Docker のみとする。最小本番構成は、1 VPS 上に Docker による system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は Docker image 転送、compose 更新、backup、container 再作成、検証の補助方式とし、`gh` と systemd timer は補助採用とする。Deno製 内製デプロイツールは中期候補、GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
+標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Deno single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。Deno製 内製デプロイツールは中期候補、GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。採用を検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
 
