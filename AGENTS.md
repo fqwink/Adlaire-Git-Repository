@@ -148,8 +148,7 @@
 |---:|---|---|
 | 1 | `docs/specs/Auris_System_Design.md` | システム全体のマスター仕様書。機能範囲、アーキテクチャ、非機能要件、セキュリティ方針の基準 |
 | 2 | `docs/specs/Adlaire_Git_Repository_Specification.md` | Adlaire Git Repository 本体のマスター仕様書 |
-| 3 | `docs/specs/Adlaire_Deploy_Specification.md` | Adlaire Git Repository 公式付随システムである Adlaire Deploy のマスター仕様書 |
-| 4 | `README.md` | 利用者向け手順、開発・デプロイ補足 |
+| 3 | `README.md` | 利用者向け手順、開発・デプロイ補足 |
 
 3類ドキュメント間に矛盾がある場合は、優先順位の高いマスター仕様書を正とする。
 
