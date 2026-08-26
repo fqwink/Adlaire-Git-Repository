@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.1.8
-**ステータス**: Phase 7 初回安定版リリース
+**文書バージョン**: v.1.16
+**ステータス**: Phase 8 長期運用準備 / マスター仕様完成版
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -31,6 +31,56 @@
 - 開発者（ソースコード push / pull）
 - プロジェクトオーナー（リポジトリ管理）
 - IT 管理者（ユーザー・アクセス管理）
+
+---
+
+## 本書の読み方
+
+本書は、Adlaire Git Repository 本体の個別3類マスター仕様書である。
+
+現行仕様判断では、以下を優先して読む。
+
+1. 本書の「現行正本仕様」
+2. `docs/specs/Auris_System_Design.md`
+3. 本書の各機能仕様
+4. `docs/plans/DEVELOPMENT_PLAN.md`
+5. フェーズ別の実装履歴と検証記録
+
+Phase 1 から Phase 7 までの記述は、実装済みまたはリリース済みの履歴を含む。履歴は削除せず保持するが、現行方針と異なる古い表記がある場合は、本書の現行正本仕様、`docs/specs/Auris_System_Design.md`、2類ポリシー、マスター開発計画を正とする。
+
+本書の完成は、ソースコード実装承認を意味しない。新規実装、既存実装変更、DB driver 実装、schema 変更、テスト変更、デプロイ実行は、別途ユーザー承認を得る。
+
+## 現行正本仕様
+
+Adlaire Git Repository 本体の現行正本仕様は以下とする。
+
+- Adlaire Group 内部向けのセルフホスト型 Git ホスティング基盤とする。
+- 基本的な機能互換は GitHub 互換基準とする。
+- UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換対象外とする。
+- 標準ランタイムは Deno、標準言語は TypeScript とする。
+- 標準データベースは libSQL とする。
+- SQLite は互換・移行元・最小ローカル検証用データベースとして保持する。
+- DBアクセスは Database Gateway、Repository 層、driver 層を経由し、SQLite または libSQL を上位層から直接触らない。
+- `DB_DRIVER=libsql` を標準 driver とする。
+- `DB_DRIVER=sqlite` は互換・移行元・最小ローカル検証用 driver とする。
+- Deno single binary を正本成果物とする。
+- Docker は正本成果物である Deno single binary を image に同梱して実行する運用選択肢の一つとする。
+- Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成とする。
+- data 側は host filesystem を正本とし、libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
+- Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。
+- Node.js runtime、npm ecosystem、外部フレームワーク、無承認外部ライブラリは採用しない。
+
+## マスター仕様完成条件
+
+本書は、以下を満たす状態をマスター仕様完成版とする。
+
+- 現行正本仕様、フェーズ別履歴、保留候補、対象外範囲を分離している。
+- GitHub 機能互換方針と GitHub UI 非互換方針を同時に定義している。
+- Repository、User、Auth、Git Smart HTTP、Issue、Pull Request、Code Review、Wiki、Webhook、Release、Organizations、Teams、Projects、Adlaire 内製 Deno Module Registry、Audit、Operations、REST API、Web UI、Deployment、Database の主要境界を追跡できる。
+- libSQL 標準DB方針と SQLite 互換・移行元・検証用方針が矛盾していない。
+- Deno single binary 正本成果物方針、Docker 運用選択肢、host filesystem data 正本方針が矛盾していない。
+- 保留候補は、保留解除とユーザー承認なしに実装対象へ戻らない。
+- 仕様書、マスター開発計画、マスター実装機能候補リスト、README の参照関係が整合している。
 
 ---
 
@@ -236,7 +286,7 @@ GET    /api/operations/status
 GET    /api/operations/libsql-evaluation
 ```
 
-Phase 3 の libSQL 再評価では、SQLite を現行 driver として維持し、Database Gateway 境界を保ったまま将来の libSQL 移行可能性を保持する。Phase 3 では libSQL driver とクラウドDBホスティングを正式採用しない。
+Phase 3 時点の libSQL 再評価では、SQLite を当時の現行 driver として維持し、Database Gateway 境界を保ったまま将来の libSQL 移行可能性を保持した。現行正本仕様では libSQL を標準DB、SQLite を互換・移行元・最小ローカル検証用DBとして扱う。
 
 ## Phase 2 開発支援機能最小仕様
 
@@ -599,7 +649,7 @@ schema、migration、seed は専用ディレクトリに集約し、Database Gat
 
 ---
 
-## deno.json
+## deno.json v.1.8 安定版 baseline
 
 正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。
 
@@ -1097,7 +1147,7 @@ VPS: 2GB × 1（容量に余裕）
 
 ## Web UI デザイン仕様
 
-Phase 5 では、補助的リリース判定に合わせて、Web UI のデザイン関連改良・改修方針を整理する。
+Phase 5 では、Web UI のデザイン関連改良・改修方針を整理する。
 
 Phase 5 のデザイン関連改良・改修は、情報設計、画面レイアウト、視覚表現、操作導線、アクセシビリティ、可読性の改善を対象とする。UI は GitHub 互換の対象外であり、本プロジェクト独自 UI として改良・改修する。
 
