@@ -26,28 +26,22 @@
 
 ## 3. 共通 Docker 方針
 
-Docker は、本番、デプロイ、運用基盤、公開経路、永続データ管理では採用禁止とする。
+Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式とする。
 
-Docker は、検証、テスト、ビルド、single binary 生成など、プロジェクトで承認された実行系検証・ビルド用途に限り補助採用できる。
+single binary 形式は維持し、Docker image 内で実行する。
 
 Docker を利用する場合も、プロジェクトの禁止ランタイム、禁止 package ecosystem、依存関係方針に違反してはならない。
 
-本番禁止対象には、最低限以下を含める。
+保護対象 data 側は host filesystem を正本として system 側から分離する。Docker image と container は差し替え可能な system 側として扱う。
 
-- Docker Desktop
-- Docker Engine
-- Docker Compose
-- Dockerfile
-- docker-compose.yml / docker-compose.yaml / compose.yaml
-- Docker image
-- Docker container
-- Docker volume
-- Docker registry
-- `docker build`
-- `docker run`
-- `docker compose`
-- `docker pull`
-- `docker push`
+Docker named volume を標準の data 正本として扱ってはならない。data 側は原則として host bind mount で container へ接続する。
+
+禁止対象には、最低限以下を含める。
+
+- Docker Desktop の本番サーバ標準採用
+- Docker named volume への data 正本の丸投げ
+- Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を含む Docker image
+- 外部 Docker デプロイフレームワーク
 
 ## 4. 承認
 

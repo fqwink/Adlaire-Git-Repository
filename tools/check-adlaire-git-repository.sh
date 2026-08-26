@@ -82,15 +82,20 @@ check_required_paths() {
   done
 }
 
-check_forbidden_production_docker_artifacts() {
-  if find "$ROOT_DIR" \
+check_docker_standard_policy() {
+  docker_artifacts=$(mktemp)
+  find "$ROOT_DIR" \
     -path "$ROOT_DIR/.git" -prune -o \
     -path "$ROOT_DIR/.check-work" -prune -o \
-    \( -name 'Dockerfile' -o -name '.dockerignore' -o -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yaml' \) \
-    -print | grep . >/dev/null 2>&1; then
-    echo "Adlaire Git Repository must not include production Docker artifacts." >&2
+    \( -name 'Dockerfile' -o -name 'docker-compose.yml' -o -name 'docker-compose.yaml' -o -name 'compose.yaml' \) \
+    -print > "$docker_artifacts"
+
+  if [ -s "$docker_artifacts" ] && xargs grep -E 'node_modules|package.json|npm install|npm:' < "$docker_artifacts" >/dev/null 2>&1; then
+    rm -f "$docker_artifacts"
+    echo "Docker production artifacts must not depend on Node.js or npm ecosystem." >&2
     exit 1
   fi
+  rm -f "$docker_artifacts"
 }
 
 check_version_policy() {
@@ -186,7 +191,7 @@ trap cleanup EXIT INT HUP TERM
 
 run_step "required path check" check_required_paths
 run_step "version policy check" check_version_policy
-run_step "forbidden production Docker artifact check" check_forbidden_production_docker_artifacts
+run_step "Docker standard policy check" check_docker_standard_policy
 run_step "forbidden Node.js project file check" check_forbidden_node_files
 run_step "forbidden unapproved registry dependency check" check_forbidden_unapproved_registries
 run_step "deno task definition check" check_deno_tasks

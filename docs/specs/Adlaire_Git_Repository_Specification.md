@@ -479,8 +479,9 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 - 外部ライブラリは内製ラッパー、内製driver、または Database Gateway の内部に閉じ込める
 - Deno、SQLite、libSQL、Git、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリは、各技術の最新の安定版を採用方針とする
 - TypeScript は 6系の最新安定版を採用方針とする
-- Docker は、本番、デプロイ、運用基盤、公開経路、永続データ管理では採用禁止とする
-- Docker は、検証、テスト、ビルド、Deno single binary 生成に限り補助採用する
+- Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式とする
+- Deno single binary 形式は維持し、Docker image 内で実行する
+- SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として system 側から分離する
 - 承認済み固定採用バージョンは、下表に従う
 
 | 技術 | 固定採用バージョン | 扱い |
@@ -512,11 +513,11 @@ Turso Cloud 等のクラウドDBホスティングを採用するかどうかは
 
 ### 標準運用基盤方針
 
-Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用サーバーを前提とする。
+Adlaire Git Repository 本体の標準運用基盤は、Docker を利用できる self-host、VPS、専用サーバーを前提とする。
 
-Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、本体の標準運用基盤は、これらを直接管理しやすい self-host / VPS / 専用サーバーを基準にする。
+最小本番構成は、1 VPS 上に Docker による system 側と host filesystem による data 側を同居させる構成とする。Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、data 側は container lifecycle に依存させず、host filesystem 上で直接保全できる構成を基準にする。
 
-本番サーバ環境へのデプロイは、Deno single binary、release directory、`current` symlink、systemd または同等のサービス管理を基本構成とし、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
+本番サーバ環境へのデプロイは、Docker、Deno single binary inside Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
 
@@ -890,11 +891,11 @@ SQLite database 復元、Git bare repository 復元、設定復元は本番デ�
 
 リカバリ時の標準確認項目は以下とする。
 
-- `adlaire-git-repository.service` の停止または保護状態確認
+- Docker container の停止または保護状態確認
 - 復元対象 backup manifest の確認
 - SQLite database 復元可否の確認
 - Git bare repository 保存領域の復元可否確認
-- service restart
+- Docker container 再作成
 - `/health` 確認
 - SQLite database と Git bare repository の参照確認
 
@@ -908,28 +909,28 @@ NAS は自動複製機能 or スナップショット機能を活用
 
 ### アップグレード手順
 
-標準アップグレードは、`scripts/deploy/deploy.sh` を用いた Deno single binary の release directory 配置、`current` symlink 切替、`adlaire-git-repository.service` restart、配置後検証を基本とする。
+標準アップグレードは、`scripts/deploy/deploy.sh` を用いた Deno single binary 入り Docker image の配置、compose 設定確認、container 再作成、配置後検証を基本とする。
 
 ```bash
-# 1. 新バイナリの compile
+# 1. 新バイナリの compile と Docker image 生成
 $ deno task compile
 
 # 2. デプロイ環境設定を確認
 $ cp scripts/deploy/deploy.env.example scripts/deploy/deploy.env
-# deploy.env へ接続先、配置先、service 名などを設定する。
+# deploy.env へ接続先、配置先、Docker image/tag、compose 設定などを設定する。
 # deploy.env はコミットしてはならない。
 
 # 3. 事前確認
 $ scripts/deploy/verify-server.sh
 
-# 4. バックアップ、成果物配置、service restart、配置後検証
+# 4. バックアップ、Docker image 配置、container 再作成、配置後検証
 $ scripts/deploy/deploy.sh
 
 # 5. 必要に応じて配置後検証を再実行
 $ scripts/deploy/verify-release.sh
 ```
 
-初回本番デプロイ、デプロイ先サーバ、SSH接続方式、接続ユーザー、配置パス、systemd unit、バックアップ保存先、保持世代、暗号化方針は、必ず別途ユーザー承認を得る。
+初回本番デプロイ、デプロイ先サーバ、SSH接続方式、接続ユーザー、配置パス、Docker Engine / Docker Compose 導入または更新、バックアップ保存先、保持世代、暗号化方針は、必ず別途ユーザー承認を得る。
 
 複数インスタンス、ロードバランサー切替、ダウンタイムなしアップグレードは将来候補とし、採用時に3類マスター仕様書、マスター開発計画、デプロイポリシーへ反映する。
 
@@ -937,15 +938,15 @@ $ scripts/deploy/verify-release.sh
 
 ### ロールバック手順
 
-通常ロールバックは、`scripts/deploy/rollback.sh` により `current` symlink を指定 release へ戻し、`adlaire-git-repository.service` restart と配置後検証を行う。
+通常ロールバックは、`scripts/deploy/rollback.sh` により直前 Docker image / tag へ戻し、container 再作成と配置後検証を行う。
 
 ```bash
-TARGET_RELEASE=v.1.8-YYYYMMDD-HHMMSS scripts/deploy/rollback.sh
+TARGET_IMAGE=adlaire-git-repo:v.1.8-YYYYMMDD-HHMMSS scripts/deploy/rollback.sh
 ```
 
 ロールバック実行は、必ず別途ユーザー承認を得る。
 
-SQLite database 復元、Git bare repository 復元、設定復元を伴うロールバックは、通常ロールバックとは分離し、本番データへ影響する操作として別承認を必須とする。
+SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元を伴うロールバックは、通常ロールバックとは分離し、本番データへ影響する操作として別承認を必須とする。
 
 ---
 
@@ -1503,13 +1504,13 @@ Phase 別の実装対象、対象外、完了条件、検証範囲は `docs/plan
 
 CI/CD とデプロイ自動化は、`docs/policies/DEPLOYMENT_POLICY.md` を正本として扱う。
 
-短期の標準デプロイ実行方式は、shell script + SSH + systemd とする。成果物配置、環境確認、バックアップ、service restart、health check、主要workflow検証、deploy manifest 記録を、承認済み範囲で自動化する。
+本番標準運用方式は Docker のみとする。Deno single binary を含む Docker image 配置、環境確認、バックアップ、container 再作成、health check、主要workflow検証、deploy manifest 記録を、承認済み範囲で自動化する。
 
-`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
+shell script + SSH は Docker image 転送、compose 更新、backup、container 再作成、検証の補助方式とする。`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
 
 Deno製 内製デプロイツールは中期候補とする。shell script 運用で固まった要件を内製化する場合は、別途ユーザー承認を得る。
 
-GitHub Actions と外部デプロイフレームワークは保留とする。Docker は検証、テスト、ビルド、Deno single binary 生成に限り補助採用し、本番、デプロイ、運用基盤、公開経路、永続データ管理では不採用とする。Node.js系は不採用とする。
+GitHub Actions と外部デプロイフレームワークは保留とする。Docker は本番サーバ運用、デプロイ、運用基盤の標準方式とする。Node.js系は不採用とする。
 
 ---
 
@@ -1520,25 +1521,28 @@ GitHub Actions と外部デプロイフレームワークは保留とする。Do
 標準自動化は以下を含む。
 
 - 本番サーバ環境の前提確認
-- Deno single binary の取得または転送
+- Docker image の取得または転送
+- Docker Compose 設定の確認
 - 配置前検証
 - SQLite database のバックアップ
 - Git bare repository 保存領域のバックアップ
 - 設定ファイルのバックアップ
-- release directory 作成
-- `current` symlink 切り替え
-- service restart
+- secrets のバックアップ
+- log 保存領域の確認
+- manifests のバックアップ
+- Docker image 読み込み
+- container 再作成
 - `/health` 検証
 - 主要APIまたは最小workflow検証
 - deploy manifest と検証結果の記録
 
-初回本番デプロイ、デプロイ先サーバ、SSH接続方式、接続ユーザー、配置パス、systemd unit、バックアップ保存先、保持世代、暗号化方針、ロールバック実行、本番データへ影響する操作は、必ず別途ユーザー承認を得る。
+初回本番デプロイ、デプロイ先サーバ、SSH接続方式、接続ユーザー、配置パス、Docker Engine / Docker Compose 導入または更新、バックアップ保存先、保持世代、暗号化方針、ロールバック実行、本番データへ影響する操作は、必ず別途ユーザー承認を得る。
 
-デプロイ実行方式は、shell script + SSH + systemd を標準採用とする。`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
+デプロイ実行方式は、Docker を標準採用とする。Docker Compose は 1 VPS 最小構成の標準起動方式とする。shell script + SSH は Docker image 転送、compose 更新、backup、container 再作成、検証の補助方式とする。`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
 
 Deno製 内製デプロイツールは中期候補とする。GitHub Actions と外部デプロイフレームワークは保留とし、必要性、依存関係、運用リスクを整理し、ユーザー承認を得るまで標準採用しない。
 
-Docker は、本番、デプロイ、運用基盤、公開経路、永続データ管理では不採用とする。Node.js系は不採用とする。Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。
+Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式とする。Node.js系は不採用とする。Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。
 
 ローカルに Deno が存在しない場合、実行系検証はローカルで完了扱いにしない。この場合は、Deno 固定採用バージョンを満たす VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で、Deno task、内製検証スクリプト、`/health`、主要workflow確認を実施する。
 
@@ -1566,22 +1570,22 @@ Docker は、本番、デプロイ、運用基盤、公開経路、永続デー�
 
 ### 基本方針
 
-Docker は、本番、デプロイ、運用基盤、公開経路、永続データ管理では採用禁止とする。検証、テスト、ビルド、Deno single binary 生成に限り、承認済み固定 Deno Docker image を利用できる。標準デプロイは、Deno single binary を VPS または専用サーバーへ配置し、ホストOS上で直接実行する方式に限定する。
+Docker は、本番サーバ運用、デプロイ、運用基盤の標準方式とする。Deno single binary 形式は維持し、Docker image 内で実行する。標準デプロイは、Deno single binary を含む Docker image を VPS または専用サーバーへ配置し、host filesystem 上の data 領域を bind mount して実行する方式に限定する。
 
 標準構成は以下を基本とする。
 
 - `deno compile` による single binary 生成
 - 安定版リリースでは ARM64 Linux と x86_64 Linux の2種類の single binary 生成
+- Deno single binary を含む Docker image 生成
 - 承認済み固定 Deno Docker image による検証、テスト、ビルド、Deno single binary 生成
-- release directory への成果物配置
-- `current` symlink による稼働版切り替え
-- systemd または同等のサービス管理
-- SQLite database、Git repository、log のホストOSファイルシステム上での永続保存
+- Docker Compose による container 起動
+- host bind mount による data 領域接続
+- SQLite database、Git repository、config、secrets、log、backups、manifests の host filesystem 上での永続保存
 - 配置前バックアップ
 - `/health` による health check
-- 直前 release directory への rollback
+- 直前 Docker image / tag への system rollback
 
-本番、デプロイ、運用基盤、公開経路、永続データ管理では、コンテナ前提の成果物、設定、手順、検証を追加してはならない。
+Docker named volume を標準の data 正本として扱ってはならない。data 側は container lifecycle に依存させず、host filesystem を正本とする。
 
 ---
 
