@@ -71,11 +71,13 @@ GitHub Releases には、リリースごとの成果物、release notes、必要
 
 Linux 向け Deno single binary を安定版リリース成果物とする場合は、ARM64 と x86_64 の2種類を標準配置対象とする。
 
-リポジトリ内には、リリース配置記録、release notes の元資料、manifest、checksum、運用手順など、履歴として追跡すべき軽量なリリース関連ファイルを配置できる。
+リポジトリ内に、変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持してはならない。
 
 大きなバイナリ成果物をリポジトリへ継続的に直接配置してはならない。大きな成果物は GitHub Releases を優先する。
 
-リポジトリ内の配置先は、必要になった時点で提案し、ユーザー承認を得て決定する。候補は `docs/releases/` または `releases/` とする。
+リリース履歴の正本は GitHub Releases とする。リリースごとの release notes、成果物、checksum、manifest は GitHub Releases 側に配置し、リポジトリ内の `docs/releases/` または `releases/` へ履歴ファイルとして配置しない。
+
+デプロイ、バックアップ、検証で生成される operational な manifest、checksum、log は、変更履歴ファイルではなく運用記録として扱う。これらの保存先、保護対象、バックアップ方針は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
 ## 6. リリース自動化
 

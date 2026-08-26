@@ -60,7 +60,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 - Phase 6、Phase 16、Phase 26 のような 6系フェーズは、大規模なバグ修正とドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズとする。必要に応じて移行準備と検証強化も行う。6系フェーズ自体は安定版リリースフェーズとして扱わない。
 - Phase 9 は安定版判定フェーズとする。Phase 19、Phase 29 のような後続9系フェーズは補助的なリリース判定フェーズとし、ケースバイケースで安定版リリースフェーズになる場合と、ならない場合がある。
 - 後続9系フェーズを安定版リリースフェーズとして扱う場合は、マスター開発計画と2類ポリシーに明記し、ユーザー承認を得る。
-- リリース提案、リリース配置、リリース成果物、リリース自動化は `docs/policies/RELEASE_POLICY.md` に従う。リリース配置は GitHub Releases を主配置とし、リポジトリ内には軽量な配置記録、release notes 元資料、manifest、checksum、運用手順を必要に応じて配置する。
+- リリース提案、リリース配置、リリース成果物、リリース自動化は `docs/policies/RELEASE_POLICY.md` に従う。リリース履歴の正本は GitHub Releases とし、リポジトリ内に変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` に従う。
 - Deno single binary 形式を正本成果物とする。Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、1 VPS 上の差し替え可能な system 側と host filesystem data 側を分離する同じ構成にする。shell script + SSH は binary または image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer を補助採用とする。Adlaire Deploy は仕様未定の将来候補とし、仕様確定まで採用・実装計画化しない。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
 - 標準データベースは libSQL とする。SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。
@@ -797,7 +797,7 @@ Phase 7 へ進む前に確認すべき残課題は以下とする。
 - 安定版リリース判定を行うかどうかのユーザー承認
 - リリースノートの整理
 - GitHub Releases を主配置とするリリース配置案の確認
-- リポジトリ内に配置する release notes 元資料、manifest、checksum、運用手順の必要性確認
+- リポジトリ内に変更履歴ファイルを保持しない方針との整合確認
 - 既知制約、対象外機能、保留候補の明示
 - backup / restore 手順の最終確認
 - 主要 workflow の最終検証
@@ -855,7 +855,7 @@ Phase 7 はユーザー承認に基づき、初回安定版リリース `v.1.8` 
 - Phase 6 までの成果に対する安定版リリース可否判定
 - リリースノートの整理
 - GitHub Releases を主配置とするリリース配置案の確認
-- リポジトリ内に配置する release notes 元資料、manifest、checksum、運用手順の必要性確認
+- リポジトリ内に変更履歴ファイルを保持しない方針との整合確認
 - 既知制約、対象外機能、保留候補の明示
 - backup / restore 手順の最終確認
 - 主要 workflow の最終検証
