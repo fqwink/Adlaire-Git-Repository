@@ -77,7 +77,7 @@ GitHub 互換は本書および個別3類マスター仕様書に定義された
 | ランタイム | Deno |
 | 言語 | TypeScript |
 | HTTP | `Deno.serve` |
-| データベース | SQLite |
+| データベース | libSQL |
 | Git 操作 | `Deno.Command` |
 | フロントエンド | HTML / CSS / Vanilla JavaScript |
 | 配布 | Deno single binary |
@@ -98,7 +98,7 @@ npm registry 互換レジストリは、Node.js / npm ecosystem リスクと衝�
 
 採用バージョンは、各技術の最新の安定版を基本方針とする。Deno、SQLite、libSQL、Git、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリは、採用または更新の時点で公式情報を確認し、最新の安定版を採用候補とする。TypeScript は 6系の最新安定版を採用方針とする。
 
-Deno single binary 形式を正本成果物とする。Docker は正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。Docker 使用時も非 Docker の binary 直実行時も、SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として system 側から分離する。
+Deno single binary 形式を正本成果物とする。Docker は正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。Docker 使用時も非 Docker の binary 直実行時も、libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として system 側から分離する。
 
 承認済み固定採用バージョンは以下とする。
 
@@ -106,8 +106,8 @@ Deno single binary 形式を正本成果物とする。Docker は正本成果物
 |---|---:|---|
 | Deno | `v2.9.5` | 標準ランタイム |
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
-| SQLite | `v3.53.4` | Phase 1 標準データベース |
-| libSQL | `libsql-server v0.24.32` | 将来移行候補。Phase 1 の実装対象外 |
+| SQLite | `v3.53.4` | 互換・移行元・検証用データベース |
+| libSQL | `libsql-server v0.24.32` | 標準データベース |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
@@ -117,23 +117,23 @@ Deno single binary 形式を正本成果物とする。Docker は正本成果物
 
 SQLite と libSQL は、本プロジェクトで許容する必要最小限の外部依存とする。
 
-Phase 1 は SQLite を標準データベースとして進める。
+標準データベースは libSQL とする。
 
-SQLite は、Phase 1 の標準データベースとして採用する必要最小限の外部依存である。
+SQLite は廃止せず、互換・移行元・最小ローカル検証用データベースとして保持する。
 
-libSQL は、SQLite からの将来移行候補として扱う。libSQL の採用も必要最小限の外部依存に該当するが、SQLite 互換、移行容易性、将来の同期・分散構成への拡張余地という採用メリットが高いため、例外採用候補として正式に保持する。
+libSQL は、SQLite 互換、移行容易性、将来の同期・分散構成への拡張余地という採用メリットが高いため、標準データベースとして扱う。
 
 libSQL の実採用タイミング、driver 実装、運用形態は、Phase 計画とユーザー承認に基づいて決定する。libSQL を採用する場合も、外部ライブラリAPIを直接利用せず、内製 `libsql` driver と Database Gateway の内部に閉じ込める。
 
 Turso Cloud 等の libSQL 系クラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングはデータベースエンジンの追加採用ではなく、libSQL の接続先または運用形態の候補として扱う。検討する場合は、標準運用方針、クローズドライセンス、データ管理責任、認証情報管理、運用コスト、障害時の復旧方針を3類マスター仕様書に追記してから判断する。
 
-SQLite から libSQL へ移行しやすくするため、データベースアクセスは専用層に集約し、アプリケーション各所から直接 SQLite 固有処理へ依存しない設計とする。
+libSQL を標準にしても SQLite 互換性を維持するため、データベースアクセスは専用層に集約し、アプリケーション各所から直接 driver 固有処理へ依存しない設計とする。
 
 ### 4.2 データベース抽象化方針
 
-SQLite を直接触る設計は、将来の libSQL 移行計画の弊害になるため禁止する。
+SQLite または libSQL を直接触る設計は禁止する。
 
-アプリケーションコードは、必ずデータベースアクセス専用層を経由して永続化処理を行う。UI、HTTP ハンドラー、認証処理、Git 操作処理、ドメインサービスから SQLite 接続、SQL 実行、トランザクション制御、migration 実行を直接呼び出してはならない。
+アプリケーションコードは、必ずデータベースアクセス専用層を経由して永続化処理を行う。UI、HTTP ハンドラー、認証処理、Git 操作処理、ドメインサービスから SQLite または libSQL 接続、SQL 実行、トランザクション制御、migration 実行を直接呼び出してはならない。
 
 データベースアクセス専用層は、以下の責務を持つ。
 
@@ -142,9 +142,9 @@ SQLite を直接触る設計は、将来の libSQL 移行計画の弊害にな�
 - トランザクション境界の管理
 - schema と migration の適用
 - SQLite 標準互換 SQL の維持
-- 将来の `sqlite` / `libsql` driver 差し替え境界の提供
+- `libsql` / `sqlite` driver 差し替え境界の提供
 
-Phase 1 では driver 実装は SQLite のみとする。ただし、インターフェース、設定名、ディレクトリ構造は libSQL への移行計画を最初から立てやすい構成として固定する。
+標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は互換・移行元・最小ローカル検証用として扱う。
 
 クラウドDBホスティングを採用する場合も、上位層からは libSQL driver の接続先差し替えとして扱い、`turso` 等のホスティングサービス名をアプリケーション上位層の依存名にしてはならない。
 
@@ -217,7 +217,7 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - Webhook 対象イベント拡張
 - 高度な監査ログ
 - 運用自動化
-- libSQL driver 採用可否の再評価
+- libSQL 標準化後の SQLite 互換性確認
 
 Discussions、Organizations / Teams 本格運用、Projects 本格運用、複数インスタンス本格運用は保留候補とし、保留解除とユーザー承認があるまで Phase 3 の実装対象へ含めない。
 

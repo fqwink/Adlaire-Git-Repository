@@ -18,7 +18,7 @@ Docker は正本成果物ではなく、Deno single binary を Docker image に�
 
 Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。
 
-最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱い、SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として host filesystem を正本にする。
+最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱い、libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として host filesystem を正本にする。
 
 標準デプロイは、Deno single binary 正本成果物を self-host、VPS、専用サーバーへ配置する方式を基準とする。Docker を利用する場合は、正本成果物である Deno single binary を Docker image に同梱し、host filesystem 上の data 領域を bind mount して実行する。
 
@@ -53,7 +53,7 @@ Docker を使用する場合も、Docker を使用せず Deno single binary を 
 - Docker 運用を選択する場合の Docker Compose 設定の配置または確認
 - binary 直実行を選択する場合の起動管理定義の配置または確認
 - 設定ファイルの配置または確認
-- SQLite database の保全
+- libSQL / SQLite database の保全
 - Git bare repository 保存領域の保全
 - log 保存領域の確認
 - Docker 運用を選択する場合の host bind mount による data 領域の接続
@@ -105,14 +105,14 @@ Docker 運用を選択する場合の container 内配置は以下を基準と�
 |---|---|
 | `scripts/deploy/deploy.env.example` | 環境固有値の雛形。実値を入れた `deploy.env` はコミットしてはならない |
 | `scripts/deploy/deploy.sh` | binary または Docker image 転送、バックアップ、起動定義確認、再起動、検証の全体実行 |
-| `scripts/deploy/backup.sh` | SQLite database、Git bare repository 保存領域、設定、secrets、logs、manifests のバックアップ |
+| `scripts/deploy/backup.sh` | libSQL / SQLite database、Git bare repository 保存領域、設定、secrets、logs、manifests のバックアップ |
 | `scripts/deploy/verify-server.sh` | SSH 接続先、本番サーバ必須コマンド、binary または Docker 実行基盤、標準ディレクトリの事前確認 |
-| `scripts/deploy/verify-release.sh` | process または container 状態、`/health`、SQLite quick check、Git repository 保存領域の配置後確認 |
+| `scripts/deploy/verify-release.sh` | process または container 状態、`/health`、DB quick check、Git repository 保存領域の配置後確認 |
 | `scripts/deploy/rollback.sh` | 直前 binary または Docker image / tag へ戻し、再起動と配置後確認を行う |
 
 標準デプロイスクリプトは、初回本番デプロイ、デプロイ先サーバ決定、SSH 接続方式、binary 直実行または Docker 運用の選択、Docker Engine / Docker Compose 導入、起動管理定義作成、バックアップ保存先決定、ロールバック実行、データ復元を自動承認するものではない。
 
-`deploy.sh` は通常デプロイの自動化雛形であり、本番データ復元を行ってはならない。SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元を伴うロールバックは、必ず別承認を得る。
+`deploy.sh` は通常デプロイの自動化雛形であり、本番データ復元を行ってはならない。libSQL / SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元を伴うロールバックは、必ず別承認を得る。
 
 ## 5. 標準自動化範囲
 
@@ -124,7 +124,7 @@ Docker 運用を選択する場合の container 内配置は以下を基準と�
 - Docker 運用を選択する場合の Docker Compose 設定の確認
 - binary 直実行を選択する場合の起動管理定義の確認
 - 配置前検証
-- SQLite database のバックアップ
+- libSQL / SQLite database のバックアップ
 - Git bare repository 保存領域のバックアップ
 - 設定ファイルのバックアップ
 - secrets のバックアップ
@@ -142,7 +142,7 @@ Docker 運用を選択する場合の container 内配置は以下を基準と�
 
 バックアップ対象は最低限以下とする。
 
-- SQLite database
+- libSQL / SQLite database
 - Git bare repository 保存領域
 - 設定ファイル
 - secrets
@@ -173,7 +173,7 @@ Docker 運用を選択する場合の container 内配置は以下を基準と�
 - トップページ確認
 - Repository 一覧または主要API確認
 - Git clone / fetch / push の代表確認
-- SQLite database と Git bare repository の参照確認
+- libSQL / SQLite database と Git bare repository の参照確認
 
 ローカル環境に Deno が存在しない場合、実行系検証はローカルで完了扱いにしてはならない。この場合は、Deno 固定採用バージョンを満たす VPS または承認済み検証サーバ上で、実行系検証とテストを実施する。
 
@@ -198,7 +198,7 @@ VPS 接続先、接続方式、配置パス、検証対象バージョン、検�
 
 標準ロールバックは、直前の Deno single binary、Docker 運用を選択している場合の直前 Docker image または image tag、直前起動定義、直前バックアップ、host filesystem data 領域を用いる。
 
-system rollback は旧 Deno single binary または旧 Docker image / tag へ戻す操作とする。data rollback は別承認を必須とする。本番データへ影響するロールバック、SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元は、必ずユーザー承認を得てから実行する。
+system rollback は旧 Deno single binary または旧 Docker image / tag へ戻す操作とする。data rollback は別承認を必須とする。本番データへ影響するロールバック、libSQL / SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元は、必ずユーザー承認を得てから実行する。
 
 ## 9. 別承認が必要な範囲
 
@@ -212,7 +212,7 @@ system rollback は旧 Deno single binary または旧 Docker image / tag へ戻
 - systemd または同等の起動管理定義の作成または変更
 - バックアップ保存先、保持世代、暗号化方針決定
 - 本番データへ影響する操作
-- SQLite database 復元
+- libSQL / SQLite database 復元
 - Git bare repository 復元
 - ロールバック実行
 - 公開経路、ドメイン、TLS 設定変更

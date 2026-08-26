@@ -469,7 +469,7 @@ Phase 1、Phase 2、Phase 3、Phase 4、Phase 5、Phase 6、Phase 8 は、開発
 
 ユニットテストは、仕様上意味のある入力と出力、エラー、境界条件を高速に検証する。
 
-統合テストは、HTTP、認証、Git 操作、Database Gateway、SQLite 永続化など、複数の責務が接続されたときの振る舞いを検証する。
+統合テストは、HTTP、認証、Git 操作、Database Gateway、libSQL / SQLite 永続化など、複数の責務が接続されたときの振る舞いを検証する。
 
 エンドツーエンドテストは、ユーザーまたは外部システムから見た重要なワークフローだけを少数に絞って検証する。
 

@@ -21,7 +21,7 @@
 - Deno single binary 形式を正本成果物とする。
 - Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。
 - Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成にする。
-- SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として分離する。
+- libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として分離する。
 - フレームワークは、内製したもの以外の採用を禁止する。
 - Deno 標準ライブラリを最優先候補とする。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 - JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする。
@@ -38,8 +38,8 @@
 |---|---:|---|
 | Deno | `v2.9.5` | 標準ランタイム |
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
-| SQLite | `v3.53.4` | Phase 1 標準データベース |
-| libSQL | `libsql-server v0.24.32` | 将来移行候補。Phase 1 の実装対象外 |
+| SQLite | `v3.53.4` | 互換・移行元・検証用データベース |
+| libSQL | `libsql-server v0.24.32` | 標準データベース |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
@@ -103,7 +103,7 @@ Deno single binary 形式、Docker 形式のいずれでも、Node.js runtime、
 
 - 本番サーバ上の Docker Desktop
 - Docker named volume を標準の data 正本として扱うこと
-- SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を container lifecycle に依存させること
+- libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を container lifecycle に依存させること
 - Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を含む Docker image
 - 外部 Docker デプロイフレームワーク
 
@@ -113,17 +113,19 @@ Docker Desktop は本番サーバ標準構成として採用しない。Docker �
 
 本番とデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、事前バックアップ、health check、rollback 手順を基本構成とする。デプロイ、検証、バックアップ、ロールバックの詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-system 側と data 側を分離する。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側とし、SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として扱う。Docker 運用を選択する場合、data 側は原則として host bind mount で container へ接続し、Docker named volume へ丸投げしてはならない。
+system 側と data 側を分離する。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側とし、libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として扱う。Docker 運用を選択する場合、data 側は原則として host bind mount で container へ接続し、Docker named volume へ丸投げしてはならない。
 
 ## 4. データベース方針
 
 採用対象のデータベースエンジンは SQLite と libSQL のみに限定する。
 
-Phase 1 は SQLite を標準データベースとして進める。libSQL は SQLite からの将来移行候補として保持する。
+標準データベースは libSQL とする。
 
-SQLite を直接触る設計は、将来の libSQL 移行計画の弊害になるため禁止する。アプリケーションコードは、必ず Database Gateway と専用 driver 層を経由して永続化処理を行う。
+SQLite は廃止せず、互換・移行元・最小ローカル検証用データベースとして保持する。
 
-クラウドDBホスティングを採用するかどうかは未定とする。採用する場合は、libSQL の接続先または運用形態の候補として扱い、ユーザー承認を得る。
+SQLite または libSQL を直接触る設計は禁止する。アプリケーションコードは、必ず Database Gateway と専用 driver 層を経由して永続化処理を行う。
+
+標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は互換・移行元・最小ローカル検証用として扱う。クラウドDBホスティングを採用するかどうかは未定とする。採用する場合は、libSQL の接続先または運用形態の候補として扱い、ユーザー承認を得る。
 
 ---
 

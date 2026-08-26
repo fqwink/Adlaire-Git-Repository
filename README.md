@@ -61,7 +61,9 @@
 
 Deno single binary を正本成果物とする。Docker は正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。Docker を使用する場合も、Docker を使用せず binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。
 
-最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として `shared/` 配下に分離し、host filesystem を正本とする。Deno single binary、Docker image / container、起動管理定義は差し替え可能な system 側として扱う。
+最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として `shared/` 配下に分離し、host filesystem を正本とする。Deno single binary、Docker image / container、起動管理定義は差し替え可能な system 側として扱う。
+
+標準データベースは libSQL とする。SQLite は廃止せず、互換・移行元・最小ローカル検証用として保持する。クラウドDBホスティングは未定であり、採用する場合も `DB_DRIVER=libsql` の接続先差し替えとして扱う。
 
 ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。Docker で検証、テスト、ビルド、binary 生成をまとめて実行する場合は、`scripts/docker/verify-build.sh` を使う。
 

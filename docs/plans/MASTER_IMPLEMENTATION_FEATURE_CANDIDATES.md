@@ -90,7 +90,7 @@ Phase 3 推奨候補は、Phase 2 までの開発支援機能を組織単位で�
 | 6 | Webhook 対象イベント拡張 | 優先 | Phase 2 の基本 Webhook を、運用上必要なイベント範囲へ広げるため |
 | 7 | 高度な監査ログ | 優先 | 組織、チーム、Registry、権限変更を追跡可能にするため |
 | 8 | 運用自動化 | 優先 | 内部向け Git ホスティング基盤として日常運用の手戻りを減らすため |
-| 9 | libSQL driver 採用可否の再評価 | 優先 | SQLite から libSQL への移行計画を立てやすい構成が維持されているか確認するため |
+| 9 | libSQL 標準DB化後の SQLite 互換性確認 | 優先 | libSQL を標準DBとしつつ、SQLite を互換・移行元・最小ローカル検証用として保持できる構成を確認するため |
 
 Adlaire 内製 Deno Module Registry の初期候補範囲は、package metadata、version 管理、module 登録、checksum、Deno native import / download endpoint、認証・認可、監査ログとする。
 
@@ -202,3 +202,4 @@ Phase 8 は、Phase 7 の安定版リリース判定後に、長期運用と保�
 | v.0.8 | Phase 5 にデザイン関連改良・改修候補を追加 |
 | v.0.9 | Phase 2 から Phase 9 までの候補を累積フェーズ単位へ再編し、Phase 3、Phase 4、Phase 6、Phase 7、Phase 8/9 の役割を整理 |
 | v.0.10 | Phase 6 の安定版リリース準備候補に基づき、既知バグ確認、ドキュメント整合性向上、移行・ロールバック前提整理、主要 workflow 検証を完了対象として整合 |
+| v.0.11 | libSQL を標準DB、SQLite を互換・移行元・最小ローカル検証用として保持する方針に合わせ、DB関連候補を整理 |
