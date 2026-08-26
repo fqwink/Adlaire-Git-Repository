@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.1.18
-**ステータス**: Phase 8 長期運用準備 / Adlaire Git Repository 本体優先
+**文書バージョン**: v.1.19
+**ステータス**: Phase 8 DB / libSQL 標準化
 
 ---
 
@@ -100,9 +100,9 @@ npm registry 互換レジストリは、Node.js / npm ecosystem リスクと衝�
 
 例外採用した外部ライブラリは、内製ラッパー、内製driver、または内製Gatewayの内部に閉じ込める。外部ライブラリのAPIをアプリケーション上位層へ直接露出させず、設計上は内製化された境界を通して利用する。
 
-採用バージョンは、各技術の最新の安定版を基本方針とする。Deno、SQLite、libSQL、Git、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリは、採用または更新の時点で公式情報を確認し、最新の安定版を採用候補とする。TypeScript は 6系の最新安定版を採用方針とする。
+採用バージョンは、各技術の最新の安定版を基本方針とする。Deno、libSQL、既存データ移行元確認用 SQLite、Git、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリは、採用または更新の時点で公式情報を確認し、最新の安定版を採用候補とする。TypeScript は 6系の最新安定版を採用方針とする。
 
-Deno single binary 形式を正本成果物とする。Docker は正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。Docker 使用時も非 Docker の binary 直実行時も、libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として system 側から分離する。
+Deno single binary 形式を正本成果物とする。Docker は正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。Docker 使用時も非 Docker の binary 直実行時も、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として system 側から分離する。
 
 承認済み固定採用バージョンは以下とする。
 
@@ -110,28 +110,28 @@ Deno single binary 形式を正本成果物とする。Docker は正本成果物
 |---|---:|---|
 | Deno | `v2.9.5` | 標準ランタイム |
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
-| SQLite | `v3.53.4` | 互換・移行元・検証用データベース |
+| SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
 ### 4.1 データベース方針
 
-採用対象のデータベースエンジンは SQLite と libSQL のみに限定する。
+標準採用するデータベースエンジンは libSQL とする。
 
-SQLite と libSQL は、本プロジェクトで許容する必要最小限の外部依存とする。
+SQLite は既存データ移行元確認用としてのみ扱う。
 
 標準データベースは libSQL とする。
 
-SQLite は廃止せず、互換・移行元・最小ローカル検証用データベースとして保持する。
+SQLite 互換維持、SQLite 最小ローカル検証用運用、SQLite 標準DB運用は行わない。
 
-libSQL は、SQLite 互換、移行容易性、将来の同期・分散構成への拡張余地という採用メリットが高いため、標準データベースとして扱う。
+libSQL は、移行容易性、将来の同期・分散構成への拡張余地という採用メリットが高いため、標準データベースとして扱う。
 
 libSQL の実採用タイミング、driver 実装、運用形態は、Phase 計画とユーザー承認に基づいて決定する。libSQL を採用する場合も、外部ライブラリAPIを直接利用せず、内製 `libsql` driver と Database Gateway の内部に閉じ込める。
 
 Turso Cloud 等の libSQL 系クラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングはデータベースエンジンの追加採用ではなく、libSQL の接続先または運用形態の候補として扱う。検討する場合は、標準運用方針、クローズドライセンス、データ管理責任、認証情報管理、運用コスト、障害時の復旧方針を3類マスター仕様書に追記してから判断する。
 
-libSQL を標準にしても SQLite 互換性を維持するため、データベースアクセスは専用層に集約し、アプリケーション各所から直接 driver 固有処理へ依存しない設計とする。
+libSQL を標準にするため、データベースアクセスは専用層に集約し、アプリケーション各所から直接 driver 固有処理へ依存しない設計とする。
 
 ### 4.2 データベース抽象化方針
 
@@ -145,10 +145,10 @@ SQLite または libSQL を直接触る設計は禁止する。
 - SQL 実行の集約
 - トランザクション境界の管理
 - schema と migration の適用
-- SQLite 標準互換 SQL の維持
-- `libsql` / `sqlite` driver 差し替え境界の提供
+- libSQL 前提の schema と query 方針
+- 既存データ移行元確認が必要な場合の SQLite 取扱境界
 
-標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は互換・移行元・最小ローカル検証用として扱う。
+標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行元確認が必要な場合に限って別途承認を得て扱う。
 
 クラウドDBホスティングを採用する場合も、上位層からは libSQL driver の接続先差し替えとして扱い、`turso` 等のホスティングサービス名をアプリケーション上位層の依存名にしてはならない。
 
@@ -188,12 +188,12 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換対象外とする。
 - 標準ランタイムは Deno、標準言語は TypeScript とする。
 - 標準データベースは libSQL とする。
-- SQLite は互換・移行元・最小ローカル検証用データベースとして保持する。
+- SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。
 - SQLite または libSQL を直接触る設計は禁止し、Database Gateway と driver 境界を経由する。
 - Deno single binary を正本成果物とする。
 - Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。
 - Docker 使用時も非 Docker の binary 直実行時も、system 側と data 側を分離する。
-- data 側は host filesystem を正本とし、libSQL / SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
+- data 側は host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
 - 標準運用基盤は self-host、VPS、専用サーバーを前提とする。
 - Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく将来候補として保留する。
 - Node.js runtime、npm ecosystem、外部フレームワーク、無承認外部ライブラリは採用しない。
@@ -212,7 +212,7 @@ Adlaire Deploy は、仕様未定の将来候補である。
 
 - 1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、マスター実装機能候補リストの役割が分離されている。
 - 現行仕様、過去フェーズ履歴、保留候補、対象外範囲が混在せず、判断基準を追跡できる。
-- libSQL 標準DB方針、SQLite 互換・移行元・検証用方針、Database Gateway 境界が矛盾していない。
+- libSQL 標準DB方針、SQLite 互換維持なし方針、Database Gateway 境界が矛盾していない。
 - Deno single binary 正本成果物方針、Docker 運用選択肢、system / data 分離方針が矛盾していない。
 - GitHub 機能互換方針と UI 非互換方針が同時に明記されている。
 - 保留機能は、ユーザー承認なしに実装対象へ戻らないように定義されている。
@@ -263,7 +263,7 @@ Adlaire Deploy は、仕様未定の将来候補である。
 - Webhook 対象イベント拡張
 - 高度な監査ログ
 - 運用自動化
-- libSQL 標準化後の SQLite 互換性確認
+- libSQL 標準化後の DB 方針整理
 
 Discussions、Organizations / Teams 本格運用、Projects 本格運用、複数インスタンス本格運用は保留候補とし、保留解除とユーザー承認があるまで Phase 3 の実装対象へ含めない。
 
@@ -335,22 +335,42 @@ Phase 7 を初回安定版リリースとして承認する場合は、安定版
 
 基準バージョン: `v.1.9`
 
-- 7系安定版判定後の長期運用準備
-- マスター仕様完成
-- 移行性確認
-- 監査、保守、運用手順整理
-- 保留解除候補の再評価
+- DB
+- libSQL 標準化
+- SQLite 互換維持なし
+- DB 方針整理
 
-Phase 8 は、Phase 7 の初回安定版リリース `v.1.8` 後の長期運用準備フェーズである。Phase 8 は安定版リリースフェーズとして扱わない。保留解除候補の再評価は実装承認ではなく、正式な実装対象にする場合は、3類マスター仕様書、マスター開発計画、検証範囲へ反映し、ユーザー承認を得る。
+Phase 8 は DB フェーズである。libSQL 標準化を中心に DB 方針を整理し、SQLite 互換維持は行わない。Phase 8 は安定版リリースフェーズとして扱わない。
+
+### 8.8.1 Phase 8.1
+
+基準バージョン: `v.1.9`
+
+- 本体整合性
+- DB 方針変更に合わせた Adlaire Git Repository 本体の仕様、計画、実装、検証導線の整合
+
+### 8.8.5 Phase 8.5
+
+基準バージョン: `v.1.9`
+
+- システム分割
+- Adlaire Git Repository 本体とデータ領域の分割
+- 本体は差し替え可能な system 側、DB、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として扱う
+
+### 8.8.7 Phase 8.7
+
+基準バージョン: `v.1.9`
+
+- 安定化
+- バグ修正、検証強化、ドキュメント整合性
 
 ### 8.9 Phase 9
 
-基準バージョン: `v.1.10`
+基準バージョン: `v.2.10`
 
-- 補助的リリース判定
-- 9系フェーズを安定版対象にするかどうかの判断
+- 安定版判定
 
-Phase 9 は補助的リリース判定フェーズである。ケースバイケースで安定版リリースフェーズになる場合と、ならない場合がある。安定版リリース対象にする場合は、2類ポリシー、3類マスター仕様書、マスター開発計画に明記し、ユーザー承認を得る。
+Phase 9 は安定版判定フェーズである。安定版リリース対象にする場合は、リリース提案、検証範囲、成果物、配置先を提示し、ユーザー承認を得る。
 
 ---
 
@@ -376,11 +396,11 @@ Phase 5、Phase 15、Phase 25 のような 5系フェーズは、設計・デザ
 
 Phase 6、Phase 16、Phase 26 のような 6系フェーズは、大規模なバグ修正とドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズとする。必要に応じて移行準備と検証強化も行う。6系フェーズ自体は安定版リリースフェーズとして扱わない。
 
-Phase 9、Phase 19、Phase 29 のような 9系フェーズは、補助的なリリース判定フェーズとして扱う。9系フェーズはケースバイケースで安定版リリースフェーズになる場合と、ならない場合がある。
+Phase 9 は安定版判定フェーズとして扱う。Phase 19、Phase 29 のような後続9系フェーズは、補助的なリリース判定フェーズとして扱い、ケースバイケースで安定版リリースフェーズになる場合と、ならない場合がある。
 
 リリースするには、以下を満たす必要がある。
 
-- 7系フェーズである。または、9系フェーズとして安定版リリース対象に明示承認されている。
+- 7系フェーズである。または、Phase 9 または後続9系フェーズとして安定版リリース対象に明示承認されている。
 - 3類マスター仕様書の対象範囲を満たしている。
 - 主要検証が完了している。
 - 既知バグが残っていない。
