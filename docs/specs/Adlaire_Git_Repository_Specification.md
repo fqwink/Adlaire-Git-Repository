@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.1.19
-**ステータス**: Phase 8 DB / libSQL 標準化
+**文書バージョン**: v.1.20
+**ステータス**: Phase 8 / Phase 9 仕様完成
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -628,6 +628,117 @@ libSQL driver（標準） / SQLite driver（移行元確認用）
 - libSQL 標準運用と既存データ移行元 SQLite 確認を分離したテスト構成
 
 schema、migration、seed は専用ディレクトリに集約し、Database Gateway からのみ適用する。
+
+### Phase 8 DB 仕様
+
+Phase 8 は、Adlaire Git Repository 本体の DB 仕様完成フェーズである。
+
+Phase 8 では、標準データベースを libSQL として扱い、SQLite 互換維持を行わない。SQLite は既存データ移行元確認用に限定し、標準運用、互換維持、最小ローカル検証用として扱わない。
+
+Phase 8 の DB 接続仕様は以下とする。
+
+| 項目 | 仕様 |
+|---|---|
+| 標準 driver | `DB_DRIVER=libsql` |
+| 接続先 | `DB_URL` |
+| 認証情報 | `DB_AUTH_TOKEN` |
+| migration 適用 | Database Gateway 経由 |
+| schema / seed | 専用ディレクトリへ集約 |
+| SQLite | 既存データ移行元確認用。利用時は別途承認 |
+| Cloud DB hosting | 未定。採用時も libSQL 接続先差し替えとして扱う |
+
+Phase 8 では、DB driver の外部ライブラリ API を Database Gateway より上位へ露出させない。Repository 層は永続化要求を表現し、接続、SQL 実行、トランザクション、migration、driver 差し替えは Database Gateway と driver 層の責務とする。
+
+Phase 8 の対象外は以下とする。
+
+- SQLite 互換維持
+- SQLite 標準DB運用
+- SQLite 最小ローカル検証用運用
+- `DB_DRIVER=sqlite` の標準化
+- `DB_DRIVER=turso` 等のホスティングサービス名の driver 化
+- Turso Cloud、Deno Deploy、その他クラウドDBホスティングの標準採用
+- HTTP ハンドラー、Web UI、サービス層、Git 操作処理からの DB 直接アクセス
+- 承認なしの schema、migration、seed、テストコード、外部依存の変更
+
+Phase 8 の検証では、標準 driver が libSQL であること、SQLite が移行元確認用に限定されていること、上位層へ driver 固有 API が漏れていないこと、主要 workflow が Database Gateway 経由で永続化されることを確認する。
+
+### Phase 8.1 本体整合性仕様
+
+Phase 8.1 は、Phase 8 の DB 仕様に合わせて Adlaire Git Repository 本体を整合するフェーズである。
+
+Phase 8.1 では、以下を確認対象とする。
+
+- 1類ルールブック
+- 2類ポリシー
+- 3類マスター仕様書
+- マスター開発計画
+- マスター実装機能候補リスト
+- README
+- 実装と DB schema
+- テストと検証導線
+- バージョン表記
+- Pull Request 説明
+
+Phase 8.1 では、SQLite 標準運用、SQLite 互換維持、libSQL 将来候補扱い、DB 直接アクセスを前提にした記述または実装が残っていないことを確認する。矛盾が見つかった場合は、Phase 8.1 の完了前に補正する。
+
+### Phase 8.5 System / Data 分離仕様
+
+Phase 8.5 は、Adlaire Git Repository 本体の system 側と data 側を分離するフェーズである。
+
+system 側は差し替え可能な構成要素として扱う。
+
+| system 側 | 扱い |
+|---|---|
+| Deno single binary | 正本成果物 |
+| Docker image | 正本 binary を同梱する運用選択肢 |
+| Docker container | 実行単位 |
+| docker compose | Docker 運用時の起動定義 |
+| systemd service または同等 | binary 直実行時の起動管理候補 |
+| deploy script | 承認済み範囲の配置・検証補助 |
+
+data 側は保護対象として扱い、host filesystem を正本とする。
+
+| data 側 | 扱い |
+|---|---|
+| libSQL database | 標準DBの永続データ |
+| 移行元 SQLite database | 既存データ移行元確認用 |
+| Git bare repositories | Git repository 実体 |
+| config | 設定 |
+| secrets | 秘密情報 |
+| logs | 運用ログ |
+| backups | バックアップ |
+| manifests | デプロイ、バックアップ、検証の運用記録 |
+
+Docker 使用時も、Docker を使用しない binary 直実行時も、同じ data 側構成を使用する。Docker named volume を data 正本として扱ってはならない。
+
+### Phase 8.7 安定化仕様
+
+Phase 8.7 は、Phase 8、Phase 8.1、Phase 8.5 の成果を対象にした安定化フェーズである。
+
+Phase 8.7 では、DB 標準化、Database Gateway 境界、system / data 分離、backup / restore / rollback、主要 workflow、ドキュメント整合性に関する既知バグを洗い出し、修正する。
+
+Phase 8.7 の検証は、意味のあるテストまたは代替検証に限定する。失敗時に壊れた仕様を説明できないテスト、内部実装に過剰依存するテスト、確信にも説明にも寄与しない冗長なテストを追加してはならない。
+
+### Phase 9 安定版判定仕様
+
+Phase 9 は、Phase 8 系の成果を対象に安定版リリース可否を判定するフェーズである。
+
+Phase 9 では、以下を判定対象とする。
+
+- libSQL 標準DB運用
+- SQLite 互換維持なし方針
+- Database Gateway、Repository 層、driver 層の責務境界
+- system / data 分離構成
+- Deno single binary 正本成果物
+- Docker image を運用選択肢とする方針
+- backup、restore、rollback の説明可能性
+- 主要 workflow の検証結果
+- 既知バグ、既知制約、対象外機能
+- リポジトリ全体の整合性
+
+Phase 9 はリリース実行を自動承認しない。tag 作成、GitHub Releases 作成、成果物配置、release notes 公開、`main` 反映は、リリース提案を提示し、別途ユーザー承認を得るまで行わない。
+
+Phase 9 で安定版リリースを行う場合、リリース履歴の正本は GitHub Releases とする。リポジトリ内に変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
 
 ---
 
