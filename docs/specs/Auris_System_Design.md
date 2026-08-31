@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.1.21
-**ステータス**: Phase 8 libSQL driver 実装中
+**文書バージョン**: v.1.22
+**ステータス**: Phase 8.1 本体整合性完了・PR確認中
 
 ---
 
@@ -130,6 +130,8 @@ libSQL は、移行容易性、将来の同期・分散構成への拡張余地�
 
 libSQL driver は Phase 8 の承認済み実装対象とする。`@libsql/client v0.17.4` は承認済み例外ライブラリとして採用し、外部ライブラリAPIを直接利用せず、内製 `libsql` driver と Database Gateway の内部に閉じ込める。
 
+`@libsql/client` の native loader が Deno 実行時に FFI と system 情報の `cpus`、`networkInterfaces`、`hostname` 参照を要求するため、Deno task では `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname` を許可対象に加える。`--allow-ffi` は libSQL native loader のための承認済み権限であり、アプリケーションコードから Deno FFI API を直接使うことは認めない。`--allow-sys` 全許可や、libSQL driver 以外の system 情報参照は標準化しない。
+
 Turso Cloud 等の libSQL 系クラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングはデータベースエンジンの追加採用ではなく、libSQL の接続先または運用形態の候補として扱う。検討する場合は、標準運用方針、クローズドライセンス、データ管理責任、認証情報管理、運用コスト、障害時の復旧方針を3類マスター仕様書に追記してから判断する。
 
 libSQL を標準にするため、データベースアクセスは専用層に集約し、アプリケーション各所から直接 driver 固有処理へ依存しない設計とする。
@@ -149,7 +151,7 @@ SQLite または libSQL を直接触る設計は禁止する。
 - libSQL 前提の schema と query 方針
 - 既存データ移行元確認が必要な場合の SQLite 取扱境界
 
-標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行元確認が必要な場合に限って別途承認を得て扱う。
+標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行元確認が必要な場合に限って別途承認を得て扱う。実装上も通常運用では `DB_DRIVER=sqlite` を拒否し、承認済みの移行元確認時に `ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` を指定した場合のみ許可する。
 
 クラウドDBホスティングを採用する場合も、上位層からは libSQL driver の接続先差し替えとして扱い、`turso` 等のホスティングサービス名をアプリケーション上位層の依存名にしてはならない。
 
@@ -379,6 +381,7 @@ Phase 8.1 の完了条件は以下とする。
 - 1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、README の DB 方針が矛盾していない。
 - 実装が Database Gateway、Repository 層、driver 層の境界に従っていることを説明できる。
 - SQLite 互換維持を前提にした完了条件、検証条件、運用条件が残っていない。
+- `DB_DRIVER=sqlite` が通常運用経路として使われず、承認済みの移行元確認用ゲートを通した場合のみ使われる。
 - リポジトリ整合性確認を実施し、矛盾または古い表記を補正している。
 
 ### 8.8.5 Phase 8.5

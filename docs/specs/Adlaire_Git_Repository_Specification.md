@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.1.21
-**ステータス**: Phase 8 libSQL driver 実装中
+**文書バージョン**: v.1.22
+**ステータス**: Phase 8.1 本体整合性完了・PR確認中
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -62,7 +62,7 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。
 - DBアクセスは Database Gateway、Repository 層、driver 層を経由し、SQLite または libSQL を上位層から直接触らない。
 - `DB_DRIVER=libsql` を標準 driver とする。
-- `DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行元確認が必要な場合に限って別途承認を得て扱う。
+- `DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行元確認が必要な場合に限って別途承認を得て扱う。実装上も通常運用では拒否し、承認済みの移行元確認時に `ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` を指定した場合のみ許可する。
 - Deno single binary を正本成果物とする。
 - Docker は正本成果物である Deno single binary を image に同梱して実行する運用選択肢の一つとする。
 - Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成とする。
@@ -558,7 +558,9 @@ SQLite 互換維持、SQLite 最小ローカル検証用運用、SQLite 標準DB
 
 libSQL は必要最小限の外部依存に該当するが、DB抽象化設計との相性、将来の同期・分散構成への拡張余地という採用メリットが高いため、標準データベースとして扱う。
 
-libSQL driver は Phase 8 の承認済み実装対象とする。`@libsql/client v0.17.4` は承認済み例外ライブラリとして採用する。外部ライブラリAPIは内製 `libsql` driver と Database Gateway の内部に閉じ込め、サービス層やRepository層へ直接露出させない。
+libSQL driver は Phase 8 の承認済み実装対象とする。`@libsql/client v0.17.4` は承認済み例外ライブラリとして採用する。外部ライブラリAPIは内製 `libsql` driver と Database Gateway の内部に閉じ込め、サービス層やRepository層へ直接露出させない。`deno.lock` は承認済み例外ライブラリの解決結果を固定するために管理し、未承認の依存追加を許可するものではない。
+
+`@libsql/client` の native loader が Deno 実行時に FFI と system 情報の `cpus`、`networkInterfaces`、`hostname` 参照を要求するため、Deno task では `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname` を許可対象に加える。`--allow-ffi` は libSQL native loader のための承認済み権限であり、アプリケーションコードから Deno FFI API を直接使うことは認めない。これは libSQL driver 実行に必要な最小権限であり、`--allow-sys` 全許可や libSQL driver 以外の system 情報参照を標準化するものではない。
 
 Turso Cloud 等のクラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングは新しいデータベースエンジンではなく、libSQL の接続先または運用形態の候補として扱う。採用する場合は、外部サービス依存、データ所在、認証トークン管理、バックアップ、障害時の復旧、運用費用を評価し、例外採用としてユーザー承認を得る。
 
@@ -616,7 +618,7 @@ libSQL driver（標準） / SQLite driver（移行元確認用）
 - migration をアプリケーション各所に分散させること
 - SQLite / libSQL 固有機能を Repository 層より上位へ漏らすこと
 
-標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行元確認が必要な場合に限って別途承認を得て扱う。クラウドDBホスティングを採用する場合も、`DB_DRIVER=libsql` の接続先設定として扱い、`DB_DRIVER=turso` 等のホスティングサービス名を driver 名にしてはならない。
+標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行元確認が必要な場合に限って別途承認を得て扱う。実装上も通常運用では拒否し、承認済みの移行元確認時に `ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` を指定した場合のみ許可する。クラウドDBホスティングを採用する場合も、`DB_DRIVER=libsql` の接続先設定として扱い、`DB_DRIVER=turso` 等のホスティングサービス名を driver 名にしてはならない。
 
 移行計画を立てやすくするため、初期実装時点から以下を固定する。
 
@@ -682,6 +684,8 @@ Phase 8.1 では、以下を確認対象とする。
 - Pull Request 説明
 
 Phase 8.1 では、SQLite 標準運用、SQLite 互換維持、libSQL 将来候補扱い、DB 直接アクセスを前提にした記述または実装が残っていないことを確認する。矛盾が見つかった場合は、Phase 8.1 の完了前に補正する。
+
+`DB_DRIVER=sqlite` は通常運用経路として利用できない。既存データ移行元確認が承認済みの場合に限り、`ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` を指定して SQLite driver を使用できる。この条件は、SQLite 互換維持または SQLite 標準運用を意味しない。
 
 ### Phase 8.5 System / Data 分離仕様
 
@@ -765,7 +769,7 @@ Phase 9 で安定版リリースを行う場合、リリース履歴の正本は
 
 ---
 
-## deno.json v.1.9 Phase 8 baseline
+## deno.json v.1.9 Phase 8.1 baseline
 
 正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。
 
@@ -781,13 +785,13 @@ Phase 9 で安定版リリースを行う場合、リリース履歴の正本は
     "@libsql/client": "npm:@libsql/client@0.17.4"
   },
   "tasks": {
-    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run src/main.ts",
+    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname src/main.ts",
     "fmt": "deno fmt deno.json src/ tests/",
     "lint": "deno lint",
-    "test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/",
-    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo src/main.ts",
-    "compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.9-aarch64-unknown-linux-gnu src/main.ts",
-    "compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.9-x86_64-unknown-linux-gnu src/main.ts",
+    "test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname tests/",
+    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo src/main.ts",
+    "compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-v1.9-aarch64-unknown-linux-gnu src/main.ts",
+    "compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-v1.9-x86_64-unknown-linux-gnu src/main.ts",
     "compile:release": "deno task compile:linux-arm64 && deno task compile:linux-x86_64",
     "docker:verify-build": "sh scripts/docker/verify-build.sh"
   },
@@ -807,6 +811,7 @@ adlaire-git-repository/
 ├── AGENTS.md
 ├── README.md
 ├── deno.json
+├── deno.lock
 ├── dist/                  (生成物)
 │   └── adlaire-git-repo   (single binary)
 ├── tools/
@@ -1767,8 +1772,8 @@ Docker named volume を標準の data 正本として扱ってはならない。
 
 ### 準備
 
-- [ ] Deno インストール（固定バージョンはユーザー承認後に確定）
-- [ ] Git インストール（固定バージョンはユーザー承認後に確定）
+- [ ] Deno `v2.9.5` を基準にした実行環境確認
+- [ ] Git `v2.55.0` 系を基準にした実行環境確認
 - [ ] Repository 作成
 - [ ] Team onboarding
 - [ ] CI/CD パイプライン

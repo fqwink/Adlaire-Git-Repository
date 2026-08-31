@@ -14,7 +14,10 @@ export interface DatabaseConfig {
 
 export function loadConfig(env: Deno.Env = Deno.env): AppConfig {
   const dataDir = env.get("ADLAIRE_DATA_DIR") ?? "./data";
-  const databaseDriver = readDatabaseDriver(env.get("DB_DRIVER"));
+  const databaseDriver = readDatabaseDriver(
+    env.get("DB_DRIVER"),
+    env.get("ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE") === "1",
+  );
   const databaseUrl = env.get("DB_URL") ??
     defaultDatabaseUrl(databaseDriver, dataDir);
 
@@ -44,10 +47,21 @@ function readPort(value: string | undefined): number {
   return port;
 }
 
-function readDatabaseDriver(value: string | undefined): "libsql" | "sqlite" {
+function readDatabaseDriver(
+  value: string | undefined,
+  allowSqliteMigrationSource: boolean,
+): "libsql" | "sqlite" {
   const driver = value ?? "libsql";
-  if (driver === "libsql" || driver === "sqlite") {
-    return driver;
+  if (driver === "libsql") {
+    return "libsql";
+  }
+  if (driver === "sqlite") {
+    if (allowSqliteMigrationSource) {
+      return "sqlite";
+    }
+    throw new Error(
+      "DB_DRIVER=sqlite requires ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1 for approved migration-source checks.",
+    );
   }
   throw new Error("DB_DRIVER must be libsql or sqlite.");
 }

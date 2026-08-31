@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.1.21
+**計画バージョン**: v.1.22
 **現行フェーズ基準バージョン**: v.1.9
-**ステータス**: Phase 8 libSQL driver 実装中
+**ステータス**: Phase 8.1 本体整合性完了・PR確認中
 
 ---
 
@@ -16,7 +16,7 @@
 
 実装は、1類ルールブック、2類ポリシー、3類マスター仕様書に従い、本書で定義したフェーズ計画に基づいて進める。
 
-Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱う。ユーザー承認に基づき、Phase 8 の現行フェーズ基準バージョンは `v.1.9` とし、`deno.json` の内部バージョンは `1.9.0` と対応させる。Phase 8 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
+Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱う。ユーザー承認に基づき、Phase 8 の現行フェーズ基準バージョンは `v.1.9` とし、`deno.json` の内部バージョンは `1.9.0` と対応させる。Phase 8.1 は同じ `v.1.9` baseline の本体整合性フェーズとして、Phase 8 の DB 方針を本体仕様、計画、実装、検証導線へ反映する。Phase 8 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
 
 本計画における「マスター仕様完成」は、実装承認ではない。仕様完成後にソースコード実装、DB driver 実装、schema 変更、テスト変更、デプロイ実行を行う場合は、対象範囲と検証方法を提示し、別途ユーザー承認を得る。
 
@@ -105,8 +105,8 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 | Phase 5 | v.0.6 | 完了 | デザイン関連の改良・改修、仕様整理。安定版リリース対象外 |
 | Phase 6 | v.0.7 | 完了 | 大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズ |
 | Phase 7 | v.1.8 | 完了 | 初回安定版リリース |
-| Phase 8 | v.1.9 | 進行中 | DB。libSQL 標準化、SQLite 互換維持なし、DB 方針整理 |
-| Phase 8.1 | v.1.9 | 未着手 | 本体整合性。DB 方針変更に合わせた本体仕様、計画、実装、検証導線の整合 |
+| Phase 8 | v.1.9 | 実装完了・PR確認中 | DB。libSQL 標準化、SQLite 互換維持なし、DB 方針整理 |
+| Phase 8.1 | v.1.9 | 完了・PR確認中 | 本体整合性。DB 方針変更に合わせた本体仕様、計画、実装、検証導線の整合 |
 | Phase 8.5 | v.1.9 | 未着手 | システム分割。Adlaire Git Repository 本体とデータ領域の分割 |
 | Phase 8.7 | v.1.9 | 未着手 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
 | Phase 9 | v.2.10 | 未着手 | 安定版判定フェーズ |
@@ -987,7 +987,22 @@ DB 方針変更に合わせて、Adlaire Git Repository 本体の仕様、計画
 
 - 旧 SQLite 標準運用、SQLite 互換維持、libSQL 将来候補扱いの表記が判断基準として残っていない。
 - Phase 8 の仕様、計画、実装、検証導線が矛盾していない。
+- `DB_DRIVER=sqlite` が通常運用経路として使われず、承認済みの移行元確認用ゲートを通した場合のみ使われる。
 - リポジトリ整合性確認を完了している。
+
+#### 13.5.3 Phase 8.1 実施中範囲
+
+Phase 8.1 では、Phase 8 の libSQL driver 実装後に残る本体整合性を扱う。
+
+実施中範囲は以下とする。
+
+- 現行フェーズ表記を `Phase 8.1 / v.1.9` へ整合する。
+- `DB_DRIVER=sqlite` を通常運用で拒否し、承認済みの移行元確認時のみ `ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` で許可する。
+- `@libsql/client v0.17.4` の利用範囲が `src/database/libsql_driver.ts` の内部に閉じていることを確認する。
+- `deno.lock` を承認済み例外ライブラリの解決固定として管理し、未承認依存追加ではないことを明記する。
+- `@libsql/client` の native loader に必要な `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname` を Deno task と検証導線へ反映し、アプリケーションコードからの直接 FFI API 使用を禁止する。
+- Database Gateway、Repository 層、driver 層の境界を確認する。
+- 1類ルールブック、2類ポリシー、3類マスター仕様書、README、テスト、検証導線、Pull Request 説明の整合性を確認する。
 
 ### 13.6 Phase 8.5: システム分割
 
@@ -1206,3 +1221,4 @@ Phase 9 はリリース実行を自動承認しない。tag 作成、GitHub Rele
 | v.1.19 | Phase 8 / Phase 9 | v.1.9 / v.2.10 | Phase 8 をDBフェーズへ再定義し、Phase 8.1本体整合性、Phase 8.5システム分割、Phase 8.7安定化、Phase 9安定版判定へ整理 |
 | v.1.20 | Phase 8 / Phase 9 | v.1.9 / v.2.10 | Phase 8 をDB仕様完成、Phase 8.1を本体整合性、Phase 8.5をsystem/data分離、Phase 8.7を安定化、Phase 9を安定版判定として、対象、対象外、検証範囲、完了条件まで具体化 |
 | v.1.21 | Phase 8 | v.1.9 | `@libsql/client v0.17.4` を承認済み例外ライブラリとして採用し、libSQL driver 実装、標準DB設定、検証導線、デプロイDB配置例をPhase 8現行状態へ整合 |
+| v.1.22 | Phase 8.1 | v.1.9 | Phase 8.1 本体整合性として、現行フェーズ表記、SQLite 移行元確認用ゲート、承認済み例外ライブラリ解決固定用の `deno.lock`、libSQL native loader 用の `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname`、直接 FFI API 使用禁止、Database Gateway 境界、README、検証導線、Pull Request 説明の整合対象を反映 |

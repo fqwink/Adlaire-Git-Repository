@@ -1,7 +1,7 @@
 import { createApp } from "../../src/server.ts";
 import { assert, assertEquals } from "../support/assert.ts";
 
-Deno.test("home UI exposes current Phase 8 baseline and workflow layout", async () => {
+Deno.test("home UI exposes current Phase 8.1 baseline and workflow layout", async () => {
   const root = await Deno.makeTempDir();
   const app = await createApp({
     host: "127.0.0.1",
@@ -24,8 +24,8 @@ Deno.test("home UI exposes current Phase 8 baseline and workflow layout", async 
 
     const html = await response.text();
     assert(
-      html.includes("Phase 8 / v.1.9"),
-      "Home UI must expose the current Phase 8 baseline.",
+      html.includes("Phase 8.1 / v.1.9"),
+      "Home UI must expose the current Phase 8.1 baseline.",
     );
     assert(html.includes('id="register-form"'));
     assert(html.includes('id="token-form"'));

@@ -369,18 +369,18 @@ export class Phase3Service {
       driver: "libsql",
       candidate: "libsql",
       conclusion:
-        "Phase 8 adopts libSQL as the standard driver while preserving Database Gateway boundaries.",
+        "Phase 8.1 keeps libSQL as the standard driver and verifies Database Gateway boundaries.",
     };
   }
 
   operationsStatus(): {
-    readonly phase: "Phase 8";
+    readonly phase: "Phase 8.1";
     readonly runtime: "Deno";
     readonly databaseDriver: "libsql";
     readonly nodeRuntime: "forbidden";
   } {
     return {
-      phase: "Phase 8",
+      phase: "Phase 8.1",
       runtime: "Deno",
       databaseDriver: "libsql",
       nodeRuntime: "forbidden",

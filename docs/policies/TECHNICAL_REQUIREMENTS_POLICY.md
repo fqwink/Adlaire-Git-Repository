@@ -61,6 +61,10 @@ Phase 8 DB driver 実装では、`@libsql/client v0.17.4` を承認済み例外�
 
 `@libsql/client` の API は内製 `LibsqlDriver` と Database Gateway の内部に閉じ込める。HTTP handler、Service 層、Repository 層、Git 操作処理、Web UI から `@libsql/client` を直接 import してはならない。
 
+`deno.lock` は、承認済み例外ライブラリとその解決結果を固定するために管理する。`deno.lock` に記録された transitive dependency は、`@libsql/client v0.17.4` の承認済み例外範囲に従属するものとして扱い、未承認の直接依存追加、JSR 依存追加、npm ecosystem 一般採用を意味しない。
+
+`@libsql/client` の native loader が Deno 実行時に FFI と system 情報の `cpus`、`networkInterfaces`、`hostname` 参照を要求するため、Deno task では `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname` を許可対象に加える。`--allow-ffi` は libSQL native loader のための承認済み権限であり、アプリケーションコードから `Deno.dlopen` 等の Deno FFI API を直接使うことは認めない。`--allow-sys` 全許可や、libSQL driver 以外の目的での system 情報参照を標準化してはならない。
+
 ## 3.2 レジストリ方針
 
 Deno ランタイムにおける外部依存は、以下の優先順位で検討する。
@@ -145,7 +149,7 @@ SQLite は既存データの移行元確認用としてのみ扱う。SQLite 互
 
 SQLite または libSQL を直接触る設計は禁止する。アプリケーションコードは、必ず Database Gateway と専用 driver 層を経由して永続化処理を行う。
 
-標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行確認が必要な場合に限って別途承認を得て扱う。クラウドDBホスティングを採用するかどうかは未定とする。採用する場合は、libSQL の接続先または運用形態の候補として扱い、ユーザー承認を得る。
+標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行確認が必要な場合に限って別途承認を得て扱う。実装上も通常運用では `DB_DRIVER=sqlite` を拒否し、承認済みの移行元確認時に `ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` を指定した場合のみ許可する。クラウドDBホスティングを採用するかどうかは未定とする。採用する場合は、libSQL の接続先または運用形態の候補として扱い、ユーザー承認を得る。
 
 ---
 

@@ -30,6 +30,7 @@ check_required_paths() {
     AGENTS.md \
     README.md \
     deno.json \
+    deno.lock \
     tools/check-adlaire-git-repository.sh \
     scripts/deploy/deploy.env.example \
     scripts/deploy/deploy.sh \
@@ -69,12 +70,15 @@ check_required_paths() {
     src/services/phase2_service.ts \
     tests/support/assert.ts \
     tests/unit/auth_service_test.ts \
+    tests/unit/config_test.ts \
     tests/unit/git_http_backend_test.ts \
     tests/unit/issue_service_test.ts \
     tests/unit/repository_name_test.ts \
     tests/unit/repository_path_test.ts \
     tests/integration/issue_api_test.ts \
     tests/integration/phase2_api_test.ts \
+    tests/integration/phase3_api_test.ts \
+    tests/integration/phase7_release_judgment_test.ts \
     tests/integration/repository_service_test.ts; do
     if [ ! -f "$ROOT_DIR/$path" ]; then
       echo "missing Adlaire Git Repository required path: $path" >&2
@@ -158,7 +162,19 @@ check_forbidden_unapproved_registries() {
   fi
 }
 
+check_forbidden_direct_ffi_usage() {
+  if grep -R -n -E 'Deno\.(dlopen|UnsafePointer|UnsafeFnPointer|UnsafeCallback|UnsafePointerView)' "$ROOT_DIR/src" "$ROOT_DIR/tests" >/dev/null 2>&1; then
+    echo "direct Deno FFI API usage is not approved; --allow-ffi is only for the libSQL native loader." >&2
+    exit 1
+  fi
+}
+
 check_deno_tasks() {
+  if ! grep -F '"dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname src/main.ts"' deno.json >/dev/null 2>&1; then
+    echo "deno.json must define the dev task." >&2
+    exit 1
+  fi
+
   if ! grep -F '"fmt": "deno fmt deno.json src/ tests/"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the fmt task." >&2
     exit 1
@@ -169,22 +185,22 @@ check_deno_tasks() {
     exit 1
   fi
 
-  if ! grep -F '"test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/"' deno.json >/dev/null 2>&1; then
+  if ! grep -F '"test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname tests/"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the test task." >&2
     exit 1
   fi
 
-  if ! grep -F '"compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo src/main.ts"' deno.json >/dev/null 2>&1; then
+  if ! grep -F '"compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo src/main.ts"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the compile task." >&2
     exit 1
   fi
 
-  if ! grep -F '"compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.9-aarch64-unknown-linux-gnu src/main.ts"' deno.json >/dev/null 2>&1; then
+  if ! grep -F '"compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-v1.9-aarch64-unknown-linux-gnu src/main.ts"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the Linux ARM64 release compile task." >&2
     exit 1
   fi
 
-  if ! grep -F '"compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.9-x86_64-unknown-linux-gnu src/main.ts"' deno.json >/dev/null 2>&1; then
+  if ! grep -F '"compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-v1.9-x86_64-unknown-linux-gnu src/main.ts"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the Linux x86_64 release compile task." >&2
     exit 1
   fi
@@ -207,6 +223,7 @@ run_step "version policy check" check_version_policy
 run_step "Docker standard policy check" check_docker_standard_policy
 run_step "forbidden Node.js project file check" check_forbidden_node_files
 run_step "forbidden unapproved registry dependency check" check_forbidden_unapproved_registries
+run_step "direct FFI usage check" check_forbidden_direct_ffi_usage
 run_step "deno task definition check" check_deno_tasks
 
 run_step "deploy script syntax check" \
@@ -236,7 +253,7 @@ run_step "deno lint" \
   deno lint
 
 run_step "deno test" \
-  deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/
+  deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname tests/
 
 run_step "deno compile" \
   deno compile \
@@ -245,6 +262,8 @@ run_step "deno compile" \
     --allow-write \
     --allow-env \
     --allow-run \
+    --allow-ffi \
+    --allow-sys=cpus,networkInterfaces,hostname \
     --output="$BIN_PATH" \
     src/main.ts
 
