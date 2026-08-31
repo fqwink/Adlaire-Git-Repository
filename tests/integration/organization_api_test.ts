@@ -93,8 +93,8 @@ async function setupApp(): Promise<{
     dataDir: root,
     repositoryRoot: `${root}/repositories`,
     database: {
-      driver: "sqlite",
-      url: `${root}/adlaire.sqlite3`,
+      driver: "libsql",
+      url: `file://${root}/adlaire.libsql`,
     },
   });
 

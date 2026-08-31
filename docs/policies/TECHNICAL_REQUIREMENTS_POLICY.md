@@ -40,10 +40,32 @@
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
+| `@libsql/client` | `v0.17.4` | Phase 8 DB driver 実装の承認済み例外ライブラリ |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
-## 3.1 レジストリ方針
+### 3.1 承認済み例外ライブラリ
+
+Phase 8 DB driver 実装では、`@libsql/client v0.17.4` を承認済み例外ライブラリとして採用する。
+
+| 項目 | 内容 |
+|---|---|
+| package | `@libsql/client` |
+| 固定バージョン | `v0.17.4` |
+| import | `npm:@libsql/client@0.17.4` |
+| 利用範囲 | `src/database/libsql_driver.ts` の内部 |
+| 採用理由 | libSQL 標準DB driver を実装し、Database Gateway 経由の接続、SQL 実行、将来の接続先差し替えを成立させるため |
+| 禁止事項 | Node.js runtime の採用、`package.json` の作成、`node_modules` の導入、npm ecosystem の一般採用、Repository 層より上位への外部API露出 |
+
+この例外は、libSQL driver 実装に必要な最小限の例外である。`npm:` specifier を使うが、Node.js runtime、npm registry 互換レジストリ、`package.json`、`node_modules`、npm ecosystem の一般採用を承認するものではない。
+
+`@libsql/client` の API は内製 `LibsqlDriver` と Database Gateway の内部に閉じ込める。HTTP handler、Service 層、Repository 層、Git 操作処理、Web UI から `@libsql/client` を直接 import してはならない。
+
+`deno.lock` は、承認済み例外ライブラリとその解決結果を固定するために管理する。`deno.lock` に記録された transitive dependency は、`@libsql/client v0.17.4` の承認済み例外範囲に従属するものとして扱い、未承認の直接依存追加、JSR 依存追加、npm ecosystem 一般採用を意味しない。
+
+`@libsql/client` の native loader が Deno 実行時に FFI と system 情報の `cpus`、`networkInterfaces`、`hostname` 参照を要求するため、Deno task では `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname` を許可対象に加える。`--allow-ffi` は libSQL native loader のための承認済み権限であり、アプリケーションコードから `Deno.dlopen` 等の Deno FFI API を直接使うことは認めない。`--allow-sys` 全許可や、libSQL driver 以外の目的での system 情報参照を標準化してはならない。
+
+## 3.2 レジストリ方針
 
 Deno ランタイムにおける外部依存は、以下の優先順位で検討する。
 
@@ -68,7 +90,9 @@ Adlaire 内製 Deno Module Registry は、npm registry 互換レジストリで�
 
 npm registry 互換レジストリ、`npm:` specifier、`package.json` 前提運用、`node_modules` 前提運用は、Node.js / npm ecosystem リスクと衝突するため標準採用しない。採用検討が必要な場合は、例外採用ではなく方針変更候補として扱い、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
-## 3.2 Binary / Docker 標準採用方針
+ただし、Phase 8 DB driver 実装に限り、承認済み例外ライブラリとして `@libsql/client v0.17.4` の `npm:` import を認める。この例外は本ポリシーの「承認済み例外ライブラリ」に定義された範囲に限定する。
+
+## 3.3 Binary / Docker 標準採用方針
 
 Deno single binary 形式を、本プロジェクトおよび AdlaireGroup 共通方針における正本成果物とする。
 
@@ -76,7 +100,7 @@ Docker は正本成果物ではなく、Deno single binary を Docker image に�
 
 Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。
 
-Deno single binary 形式、Docker 形式のいずれでも、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
+Deno single binary 形式、Docker 形式のいずれでも、Node.js runtime、npm ecosystem、`package.json`、`node_modules` を導入してはならない。承認済み例外ライブラリとして明記された場合を除き、`npm:` specifier を導入してはならない。
 
 標準対象は、最低限以下とする。
 
@@ -125,7 +149,7 @@ SQLite は既存データの移行元確認用としてのみ扱う。SQLite 互
 
 SQLite または libSQL を直接触る設計は禁止する。アプリケーションコードは、必ず Database Gateway と専用 driver 層を経由して永続化処理を行う。
 
-標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行確認が必要な場合に限って別途承認を得て扱う。クラウドDBホスティングを採用するかどうかは未定とする。採用する場合は、libSQL の接続先または運用形態の候補として扱い、ユーザー承認を得る。
+標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行確認が必要な場合に限って別途承認を得て扱う。実装上も通常運用では `DB_DRIVER=sqlite` を拒否し、承認済みの移行元確認時に `ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` を指定した場合のみ許可する。クラウドDBホスティングを採用するかどうかは未定とする。採用する場合は、libSQL の接続先または運用形態の候補として扱い、ユーザー承認を得る。
 
 ---
 

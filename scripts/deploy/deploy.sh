@@ -13,7 +13,7 @@ fi
 DEPLOY_PORT="${DEPLOY_PORT:-22}"
 APP_ROOT="${APP_ROOT:-/opt/adlaire-git-repository}"
 SERVICE_NAME="${SERVICE_NAME:-adlaire-git-repository}"
-RELEASE_VERSION="${RELEASE_VERSION:-v.1.8}"
+RELEASE_VERSION="${RELEASE_VERSION:-v.1.9}"
 ARTIFACT_PATH="${ARTIFACT_PATH:-$ROOT_DIR/dist/adlaire-git-repo}"
 HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:8080/health}"
 

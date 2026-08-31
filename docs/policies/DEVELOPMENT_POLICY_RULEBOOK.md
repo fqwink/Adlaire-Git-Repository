@@ -131,7 +131,7 @@
 - 本番サーバ運用、デプロイ、運用基盤では、Deno single binary 形式と Docker 形式の双方を標準化対象とする。Deno single binary を正本成果物とし、Docker は正本成果物を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、保護対象 data 側は host filesystem を正本として system 側から分離する。詳細は `docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` と `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 - Deno 標準ライブラリを最優先候補とし、JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認なしに採用してはならない。
-- JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。
+- JSR レジストリの公開ライブラリであっても、npm 互換、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。承認済み例外ライブラリとして技術要件ポリシーに明記された場合を除き、`npm:` specifier を導入してはならない。
 - クローズド資産は JSR へ公開してはならず、クローズドな Adlaire 内製 Deno package の中長期配布基盤は Adlaire 内製 Deno Module Registry とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
 - npm registry 互換レジストリは Node.js / npm ecosystem リスクと衝突するため標準採用しない。
 - 変更した場合は、承認済みの変更範囲だけを stage し、必ずコミットまで行う。

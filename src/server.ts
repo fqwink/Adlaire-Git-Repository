@@ -1,5 +1,6 @@
 import type { AppConfig } from "./config.ts";
 import { DatabaseGateway } from "./database/gateway.ts";
+import { LibsqlDriver } from "./database/libsql_driver.ts";
 import { SqliteCliDriver } from "./database/sqlite_cli_driver.ts";
 import { GitHttpBackend, isGitWriteRequest } from "./git/http_backend.ts";
 import { GitService } from "./git/git_service.ts";
@@ -53,9 +54,7 @@ export async function createApp(config: AppConfig): Promise<App> {
   await Deno.mkdir(config.dataDir, { recursive: true });
   await Deno.mkdir(config.repositoryRoot, { recursive: true });
 
-  const database = new DatabaseGateway(
-    new SqliteCliDriver(config.database.url),
-  );
+  const database = new DatabaseGateway(createDatabaseDriver(config.database));
   await database.initialize();
 
   const auditService = new AuditService(new AuditLogRepository(database));
@@ -142,7 +141,7 @@ async function handle(
         400,
       );
     }
-    if (isSqliteUniqueConstraintError(error)) {
+    if (isUniqueConstraintError(error)) {
       return jsonResponse({ error: "conflict" }, 409);
     }
     console.error(error);
@@ -1050,9 +1049,17 @@ function gitAuthenticationRequired(): Response {
   });
 }
 
-function isSqliteUniqueConstraintError(error: unknown): boolean {
+function createDatabaseDriver(config: AppConfig["database"]) {
+  if (config.driver === "sqlite") {
+    return new SqliteCliDriver(config.url);
+  }
+  return new LibsqlDriver(config.url, config.authToken);
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
   return error instanceof Error &&
-    error.message.includes("UNIQUE constraint failed");
+    (error.message.includes("UNIQUE constraint failed") ||
+      error.message.includes("SQLITE_CONSTRAINT_UNIQUE"));
 }
 
 function matchRepositoryRoute(
@@ -1430,7 +1437,7 @@ function renderHome(): string {
     <header>
       <div>
         <h1>Adlaire Git Repository</h1>
-        <div class="phase">Phase 7 / v.1.8</div>
+        <div class="phase">Phase 8.1 / v.1.9</div>
       </div>
       <div class="status" id="status" role="status" aria-live="polite"></div>
     </header>

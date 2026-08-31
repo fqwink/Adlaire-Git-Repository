@@ -47,7 +47,6 @@ require_command ln
 require_command mkdir
 require_command systemctl
 require_command curl
-require_command sqlite3
 require_command git
 
 if ! command -v sha256sum >/dev/null 2>&1 && ! command -v shasum >/dev/null 2>&1; then

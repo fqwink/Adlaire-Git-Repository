@@ -133,8 +133,8 @@ Deno.test("phase 3 API supports teams, projects, registry, webhook events, and o
       undefined,
       aliceToken,
     ) as { phase: string; databaseDriver: string; nodeRuntime: string };
-    assertEquals(operations.phase, "Phase 3");
-    assertEquals(operations.databaseDriver, "sqlite");
+    assertEquals(operations.phase, "Phase 8.1");
+    assertEquals(operations.databaseDriver, "libsql");
     assertEquals(operations.nodeRuntime, "forbidden");
 
     const libsql = await request(
@@ -144,7 +144,7 @@ Deno.test("phase 3 API supports teams, projects, registry, webhook events, and o
       undefined,
       aliceToken,
     ) as { status: string; candidate: string };
-    assertEquals(libsql.status, "not_adopted");
+    assertEquals(libsql.status, "adopted");
     assertEquals(libsql.candidate, "libsql");
 
     const auditLogs = await request(
@@ -177,8 +177,8 @@ async function setupApp(): Promise<{
     dataDir: root,
     repositoryRoot: `${root}/repositories`,
     database: {
-      driver: "sqlite",
-      url: `${root}/adlaire.sqlite3`,
+      driver: "libsql",
+      url: `file://${root}/adlaire.libsql`,
     },
   });
 

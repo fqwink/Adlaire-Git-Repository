@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.1.20
-**ステータス**: Phase 8 / Phase 9 仕様完成
+**文書バージョン**: v.1.22
+**ステータス**: Phase 8.1 本体整合性完了・PR確認中
 
 ---
 
@@ -92,7 +92,7 @@ Node.js ランタイムは採用しない。
 
 Deno 標準ライブラリを最優先候補とする。ただし、個別モジュールの採用は自動承認ではなく、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 
-JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用してはならない。JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。JSR へ公開する package は公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
+JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用してはならない。JSR レジストリの公開ライブラリであっても、npm 互換、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。承認済み例外ライブラリとして明記された場合を除き、`npm:` specifier を導入してはならない。JSR へ公開する package は公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
 
 クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
 
@@ -112,6 +112,7 @@ Deno single binary 形式を正本成果物とする。Docker は正本成果物
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
+| `@libsql/client` | `v0.17.4` | Phase 8 DB driver 実装の承認済み例外ライブラリ |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
@@ -127,7 +128,9 @@ SQLite 互換維持、SQLite 最小ローカル検証用運用、SQLite 標準DB
 
 libSQL は、移行容易性、将来の同期・分散構成への拡張余地という採用メリットが高いため、標準データベースとして扱う。
 
-libSQL の実採用タイミング、driver 実装、運用形態は、Phase 計画とユーザー承認に基づいて決定する。libSQL を採用する場合も、外部ライブラリAPIを直接利用せず、内製 `libsql` driver と Database Gateway の内部に閉じ込める。
+libSQL driver は Phase 8 の承認済み実装対象とする。`@libsql/client v0.17.4` は承認済み例外ライブラリとして採用し、外部ライブラリAPIを直接利用せず、内製 `libsql` driver と Database Gateway の内部に閉じ込める。
+
+`@libsql/client` の native loader が Deno 実行時に FFI と system 情報の `cpus`、`networkInterfaces`、`hostname` 参照を要求するため、Deno task では `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname` を許可対象に加える。`--allow-ffi` は libSQL native loader のための承認済み権限であり、アプリケーションコードから Deno FFI API を直接使うことは認めない。`--allow-sys` 全許可や、libSQL driver 以外の system 情報参照は標準化しない。
 
 Turso Cloud 等の libSQL 系クラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングはデータベースエンジンの追加採用ではなく、libSQL の接続先または運用形態の候補として扱う。検討する場合は、標準運用方針、クローズドライセンス、データ管理責任、認証情報管理、運用コスト、障害時の復旧方針を3類マスター仕様書に追記してから判断する。
 
@@ -148,7 +151,7 @@ SQLite または libSQL を直接触る設計は禁止する。
 - libSQL 前提の schema と query 方針
 - 既存データ移行元確認が必要な場合の SQLite 取扱境界
 
-標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行元確認が必要な場合に限って別途承認を得て扱う。
+標準 driver は `DB_DRIVER=libsql` とする。`DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行元確認が必要な場合に限って別途承認を得て扱う。実装上も通常運用では `DB_DRIVER=sqlite` を拒否し、承認済みの移行元確認時に `ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` を指定した場合のみ許可する。
 
 クラウドDBホスティングを採用する場合も、上位層からは libSQL driver の接続先差し替えとして扱い、`turso` 等のホスティングサービス名をアプリケーション上位層の依存名にしてはならない。
 
@@ -344,6 +347,7 @@ Phase 8 の実施対象は以下とする。
 - libSQL 標準DB仕様の確定
 - `DB_DRIVER=libsql` を標準 driver とする接続仕様
 - `DB_URL` と `DB_AUTH_TOKEN` による接続先・認証情報の扱い
+- `@libsql/client v0.17.4` の承認済み例外ライブラリ採用
 - Database Gateway、Repository 層、driver 層の責務境界
 - libSQL 前提の schema、migration、seed 管理方針
 - 既存データ移行元確認用 SQLite の取扱境界
@@ -377,6 +381,7 @@ Phase 8.1 の完了条件は以下とする。
 - 1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、README の DB 方針が矛盾していない。
 - 実装が Database Gateway、Repository 層、driver 層の境界に従っていることを説明できる。
 - SQLite 互換維持を前提にした完了条件、検証条件、運用条件が残っていない。
+- `DB_DRIVER=sqlite` が通常運用経路として使われず、承認済みの移行元確認用ゲートを通した場合のみ使われる。
 - リポジトリ整合性確認を実施し、矛盾または古い表記を補正している。
 
 ### 8.8.5 Phase 8.5
