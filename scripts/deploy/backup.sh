@@ -13,7 +13,7 @@ DEPLOY_PORT="${DEPLOY_PORT:-22}"
 APP_ROOT="${APP_ROOT:-/opt/adlaire-git-repository}"
 SERVICE_NAME="${SERVICE_NAME:-adlaire-git-repository}"
 REMOTE_ENV_FILE="${REMOTE_ENV_FILE:-$APP_ROOT/shared/config/adlaire.env}"
-REMOTE_DATABASE_PATH="${REMOTE_DATABASE_PATH:-$APP_ROOT/shared/data/database/adlaire.sqlite3}"
+REMOTE_DATABASE_PATH="${REMOTE_DATABASE_PATH:-$APP_ROOT/shared/data/database/adlaire.libsql}"
 REMOTE_REPOSITORY_ROOT="${REMOTE_REPOSITORY_ROOT:-$APP_ROOT/shared/data/repositories}"
 
 require_value() {
@@ -41,9 +41,36 @@ timestamp=\$(date +%Y%m%d-%H%M%S)
 backup_dir="$APP_ROOT/shared/backups/\$timestamp"
 mkdir -p "\$backup_dir/database" "\$backup_dir/repositories" "\$backup_dir/config" "\$backup_dir/release"
 
-if [ -f "$REMOTE_DATABASE_PATH" ]; then
-  sqlite3 "$REMOTE_DATABASE_PATH" ".backup '\$backup_dir/database/adlaire.sqlite3'"
+service_was_active=no
+if command -v systemctl >/dev/null 2>&1 && systemctl is-active --quiet "$SERVICE_NAME"; then
+  service_was_active=yes
+  systemctl stop "$SERVICE_NAME"
 fi
+
+restart_service_if_needed() {
+  if [ "\$service_was_active" = yes ]; then
+    systemctl start "$SERVICE_NAME"
+  fi
+}
+trap restart_service_if_needed EXIT HUP INT TERM
+
+if [ -f "$REMOTE_DATABASE_PATH" ]; then
+  cp "$REMOTE_DATABASE_PATH" "\$backup_dir/database/"
+fi
+
+for suffix in -wal -shm; do
+  if [ -f "$REMOTE_DATABASE_PATH\$suffix" ]; then
+    cp "$REMOTE_DATABASE_PATH\$suffix" "\$backup_dir/database/"
+  fi
+done
+
+database_dir=\$(dirname "$REMOTE_DATABASE_PATH")
+if [ -d "\$database_dir" ]; then
+  find "\$database_dir" -maxdepth 1 -type f -name '*.libsql*' -exec cp {} "\$backup_dir/database/" \;
+fi
+
+trap - EXIT HUP INT TERM
+restart_service_if_needed
 
 if [ -d "$REMOTE_REPOSITORY_ROOT" ]; then
   tar -C "$REMOTE_REPOSITORY_ROOT" -czf "\$backup_dir/repositories/repositories.tar.gz" .
@@ -62,6 +89,7 @@ fi
 cat > "\$backup_dir/backup-manifest.txt" <<MANIFEST
 timestamp=\$timestamp
 service=$SERVICE_NAME
+service_was_active=\$service_was_active
 app_root=$APP_ROOT
 database=$REMOTE_DATABASE_PATH
 repositories=$REMOTE_REPOSITORY_ROOT

@@ -359,30 +359,30 @@ export class Phase3Service {
   }
 
   libsqlEvaluation(): {
-    readonly status: "not_adopted";
-    readonly driver: "sqlite";
+    readonly status: "adopted";
+    readonly driver: "libsql";
     readonly candidate: "libsql";
     readonly conclusion: string;
   } {
     return {
-      status: "not_adopted",
-      driver: "sqlite",
+      status: "adopted",
+      driver: "libsql",
       candidate: "libsql",
       conclusion:
-        "Phase 3 keeps SQLite as the active driver and preserves Database Gateway boundaries for future libSQL migration.",
+        "Phase 8 adopts libSQL as the standard driver while preserving Database Gateway boundaries.",
     };
   }
 
   operationsStatus(): {
-    readonly phase: "Phase 3";
+    readonly phase: "Phase 8";
     readonly runtime: "Deno";
-    readonly databaseDriver: "sqlite";
+    readonly databaseDriver: "libsql";
     readonly nodeRuntime: "forbidden";
   } {
     return {
-      phase: "Phase 3",
+      phase: "Phase 8",
       runtime: "Deno",
-      databaseDriver: "sqlite",
+      databaseDriver: "libsql",
       nodeRuntime: "forbidden",
     };
   }

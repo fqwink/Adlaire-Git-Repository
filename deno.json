@@ -1,16 +1,19 @@
 {
   "name": "adlaire-git-repository",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "license": "CLOSED",
   "exports": "./src/main.ts",
+  "imports": {
+    "@libsql/client": "npm:@libsql/client@0.17.4"
+  },
   "tasks": {
     "dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run src/main.ts",
     "fmt": "deno fmt deno.json src/ tests/",
     "lint": "deno lint",
     "test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/",
     "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo src/main.ts",
-    "compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.8-aarch64-unknown-linux-gnu src/main.ts",
-    "compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.8-x86_64-unknown-linux-gnu src/main.ts",
+    "compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.9-aarch64-unknown-linux-gnu src/main.ts",
+    "compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.9-x86_64-unknown-linux-gnu src/main.ts",
     "compile:release": "deno task compile:linux-arm64 && deno task compile:linux-x86_64",
     "docker:verify-build": "sh scripts/docker/verify-build.sh"
   },

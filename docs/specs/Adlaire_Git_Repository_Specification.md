@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.1.20
-**ステータス**: Phase 8 / Phase 9 仕様完成
+**文書バージョン**: v.1.21
+**ステータス**: Phase 8 libSQL driver 実装中
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -520,7 +520,7 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 - フレームワーク採用禁止（内製化のみ）
 - Deno 標準ライブラリを最優先候補とする。ただし、個別モジュールの採用はユーザー承認を必須とする
 - JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする
-- JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする
+- JSR レジストリの公開ライブラリであっても、npm 互換、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。承認済み例外ライブラリとして明記された場合を除き、`npm:` specifier を導入してはならない
 - JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする
 - クローズドライセンス、内部専用、非公開資産は JSR へ公開しない
 - クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする
@@ -542,6 +542,7 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
+| `@libsql/client` | `v0.17.4` | Phase 8 DB driver 実装の承認済み例外ライブラリ |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
@@ -557,7 +558,7 @@ SQLite 互換維持、SQLite 最小ローカル検証用運用、SQLite 標準DB
 
 libSQL は必要最小限の外部依存に該当するが、DB抽象化設計との相性、将来の同期・分散構成への拡張余地という採用メリットが高いため、標準データベースとして扱う。
 
-libSQL driver の実装は、Phase 計画、移行計画、検証計画、ユーザー承認を揃えてから行う。libSQL を採用する場合も、外部ライブラリAPIは内製 `libsql` driver と Database Gateway の内部に閉じ込め、サービス層やRepository層へ直接露出させない。
+libSQL driver は Phase 8 の承認済み実装対象とする。`@libsql/client v0.17.4` は承認済み例外ライブラリとして採用する。外部ライブラリAPIは内製 `libsql` driver と Database Gateway の内部に閉じ込め、サービス層やRepository層へ直接露出させない。
 
 Turso Cloud 等のクラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングは新しいデータベースエンジンではなく、libSQL の接続先または運用形態の候補として扱う。採用する場合は、外部サービス依存、データ所在、認証トークン管理、バックアップ、障害時の復旧、運用費用を評価し、例外採用としてユーザー承認を得る。
 
@@ -642,6 +643,7 @@ Phase 8 の DB 接続仕様は以下とする。
 | 標準 driver | `DB_DRIVER=libsql` |
 | 接続先 | `DB_URL` |
 | 認証情報 | `DB_AUTH_TOKEN` |
+| driver ライブラリ | `@libsql/client v0.17.4` を承認済み例外ライブラリとして使用 |
 | migration 適用 | Database Gateway 経由 |
 | schema / seed | 専用ディレクトリへ集約 |
 | SQLite | 既存データ移行元確認用。利用時は別途承認 |
@@ -763,26 +765,29 @@ Phase 9 で安定版リリースを行う場合、リリース履歴の正本は
 
 ---
 
-## deno.json v.1.8 安定版 baseline
+## deno.json v.1.9 Phase 8 baseline
 
 正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。
 
-初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。安定版リリース系列では正式表記を `v.{Major}.{Minor}` とし、`deno.json` 側では `{Major}.{Minor}.0` に対応させる。たとえば `1.8.0` は正式表記 `v.1.8` に対応する。
+初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。安定版リリース系列では正式表記を `v.{Major}.{Minor}` とし、`deno.json` 側では `{Major}.{Minor}.0` に対応させる。たとえば `1.9.0` は正式表記 `v.1.9` に対応する。
 
 ```json
 {
   "name": "adlaire-git-repository",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "license": "CLOSED",
   "exports": "./src/main.ts",
+  "imports": {
+    "@libsql/client": "npm:@libsql/client@0.17.4"
+  },
   "tasks": {
     "dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run src/main.ts",
     "fmt": "deno fmt deno.json src/ tests/",
     "lint": "deno lint",
     "test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/",
     "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo src/main.ts",
-    "compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.8-aarch64-unknown-linux-gnu src/main.ts",
-    "compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.8-x86_64-unknown-linux-gnu src/main.ts",
+    "compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.9-aarch64-unknown-linux-gnu src/main.ts",
+    "compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.9-x86_64-unknown-linux-gnu src/main.ts",
     "compile:release": "deno task compile:linux-arm64 && deno task compile:linux-x86_64",
     "docker:verify-build": "sh scripts/docker/verify-build.sh"
   },
@@ -812,6 +817,7 @@ adlaire-git-repository/
 │   ├── config.ts            (設定)
 │   ├── database/
 │   │   ├── gateway.ts       (Database Gateway)
+│   │   ├── libsql_driver.ts
 │   │   ├── schema.sql
 │   │   ├── sql.ts
 │   │   ├── sqlite_cli_driver.ts
@@ -945,7 +951,7 @@ deno task compile
 
 **構成**
 ```
-DB: /opt/adlaire-git-repository/shared/data/database/adlaire.sqlite3
+DB: /opt/adlaire-git-repository/shared/data/database/adlaire.libsql
 Git repos: /opt/adlaire-git-repository/shared/data/repositories/
 ログ: /opt/adlaire-git-repository/shared/logs/
 バックアップ: /opt/adlaire-git-repository/shared/backups/
@@ -961,7 +967,7 @@ Git repos: /opt/adlaire-git-repository/shared/data/repositories/
 **バックアップ戦略**
 標準バックアップ雛形は `scripts/deploy/backup.sh` とする。
 
-バックアップ対象は libSQL database、移行元 SQLite database、Git bare repository、設定、現行 release、backup manifest とする。
+バックアップ対象は libSQL database、移行元 SQLite database、Git bare repository、設定、現行 release、backup manifest とする。libSQL database のファイルバックアップは、標準雛形ではサービス停止を伴う cold backup とし、`sqlite3` CLI による SQLite backup API を標準前提にしない。
 
 定期実行は systemd timer を補助採用候補とし、実行間隔、保持期間、外部保管、暗号化、復元手順は `docs/policies/DEPLOYMENT_POLICY.md` に従い、ユーザー承認後に確定する。
 
@@ -971,7 +977,7 @@ Git repos: /opt/adlaire-git-repository/shared/data/repositories/
 
 **構成**
 ```
-DB: /opt/adlaire-git-repository/shared/data/database/adlaire.sqlite3
+DB: /opt/adlaire-git-repository/shared/data/database/adlaire.libsql
 Git repos: /opt/adlaire-git-repository/shared/data/repositories/
 ログ: /opt/adlaire-git-repository/shared/logs/
 バックアップ: /opt/adlaire-git-repository/shared/backups/
@@ -1710,7 +1716,7 @@ GitHub Actions と外部デプロイフレームワークは保留とする。Do
 
 Adlaire Deploy は仕様未定の将来候補とし、仕様確定まで採用・実装計画化しない。GitHub Actions と外部デプロイフレームワークは保留とし、必要性、依存関係、運用リスクを整理し、ユーザー承認を得るまで標準採用しない。
 
-Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Node.js系は不採用とする。Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。
+Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Node.js系は不採用とする。Node.js runtime、npm ecosystem、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。承認済み例外ライブラリとして明記された場合を除き、`npm:` specifier を導入してはならない。
 
 ローカルに Deno が存在しない場合、実行系検証はローカルで完了扱いにしない。この場合は、Deno 固定採用バージョンを満たす VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で、Deno task、内製検証スクリプト、`/health`、主要workflow確認を実施する。
 

@@ -59,6 +59,7 @@ check_required_paths() {
     src/domain/phase2.ts \
     src/database/types.ts \
     src/database/gateway.ts \
+    src/database/libsql_driver.ts \
     src/database/sql.ts \
     src/database/sqlite_cli_driver.ts \
     src/database/schema.sql \
@@ -139,8 +140,20 @@ check_forbidden_node_files() {
 }
 
 check_forbidden_unapproved_registries() {
-  if grep -R -n -E '["'\''](jsr|npm):' "$ROOT_DIR/src" "$ROOT_DIR/tests" "$ROOT_DIR/deno.json" >/dev/null 2>&1; then
+  if grep -R -n -E '["'\''](jsr|npm):' "$ROOT_DIR/src" "$ROOT_DIR/tests" "$ROOT_DIR/deno.json" \
+    | grep -v 'npm:@libsql/client@0.17.4' >/dev/null 2>&1; then
     echo "JSR/npm registry dependencies are not allowed without explicit approval and policy updates." >&2
+    exit 1
+  fi
+
+  if ! grep -F '"@libsql/client": "npm:@libsql/client@0.17.4"' deno.json >/dev/null 2>&1; then
+    echo "deno.json must pin the approved libSQL exception library." >&2
+    exit 1
+  fi
+
+  if grep -R -n 'from "@libsql/client"' "$ROOT_DIR/src" "$ROOT_DIR/tests" \
+    | grep -v 'src/database/libsql_driver.ts' >/dev/null 2>&1; then
+    echo "approved libSQL client imports must stay inside src/database/libsql_driver.ts." >&2
     exit 1
   fi
 }
@@ -166,12 +179,12 @@ check_deno_tasks() {
     exit 1
   fi
 
-  if ! grep -F '"compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.8-aarch64-unknown-linux-gnu src/main.ts"' deno.json >/dev/null 2>&1; then
+  if ! grep -F '"compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.9-aarch64-unknown-linux-gnu src/main.ts"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the Linux ARM64 release compile task." >&2
     exit 1
   fi
 
-  if ! grep -F '"compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.8-x86_64-unknown-linux-gnu src/main.ts"' deno.json >/dev/null 2>&1; then
+  if ! grep -F '"compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v1.9-x86_64-unknown-linux-gnu src/main.ts"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the Linux x86_64 release compile task." >&2
     exit 1
   fi
@@ -213,7 +226,6 @@ run_step "docker verify build script syntax check" \
 
 require_command deno
 require_command git
-require_command sqlite3
 
 mkdir -p "$TMP_DIR"
 

@@ -72,7 +72,7 @@ Adlaire Deploy は仕様未定の将来候補とする。仕様が確定する�
 │   ├── docker/
 │   │   ├── compose.yml
 │   │   └── images/
-│   │       └── adlaire-git-repo-v1.8.tar
+│   │       └── adlaire-git-repo-v1.9.tar
 │   └── service/
 │       └── adlaire-git-repository.service
 ├── env/
@@ -157,6 +157,8 @@ Adlaire Deploy の仕様が確定するまで、上記 script 群を標準デプ
 - 現行 Deno single binary
 - Docker 運用を選択している場合の現行 Docker image または image tag 情報
 - deploy manifest
+
+libSQL database のファイルバックアップは、標準雛形ではサービス停止を伴う cold backup とする。`sqlite3` CLI による SQLite backup API を標準前提にしてはならない。バックアップ前に service が稼働していた場合は、DB ファイルと関連 sidecar のコピー後に service を再起動する。
 
 バックアップは、復元可能性を検証できる形式で保存する。保存先、保持世代、暗号化、外部退避の有無は、デプロイ先決定時にユーザー承認を得る。
 

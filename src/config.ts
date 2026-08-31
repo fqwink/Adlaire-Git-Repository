@@ -7,14 +7,16 @@ export interface AppConfig {
 }
 
 export interface DatabaseConfig {
-  readonly driver: "sqlite";
+  readonly driver: "libsql" | "sqlite";
   readonly url: string;
   readonly authToken?: string;
 }
 
 export function loadConfig(env: Deno.Env = Deno.env): AppConfig {
   const dataDir = env.get("ADLAIRE_DATA_DIR") ?? "./data";
-  const databaseUrl = env.get("DB_URL") ?? `${dataDir}/adlaire.sqlite3`;
+  const databaseDriver = readDatabaseDriver(env.get("DB_DRIVER"));
+  const databaseUrl = env.get("DB_URL") ??
+    defaultDatabaseUrl(databaseDriver, dataDir);
 
   return {
     host: env.get("ADLAIRE_HOST") ?? "127.0.0.1",
@@ -23,7 +25,7 @@ export function loadConfig(env: Deno.Env = Deno.env): AppConfig {
     repositoryRoot: env.get("ADLAIRE_REPOSITORY_ROOT") ??
       `${dataDir}/repositories`,
     database: {
-      driver: readDatabaseDriver(env.get("DB_DRIVER")),
+      driver: databaseDriver,
       url: databaseUrl,
       authToken: env.get("DB_AUTH_TOKEN") ?? undefined,
     },
@@ -42,10 +44,20 @@ function readPort(value: string | undefined): number {
   return port;
 }
 
-function readDatabaseDriver(value: string | undefined): "sqlite" {
-  const driver = value ?? "sqlite";
-  if (driver !== "sqlite") {
-    throw new Error("Phase 1 supports DB_DRIVER=sqlite only.");
+function readDatabaseDriver(value: string | undefined): "libsql" | "sqlite" {
+  const driver = value ?? "libsql";
+  if (driver === "libsql" || driver === "sqlite") {
+    return driver;
   }
-  return "sqlite";
+  throw new Error("DB_DRIVER must be libsql or sqlite.");
+}
+
+function defaultDatabaseUrl(
+  driver: "libsql" | "sqlite",
+  dataDir: string,
+): string {
+  if (driver === "sqlite") {
+    return `${dataDir}/adlaire.sqlite3`;
+  }
+  return `file:${dataDir}/adlaire.libsql`;
 }

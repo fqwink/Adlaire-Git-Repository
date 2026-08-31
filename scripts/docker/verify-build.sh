@@ -27,9 +27,9 @@ PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH" exec "$DOCKER_BIN" 
   -w /workspace \
   -e DENO_DIR=/deno-dir \
   "$IMAGE" -eu -c '
-    if ! command -v sqlite3 >/dev/null 2>&1 || ! command -v git >/dev/null 2>&1; then
+    if ! command -v git >/dev/null 2>&1; then
       apt-get update
-      apt-get install -y --no-install-recommends sqlite3 git ca-certificates
+      apt-get install -y --no-install-recommends git ca-certificates
       rm -rf /var/lib/apt/lists/*
     fi
 

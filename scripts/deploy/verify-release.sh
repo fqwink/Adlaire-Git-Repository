@@ -13,7 +13,7 @@ DEPLOY_PORT="${DEPLOY_PORT:-22}"
 APP_ROOT="${APP_ROOT:-/opt/adlaire-git-repository}"
 SERVICE_NAME="${SERVICE_NAME:-adlaire-git-repository}"
 HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:8080/health}"
-REMOTE_DATABASE_PATH="${REMOTE_DATABASE_PATH:-$APP_ROOT/shared/data/database/adlaire.sqlite3}"
+REMOTE_DATABASE_PATH="${REMOTE_DATABASE_PATH:-$APP_ROOT/shared/data/database/adlaire.libsql}"
 REMOTE_REPOSITORY_ROOT="${REMOTE_REPOSITORY_ROOT:-$APP_ROOT/shared/data/repositories}"
 
 require_value() {
@@ -54,8 +54,6 @@ if [ ! -d "$REMOTE_REPOSITORY_ROOT" ]; then
   echo "missing repository root: $REMOTE_REPOSITORY_ROOT" >&2
   exit 1
 fi
-
-sqlite3 "$REMOTE_DATABASE_PATH" 'PRAGMA quick_check;' | grep -F 'ok' >/dev/null
 
 echo "deploy-release-verify-ok"
 EOF

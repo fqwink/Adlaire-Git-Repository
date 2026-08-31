@@ -1,7 +1,7 @@
 import { createApp } from "../../src/server.ts";
 import { assert, assertEquals } from "../support/assert.ts";
 
-Deno.test("phase 7 home UI exposes release-judgment baseline and workflow layout", async () => {
+Deno.test("home UI exposes current Phase 8 baseline and workflow layout", async () => {
   const root = await Deno.makeTempDir();
   const app = await createApp({
     host: "127.0.0.1",
@@ -9,8 +9,8 @@ Deno.test("phase 7 home UI exposes release-judgment baseline and workflow layout
     dataDir: root,
     repositoryRoot: `${root}/repositories`,
     database: {
-      driver: "sqlite",
-      url: `${root}/adlaire.sqlite3`,
+      driver: "libsql",
+      url: `file://${root}/adlaire.libsql`,
     },
   });
 
@@ -24,8 +24,8 @@ Deno.test("phase 7 home UI exposes release-judgment baseline and workflow layout
 
     const html = await response.text();
     assert(
-      html.includes("Phase 7 / v.1.8"),
-      "Home UI must expose the Phase 7 stable release baseline.",
+      html.includes("Phase 8 / v.1.9"),
+      "Home UI must expose the current Phase 8 baseline.",
     );
     assert(html.includes('id="register-form"'));
     assert(html.includes('id="token-form"'));

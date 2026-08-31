@@ -253,6 +253,7 @@ TypeScript は **6系の最新安定版** を採用方針とする。Deno に同
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
+| `@libsql/client` | `v0.17.4` | Phase 8 DB driver 実装の承認済み例外ライブラリ |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
@@ -266,7 +267,7 @@ Deno single binary を正本成果物とする。Docker は正本成果物では
 
 Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として扱い、host filesystem を正本として system 側から分離する。
 
-Docker を利用する場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
+Docker を利用する場合も、Node.js runtime、npm ecosystem、`package.json`、`node_modules` を導入してはならない。承認済み例外ライブラリとして明記された場合を除き、`npm:` specifier を導入してはならない。
 
 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
@@ -297,6 +298,7 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - npm registry 互換レジストリは、Node.js / npm ecosystem リスクと衝突するため標準採用しない。
 - 外部ライブラリを採用する場合は、必要最小限であることを前提とし、必ず **例外採用** として指定したうえでユーザー承認を得る。
 - 例外採用した外部ライブラリは、アプリケーション全体へ直接露出させず、内製ラッパー、内製driver、または内製Gatewayの内部に閉じ込める。外部ライブラリを使う場合も、設計上は内製化された境界を通して利用する。
+- Phase 8 DB driver 実装に限り、`@libsql/client v0.17.4` を承認済み例外ライブラリとする。この承認は npm ecosystem の一般採用を意味せず、利用範囲は2類技術要件ポリシーと3類マスター仕様書に従う。
 - Node.js ランタイムの採用は禁止する。
 - npm パッケージ、Node.js 前提ツール、webpack、jest 等の導入は禁止する。ただし、実行時ランタイムに Node.js を含まず、Deno 方針を破らない開発補助用途に限り、外部ツールの例外採用として1類ルールブックおよび2類ポリシーで許可し、3類マスター仕様書に承認理由を記載し、ユーザー承認を得てから行う。
 - セキュリティ・暗号・認証に関わる処理を独自実装する場合は、3類マスター仕様書にリスクと検証方針を記載する。

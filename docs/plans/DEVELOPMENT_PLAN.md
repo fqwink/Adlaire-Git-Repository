@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.1.20
-**現行フェーズ基準バージョン**: v.1.8
-**ステータス**: Phase 8 / Phase 9 仕様完成
+**計画バージョン**: v.1.21
+**現行フェーズ基準バージョン**: v.1.9
+**ステータス**: Phase 8 libSQL driver 実装中
 
 ---
 
@@ -16,7 +16,7 @@
 
 実装は、1類ルールブック、2類ポリシー、3類マスター仕様書に従い、本書で定義したフェーズ計画に基づいて進める。
 
-Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱うが、`deno.json` の内部バージョン更新は実装設定変更に該当するため、別途ユーザー承認を得るまで現行フェーズ基準バージョンは `v.1.8` を維持する。Phase 8 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
+Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱う。ユーザー承認に基づき、Phase 8 の現行フェーズ基準バージョンは `v.1.9` とし、`deno.json` の内部バージョンは `1.9.0` と対応させる。Phase 8 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
 
 本計画における「マスター仕様完成」は、実装承認ではない。仕様完成後にソースコード実装、DB driver 実装、schema 変更、テスト変更、デプロイ実行を行う場合は、対象範囲と検証方法を提示し、別途ユーザー承認を得る。
 
@@ -141,7 +141,7 @@ Deno single binary 形式を正本成果物とする。Docker は、正本成果
 
 Deno 標準ライブラリを最優先候補とする。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 
-JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする。JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。JSR へ公開する package は、公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
+JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする。JSR レジストリの公開ライブラリであっても、npm 互換、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。承認済み例外ライブラリとして明記された場合を除き、`npm:` specifier を導入してはならない。JSR へ公開する package は、公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
 
 クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
 
@@ -157,6 +157,7 @@ TypeScript は **6系の最新安定版** を採用方針とする。Deno に同
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
+| `@libsql/client` | `v0.17.4` | Phase 8 DB driver 実装の承認済み例外ライブラリ |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 エージェントは、候補提示、比較、調査、リスク整理、推奨案の提示を行ってよい。ただし、ユーザーの明示承認なしに採用決定、バージョン固定、方針確定、実装反映を行ってはならない。
 
@@ -932,6 +933,7 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 - libSQL 標準DB仕様の確定
 - `DB_DRIVER=libsql` を標準 driver とする接続仕様
 - `DB_URL` と `DB_AUTH_TOKEN` による接続先・認証情報の扱い
+- `@libsql/client v0.17.4` の承認済み例外ライブラリ採用
 - Database Gateway、Repository 層、driver 層の責務境界
 - libSQL 前提の schema、migration、seed 管理方針
 - 既存データ移行元確認用 SQLite の取扱境界
@@ -954,6 +956,7 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 ### 13.4.2 必須検証
 
 - 標準 driver が `DB_DRIVER=libsql` として定義されていること
+- `@libsql/client v0.17.4` が内製 `LibsqlDriver` の内部だけで利用されていること
 - SQLite が既存データ移行元確認用に限定されていること
 - Database Gateway、Repository 層、driver 層の責務境界が仕様書と矛盾していないこと
 - DB driver 固有 API が上位層へ漏れない構成になっていること
@@ -1202,3 +1205,4 @@ Phase 9 はリリース実行を自動承認しない。tag 作成、GitHub Rele
 | v.1.18 | Phase 8 | v.1.9 | Adlaire Deploy を仕様未定の将来候補へ戻し、当面は Adlaire Git Repository 本体優先の長期運用準備へ整理 |
 | v.1.19 | Phase 8 / Phase 9 | v.1.9 / v.2.10 | Phase 8 をDBフェーズへ再定義し、Phase 8.1本体整合性、Phase 8.5システム分割、Phase 8.7安定化、Phase 9安定版判定へ整理 |
 | v.1.20 | Phase 8 / Phase 9 | v.1.9 / v.2.10 | Phase 8 をDB仕様完成、Phase 8.1を本体整合性、Phase 8.5をsystem/data分離、Phase 8.7を安定化、Phase 9を安定版判定として、対象、対象外、検証範囲、完了条件まで具体化 |
+| v.1.21 | Phase 8 | v.1.9 | `@libsql/client v0.17.4` を承認済み例外ライブラリとして採用し、libSQL driver 実装、標準DB設定、検証導線、デプロイDB配置例をPhase 8現行状態へ整合 |

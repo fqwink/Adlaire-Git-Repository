@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**現行フェーズ**: Phase 8 / Phase 9 仕様完成 / v.1.8 baseline
+**現行フェーズ**: Phase 8 libSQL driver 実装中 / v.1.9 baseline
 **直近安定版リリース**: Phase 7 / v.1.8
 
 ## ドキュメント
@@ -56,7 +56,7 @@
 
 Adlaire Deploy は仕様未定の将来候補である。仕様が確定するまで3類マスター仕様書として扱わず、当面は Adlaire Git Repository 本体の開発、整合性向上、運用基盤整備を優先する。
 
-3類マスター仕様書は、Phase 8 / Phase 9 仕様完成版として、現行正本仕様、フェーズ別履歴、保留候補、対象外範囲を分離して管理する。Phase 7 / `v.1.8` は初回安定版リリース済みの履歴であり、Phase 8 以降の仕様判断では現行正本仕様を参照する。
+3類マスター仕様書は、Phase 8 の現行正本仕様、フェーズ別履歴、保留候補、対象外範囲を分離して管理する。Phase 7 / `v.1.8` は初回安定版リリース済みの履歴であり、Phase 8 以降の仕様判断では現行正本仕様を参照する。
 
 本プロジェクトの変更が AdlaireGroup 共通方針に該当する場合は、`docs/tpl-governance/` の更新要否を判定し、必要な場合は同一変更範囲で雛形も整合させる。
 
@@ -69,6 +69,8 @@ Deno single binary を正本成果物とする。Docker は正本成果物であ
 最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として `shared/` 配下に分離し、host filesystem を正本とする。Deno single binary、Docker image / container、起動管理定義は差し替え可能な system 側として扱う。
 
 標準データベースは libSQL とする。SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。クラウドDBホスティングは未定であり、採用する場合も `DB_DRIVER=libsql` の接続先差し替えとして扱う。
+
+Phase 8 では `@libsql/client v0.17.4` を承認済み例外ライブラリとして採用し、`src/database/libsql_driver.ts` と Database Gateway の内部に閉じ込める。これは npm ecosystem の一般採用を意味しない。
 
 ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。Docker で検証、テスト、ビルド、binary 生成をまとめて実行する場合は、`scripts/docker/verify-build.sh` を使う。
 
