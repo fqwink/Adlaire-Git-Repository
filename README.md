@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**現行フェーズ**: Phase 10 Adlaire Deploy 仕様固定 / v.2.10 baseline
+**現行フェーズ**: Phase 10 リリース配置 GitHub Releases 一本化 / v.2.10 baseline
 **直近安定版リリース**: Phase 7 / v.1.8
 
 ## ドキュメント
@@ -48,16 +48,13 @@
     │   └── LICENSE_POLICY.md
     ├── specs/
     │   ├── Auris_System_Design.md
-    │   ├── Adlaire_Git_Repository_Specification.md
-    │   └── Adlaire_Deploy_Specification.md
+    │   └── Adlaire_Git_Repository_Specification.md
     └── tpl-governance/
         ├── core/
         └── policy-slots/
 ```
 
 `AGENTS.md` は本リポジトリの最上位ルールブックである。`docs/DOCUMENT_INDEX.md` は参照索引であり、正本ではない。`docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` は2類ドキュメント群の総則であり、ドキュメント憲章と責務別ポリシーは `docs/policies/` 配下で管理する。`docs/specs/Auris_System_Design.md` は、3類マスター仕様書群におけるシステム全体の最上位マスター仕様書である。`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` は候補整理の正本であり、実装承認ではない。`docs/tpl-governance/` は AdlaireGroup 関連プロジェクト、プロダクトへ共通展開する共通ガバナンス雛形の正本であり、現行プロジェクト固有の正本ではない。ソースコード実装作業は、1類ルールブック、2類ドキュメント群、3類マスター仕様書、`docs/plans/DEVELOPMENT_PLAN.md` の承認済みフェーズ計画に基づいて行う。
-
-Adlaire Deploy は Phase 10 の着手対象である。Adlaire Git Repository 本体へ統合せず、DB 不使用の付随システムとして同居・連携し、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。Adlaire Deploy 専用 database は持たず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。標準実行主体は `adlaire-deploy` CLI とし、JSON deployment manifest を正規入力として、`plan`、`verify`、`dry-run`、`apply-system`、`rollback-system` を扱う。VPS、self-host、専用サーバーでは SSH 使用可能を最低必須条件とする。Deno Deploy 環境対応は白紙とする。詳細は [docs/specs/Adlaire_Deploy_Specification.md](./docs/specs/Adlaire_Deploy_Specification.md) を参照する。
 
 3類マスター仕様書は、Phase 8 の現行正本仕様、フェーズ別履歴、保留候補、対象外範囲を分離して管理する。Phase 7 / `v.1.8` は初回安定版リリース済みの履歴であり、Phase 8 以降の仕様判断では現行正本仕様を参照する。
 
@@ -81,8 +78,10 @@ libSQL は必要最小限の外部依存例外として扱うが、npm 互換 pa
 
 標準デプロイ雛形は [scripts/deploy/](./scripts/deploy/) で管理する。`deploy.env.example` を基準に環境固有値を定義し、`deploy.sh`、`backup.sh`、`verify-server.sh`、`verify-release.sh`、`rollback.sh` を承認済み範囲で実行する。実値を含む環境設定、接続先、秘密情報はコミットしてはならない。
 
+リリース配置は GitHub Releases へ一本化する。Deno single binary、release notes、checksum、manifest は GitHub Releases 側へ配置し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない。
+
 Phase 8.5 では、標準アプリケーション設定と標準デプロイ雛形を system / data 分離構成へ整合した。`ADLAIRE_APP_ROOT=/opt/adlaire-git-repository` を基準に、稼働版 release / current は `system/` 側、libSQL database、Git bare repositories、config、secrets、logs、backups、manifests は `shared/` 側へ分離する。
 
 安定版リリースの標準 Linux バイナリは、ARM64 と x86_64 の2種類を正本成果物とする。VPS デプロイ時は `uname -m` で `aarch64` または `x86_64` を確認し、対象アーキテクチャの Deno single binary を配置する。Docker を選択する場合は、その正本 binary を Docker image に同梱して配置する。
 
-Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして完了済みである。Phase 8 はDB仕様完成としてlibSQL標準化を扱う。Phase 8.1 は本体整合性、Phase 8.5 はAdlaire Git Repository本体とデータ領域の分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備を扱う。`v.2.10` の公開配布は保留し、Phase 10 では Adlaire Deploy を主対象として、DB 不使用で binary 正本成果物の配布・取得・検証・配置を内製化し、実行主体、標準コマンド、manifest、artifact、SSH target、preflight、出力、error、security / data 保護を仕様固定する。
+Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして完了済みである。Phase 8 はDB仕様完成としてlibSQL標準化を扱う。Phase 8.1 は本体整合性、Phase 8.5 はAdlaire Git Repository本体とデータ領域の分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備を扱う。`v.2.10` の公開配布は保留し、Phase 10 ではリリース配置を GitHub Releases へ一本化するためのドキュメント整合性と運用方針整理を扱う。

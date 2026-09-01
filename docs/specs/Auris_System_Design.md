@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.2.16
-**ステータス**: libSQL 標準DB確定と Deno 専用 driver 条件整合
+**文書バージョン**: v.2.17
+**ステータス**: GitHub Releases リリース配置一本化方針整合
 
 ---
 
@@ -170,7 +170,7 @@ Git ホスティング本体は、Git bare repository の永続保存、`git` �
 
 本番サーバ環境へのデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Deno single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。Adlaire Deploy は Phase 10 の着手対象とし、DB 不使用の `adlaire-deploy` CLI として、JSON deployment manifest、Deno single binary 正本成果物の取得、checksum 検証、preflight、plan / result / error、配置、backup、rollback を扱う付随システムとする。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
+標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Deno single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。リリース配置は GitHub Releases へ一本化する。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
 
 Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
@@ -185,7 +185,6 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 | ドキュメント | 役割 |
 |---|---|
 | `docs/specs/Adlaire_Git_Repository_Specification.md` | Git ホスティング基盤本体の仕様 |
-| `docs/specs/Adlaire_Deploy_Specification.md` | Adlaire Deploy の仕様。付随システム、CLI、JSON manifest、binary 取得、検証、配置、backup、rollback、plan / result / error、security / data 保護の基準 |
 
 ---
 
@@ -194,7 +193,6 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 現行正本仕様は以下とする。
 
 - Adlaire Git Repository は、Adlaire Group 内部向けのセルフホスト型 Git ホスティング基盤である。
-- Adlaire Deploy は Phase 10 の着手対象であり、DB 不使用の付随システムとして個別3類マスター仕様書を持つ。
 - 基本的な機能互換は GitHub 互換基準とする。
 - UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換対象外とする。
 - 標準ランタイムは Deno、標準言語は TypeScript とする。
@@ -206,21 +204,18 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - Docker 使用時も非 Docker の binary 直実行時も、system 側と data 側を分離する。
 - data 側は host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
 - 標準運用基盤は self-host、VPS、専用サーバーを前提とする。
+- リリース配置は GitHub Releases へ一本化する。
 - Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。
 - Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく将来候補として保留する。
 - Node.js runtime、npm ecosystem、npm 依存、外部フレームワーク、無承認外部ライブラリは採用しない。
 
-## 6.1 Adlaire Deploy
+## 6.1 リリース配置
 
-Adlaire Deploy は、Adlaire Git Repository の付随システムである。
+リリース配置は GitHub Releases へ一本化する。
 
-Adlaire Deploy は Adlaire Git Repository 本体へ統合せず、同居・連携する。標準実行主体は `adlaire-deploy` CLI とし、JSON deployment manifest を正規入力として、Deno single binary 正本成果物の取得、checksum 検証、preflight、配置、backup、rollback、plan / result / error 記録を扱う。
+Deno single binary、release notes、checksum、manifest は GitHub Releases 側へ配置する。リポジトリ内に、変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持してはならない。
 
-Adlaire Deploy は専用 database を持たず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。計画、結果、検証記録は host filesystem 上の manifest、plan、log として扱う。
-
-VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可能を最低必須条件とする。`plan`、`verify`、`dry-run` は system 側と data 側を変更せず、`apply-system` と `rollback-system` は別途ユーザー承認を得た範囲で system 側のみを変更する候補として扱う。
-
-Adlaire Deploy の詳細仕様は `docs/specs/Adlaire_Deploy_Specification.md` を正本とする。
+GitHub Releases の作成、成果物配置、release notes 公開、tag 作成は、リリース提案を提示し、ユーザー承認を得てから実行する。
 
 ## 7. 完成判定
 
@@ -468,48 +463,19 @@ Phase 9 の完了条件は以下とする。
 
 ### 8.10 Phase 10
 
-基準バージョン: `v.2.11`
+基準バージョン: `v.2.10`
 
-Phase 10 は、Adlaire Deploy の着手フェーズである。
+Phase 10 は、リリース配置を GitHub Releases へ一本化するための整合フェーズである。
 
-Phase 10 では、Adlaire Deploy を Adlaire Git Repository の付随システムとして定義し、`adlaire-deploy` CLI、JSON deployment manifest、Deno single binary 正本成果物の取得、checksum 検証、preflight、配置、backup、rollback、plan / result / error 記録を扱う内製デプロイメントシステムとして整備する。
+Phase 10 では、Deno single binary、release notes、checksum、manifest の配置先を GitHub Releases に統一し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない方針を明確にする。
 
-Adlaire Deploy は DB 不使用とし、専用 database を作成せず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。連携は release manifest、JSON deployment manifest、artifact、checksum、health check endpoint、標準デプロイ雛形、filesystem path、command execution、SSH、plan / result / error の境界で行う。
-
-VPS、self-host、専用サーバーは SSH 使用可能を最低必須条件とする。
-
-Phase 10 の対象外は以下とする。
-
-- Adlaire Deploy 専用 database
-- Adlaire Git Repository 本体 database への直接接続
-- database schema 変更
-- database migration 実行
-- database query 実行
-- database restore 自動実行
-- Docker image 配布の正式化
-- Container registry
-- GitHub Actions
-- 外部デプロイフレームワーク
-- Node.js / npm 前提ツール
-- 初回から本番サーバへ破壊的変更を行う remote deploy 実行
-- 本番データ復元の自動実行
-- rollback の data 復元自動実行
-- SSH を使用できない VPS、self-host、専用サーバーへの標準対応
-- 複数サーバー同時 rolling deploy
-- blue-green deployment
-- zero downtime 切替
-- GUI
-- SaaS 型クラウドデプロイ基盤
+Phase 10 では、新しい内製デプロイメントシステム、GitHub Actions、外部デプロイフレームワーク、Container registry、Docker image 配布の正式化、Node.js / npm 前提ツールは対象外とする。
 
 Phase 10 の完了条件は以下とする。
 
-- Adlaire Deploy が3類マスター仕様書として定義されている。
-- Adlaire Deploy の実行主体、標準コマンド、manifest、artifact、target / SSH、preflight、出力、error 分類、security / data 保護が仕様固定されている。
-- Adlaire Deploy が DB 不使用の付随システムとして定義されている。
-- Adlaire Deploy が保留候補ではなく Phase 10 の正式着手対象として整理されている。
-- Adlaire Git Repository 本体と Adlaire Deploy の責務境界を説明できる。
-- VPS、self-host、専用サーバーでは SSH 使用可能を最低必須条件として定義している。
-- Deno single binary 正本成果物、system / data 分離、標準デプロイ雛形との整合が取れている。
+- リリース配置が GitHub Releases へ一本化されている。
+- 3類マスター仕様書、2類リリースポリシー、2類デプロイポリシー、マスター開発計画、README の記述が矛盾していない。
+- 標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Deno single binary を本番サーバへ反映する補助導線として説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
 ---
