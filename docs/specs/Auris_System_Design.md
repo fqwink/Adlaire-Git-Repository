@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.2.10
-**ステータス**: Phase 9 安定版判定・リリース準備
+**文書バージョン**: v.2.11
+**ステータス**: Phase 10 Adlaire Deploy 着手
 
 ---
 
@@ -163,7 +163,7 @@ Git ホスティング本体は、Git bare repository の永続保存、`git` �
 
 本番サーバ環境へのデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Deno single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。Adlaire Deploy は仕様未定の将来候補とし、仕様確定まで採用・実装計画化しない。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
+標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Deno single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。Adlaire Deploy は Phase 10 の着手対象とし、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う付随システムとする。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。採用を検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
 
@@ -178,6 +178,7 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 | ドキュメント | 役割 |
 |---|---|
 | `docs/specs/Adlaire_Git_Repository_Specification.md` | Git ホスティング基盤本体の仕様 |
+| `docs/specs/Adlaire_Deploy_Specification.md` | Adlaire Deploy の仕様。付随システム、binary 取得、検証、配置、backup、rollback、manifest 記録の基準 |
 
 ---
 
@@ -186,7 +187,7 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 現行正本仕様は以下とする。
 
 - Adlaire Git Repository は、Adlaire Group 内部向けのセルフホスト型 Git ホスティング基盤である。
-- Adlaire Deploy は仕様未定の将来候補であり、現行正本仕様、3類マスター仕様書、実装対象として扱わない。
+- Adlaire Deploy は Phase 10 の着手対象であり、付随システムとして個別3類マスター仕様書を持つ。
 - 基本的な機能互換は GitHub 互換基準とする。
 - UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換対象外とする。
 - 標準ランタイムは Deno、標準言語は TypeScript とする。
@@ -201,13 +202,13 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく将来候補として保留する。
 - Node.js runtime、npm ecosystem、外部フレームワーク、無承認外部ライブラリは採用しない。
 
-## 6.1 将来候補
+## 6.1 Adlaire Deploy
 
-Adlaire Deploy は、仕様未定の将来候補である。
+Adlaire Deploy は、Adlaire Git Repository の付随システムである。
 
-仕様確定まで、Adlaire Deploy を公式付随システム、3類マスター仕様書、実装対象、推奨候補フェーズとして扱わない。
+Adlaire Deploy は Adlaire Git Repository 本体へ統合せず、同居・連携する。Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。
 
-当面は Adlaire Git Repository 本体の長期運用準備、標準デプロイ雛形、検証導線、リポジトリ整合性向上を優先する。
+Adlaire Deploy の詳細仕様は `docs/specs/Adlaire_Deploy_Specification.md` を正本とする。
 
 ## 7. 完成判定
 
@@ -451,6 +452,40 @@ Phase 9 の完了条件は以下とする。
 - ARM64 と x86_64 の Linux binary 成果物方針を説明できる。
 - 安定版リリースを行う場合は、別途ユーザー承認を得ている。
 - Phase 9 のバグ精査で追加の既知バグが確認されない、または確認されたバグが修正済みである。
+
+### 8.10 Phase 10
+
+基準バージョン: `v.2.11`
+
+Phase 10 は、Adlaire Deploy の着手フェーズである。
+
+Phase 10 では、Adlaire Deploy を Adlaire Git Repository の付随システムとして定義し、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う内製デプロイメントシステムとして整備する。
+
+Adlaire Deploy は Adlaire Git Repository 本体へ統合しない。連携は release manifest、checksum、health check endpoint、標準デプロイ雛形、filesystem path、command execution の境界で行う。
+
+Phase 10 の対象外は以下とする。
+
+- Docker image 配布の正式化
+- Container registry
+- GitHub Actions
+- 外部デプロイフレームワーク
+- Node.js / npm 前提ツール
+- 初回から本番サーバへ破壊的変更を行う remote deploy 実行
+- 本番データ復元の自動実行
+- rollback の data 復元自動実行
+- 複数サーバー同時 rolling deploy
+- blue-green deployment
+- zero downtime 切替
+- GUI
+- SaaS 型クラウドデプロイ基盤
+
+Phase 10 の完了条件は以下とする。
+
+- Adlaire Deploy が3類マスター仕様書として定義されている。
+- Adlaire Deploy が保留候補ではなく Phase 10 の正式着手対象として整理されている。
+- Adlaire Git Repository 本体と Adlaire Deploy の責務境界を説明できる。
+- Deno single binary 正本成果物、system / data 分離、標準デプロイ雛形との整合が取れている。
+- リポジトリ整合性確認と整合性向上を完了している。
 
 ---
 

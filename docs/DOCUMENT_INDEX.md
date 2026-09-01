@@ -2,7 +2,7 @@
 
 **位置づけ**: 参照索引
 **責務**: ドキュメント一覧、参照順序、読了対象、役割確認
-**ステータス**: Phase 9 安定版判定・リリース準備
+**ステータス**: Phase 10 Adlaire Deploy 着手
 
 ---
 
@@ -65,6 +65,7 @@
 |---|---|
 | `docs/specs/Auris_System_Design.md` | システム全体のマスター仕様書。機能範囲、アーキテクチャ、非機能要件、セキュリティ方針の基準 |
 | `docs/specs/Adlaire_Git_Repository_Specification.md` | Adlaire Git Repository 本体のマスター仕様書 |
+| `docs/specs/Adlaire_Deploy_Specification.md` | Adlaire Deploy のマスター仕様書。付随システム、binary 取得、検証、配置、backup、rollback、manifest 記録の基準 |
 
 3類マスター仕様書は、現行正本仕様、フェーズ別履歴、保留候補、対象外範囲を分離して読む。Phase 7 初回安定版リリース `v.1.8` は履歴として保持し、Phase 8 / Phase 9 以降の仕様判断では、各マスター仕様書の現行正本仕様、2類ポリシー、マスター開発計画を基準にする。
 
