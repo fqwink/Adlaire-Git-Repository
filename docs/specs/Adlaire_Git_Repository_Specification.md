@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.11
-**ステータス**: Phase 10 Adlaire Deploy 着手
+**文書バージョン**: v.2.12
+**ステータス**: Phase 10 Adlaire Deploy DB 不使用仕様確定
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -69,7 +69,7 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - data 側は host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
 - Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。
 - Node.js runtime、npm ecosystem、外部フレームワーク、無承認外部ライブラリは採用しない。
-- Adlaire Deploy は Phase 10 の着手対象であり、Adlaire Git Repository 本体へ統合せず、付随システムとして同居・連携する。
+- Adlaire Deploy は Phase 10 の着手対象であり、Adlaire Git Repository 本体へ統合せず、DB 不使用の付随システムとして同居・連携する。
 
 ## マスター仕様完成条件
 
@@ -574,7 +574,7 @@ Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用
 
 本番サーバ環境へのデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-Adlaire Deploy は Phase 10 の着手対象であり、個別3類マスター仕様書 `docs/specs/Adlaire_Deploy_Specification.md` を正本とする。Adlaire Git Repository 本体へ統合せず、付随システムとして同居・連携し、Release manifest、checksum、health check endpoint、Audit log、標準デプロイ雛形の境界を保持する。
+Adlaire Deploy は Phase 10 の着手対象であり、個別3類マスター仕様書 `docs/specs/Adlaire_Deploy_Specification.md` を正本とする。Adlaire Git Repository 本体へ統合せず、DB 不使用の付随システムとして同居・連携し、Release manifest、checksum、health check endpoint、Audit log、標準デプロイ雛形、SSH、filesystem path の境界を保持する。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
 
@@ -762,7 +762,9 @@ Phase 9 で安定版リリースを行う場合、リリース履歴の正本は
 
 Phase 10 は、Adlaire Deploy の着手フェーズである。
 
-Adlaire Git Repository 本体は、Adlaire Deploy を内部統合しない。Adlaire Deploy は付随システムとして同居・連携し、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。
+Adlaire Git Repository 本体は、Adlaire Deploy を内部統合しない。Adlaire Deploy は DB 不使用の付随システムとして同居・連携し、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。
+
+Adlaire Deploy は、Adlaire Deploy 専用 database を持たず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。Adlaire Git Repository 本体は、Deploy 用 database schema、Deploy 用 migration、Deploy 用 application API を Phase 10 の前提として追加しない。
 
 Adlaire Git Repository 本体が Phase 10 で提供または維持する連携境界は以下とする。
 
@@ -772,9 +774,10 @@ Adlaire Git Repository 本体が Phase 10 で提供または維持する連携�
 - 標準デプロイ雛形
 - system / data 分離済み filesystem path
 - deploy manifest 保存先
+- SSH 接続前提
 - audit log 連携余地
 
-Phase 10 では、Docker image 配布の正式化、Container registry、GitHub Actions、外部デプロイフレームワーク、Node.js / npm 前提ツール、本番データ復元の自動実行は対象外とする。
+Phase 10 では、Adlaire Deploy 専用 database、Adlaire Git Repository 本体 database への直接接続、database schema 変更、database migration 実行、database restore 自動実行、Docker image 配布の正式化、Container registry、GitHub Actions、外部デプロイフレームワーク、Node.js / npm 前提ツール、本番データ復元の自動実行、SSH を使用できない VPS、self-host、専用サーバーへの標準対応は対象外とする。
 
 `deno.json` の内部バージョン更新、Adlaire Deploy の実装コード追加、デプロイ実行、成果物配置は、対象範囲と検証方法を提示し、別途ユーザー承認を得てから行う。
 
@@ -1720,7 +1723,7 @@ CI/CD とデプロイ自動化は、`docs/policies/DEPLOYMENT_POLICY.md` を正�
 
 shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とする。`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
 
-Adlaire Deploy は Phase 10 の着手対象とし、Adlaire Git Repository 本体へ統合せず、付随システムとして同居・連携する。shell script 運用で固まった要件は、Adlaire Deploy の移行元・暫定標準として扱う。
+Adlaire Deploy は Phase 10 の着手対象とし、Adlaire Git Repository 本体へ統合せず、DB 不使用の付随システムとして同居・連携する。shell script 運用で固まった要件は、Adlaire Deploy の移行元・暫定標準として扱う。
 
 GitHub Actions と外部デプロイフレームワークは保留とする。Docker は運用選択肢の一つとし、正本成果物は Deno single binary とする。Node.js系は不採用とする。
 
@@ -1754,7 +1757,7 @@ GitHub Actions と外部デプロイフレームワークは保留とする。Do
 
 デプロイ実行方式は、Deno single binary 正本成果物の配置を基準とする。Docker は標準運用選択肢の一つであり、Docker Compose は Docker 運用選択時の 1 VPS 最小構成起動方式とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とする。`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
 
-Adlaire Deploy は Phase 10 の着手対象とし、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。GitHub Actions と外部デプロイフレームワークは保留とし、必要性、依存関係、運用リスクを整理し、ユーザー承認を得るまで標準採用しない。
+Adlaire Deploy は Phase 10 の着手対象とし、DB 不使用で Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。VPS、self-host、専用サーバーでは SSH 使用可能を最低必須条件とする。GitHub Actions と外部デプロイフレームワークは保留とし、必要性、依存関係、運用リスクを整理し、ユーザー承認を得るまで標準採用しない。
 
 Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Node.js系は不採用とする。Node.js runtime、npm ecosystem、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。承認済み例外ライブラリとして明記された場合を除き、`npm:` specifier を導入してはならない。
 

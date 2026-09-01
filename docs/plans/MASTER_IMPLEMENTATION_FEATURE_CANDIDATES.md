@@ -2,8 +2,8 @@
 
 **位置づけ**: マスター実装機能候補リスト
 **対象**: Auris / Adlaire Git Repository
-**文書バージョン**: v.0.22
-**ステータス**: Phase 10 Adlaire Deploy 着手に伴う候補整理
+**文書バージョン**: v.0.23
+**ステータス**: Phase 10 Adlaire Deploy DB 不使用候補整理
 
 ---
 
@@ -163,13 +163,17 @@ Phase 8 は DB 仕様完成フェーズとする。Phase 8.1 は本体整合性�
 
 ### 3.9 Phase 10 推奨候補: Adlaire Deploy
 
-Phase 10 推奨候補は、Adlaire Git Repository の配布、取得、検証、配置を内製化する Adlaire Deploy を優先する。
+Phase 10 推奨候補は、Adlaire Git Repository の配布、取得、検証、配置を DB 不使用で内製化する Adlaire Deploy を優先する。
 
 | 優先順 | 機能 | 種別 | 理由 |
 |---:|---|---|---|
-| 1 | Adlaire Deploy 最小実装 | 優先 | Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を内製化するため |
-| 2 | dry-run / plan / verify | 優先 | 初回から本番サーバへ破壊的変更を行わず、配置計画と検証結果を先に説明できる状態にするため |
-| 3 | 標準デプロイ雛形との責務整理 | 優先 | `scripts/deploy/` 配下の shell script を移行元・暫定標準として維持しつつ、Adlaire Deploy へ段階移行するため |
+| 1 | Adlaire Deploy DB 不使用実装 | 優先 | 専用 database を持たず、manifest、plan、log によってデプロイ計画と結果を扱うため |
+| 2 | artifact 取得・検証 | 優先 | Deno single binary 正本成果物の取得元定義、local / GitHub Releases artifact 参照、checksum、architecture、permission を検証するため |
+| 3 | SSH / remote 事前検証 | 優先 | VPS、self-host、専用サーバーでは SSH 使用可能を最低必須条件とし、接続、必須コマンド、path、権限を確認するため |
+| 4 | system / data 分離検証 | 優先 | system 側の差し替えと data 側の保護を分離し、database file を data file としてのみ扱うため |
+| 5 | dry-run / plan / verify | 優先 | 初回から本番サーバへ破壊的変更を行わず、配置計画と検証結果を先に説明できる状態にするため |
+| 6 | backup / rollback 計画 | 優先 | data 復元や database restore を自動実行せず、承認前に backup と system rollback の範囲を説明するため |
+| 7 | 標準デプロイ雛形との責務整理 | 優先 | `scripts/deploy/` 配下の shell script を移行元・暫定標準として維持しつつ、Adlaire Deploy へ段階移行するため |
 
 ## 4. 保留候補
 
@@ -228,3 +232,4 @@ Phase 10 推奨候補は、Adlaire Git Repository の配布、取得、検証、
 | v.0.20 | Phase 8.7 安定化完了に合わせ、DB 標準化、Database Gateway 境界、system / data 分離、backup / rollback の安定化候補と正式仕様・計画の責務分離を維持 |
 | v.0.21 | Phase 9 安定版判定・リリース準備に合わせ、安定版判定候補と正式なリリース実行承認の責務分離を維持 |
 | v.0.22 | Phase 10 Adlaire Deploy 着手に合わせ、Adlaire Deploy を保留候補から外し、付随システムの優先候補として整理 |
+| v.0.23 | Phase 10 Adlaire Deploy を DB 不使用、SSH 必須、DB 不使用で実装可能な機能を優先対象とする候補整理へ改訂 |

@@ -2,7 +2,7 @@
 
 **位置づけ**: 2類責務別ポリシー
 **責務**: デプロイ、運用基盤、環境管理、本番サーバ反映、バックアップ、検証、ロールバック
-**ステータス**: Phase 10 Adlaire Deploy 着手
+**ステータス**: Phase 10 Adlaire Deploy DB 不使用方針
 
 ---
 
@@ -19,6 +19,10 @@ Docker は正本成果物ではなく、Deno single binary を Docker image に�
 Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。
 
 Adlaire Deploy は Phase 10 の着手対象とする。Adlaire Git Repository 本体へ統合せず、付随システムとして同居・連携し、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。
+
+Adlaire Deploy は DB 不使用とする。Adlaire Deploy 専用 database を持たず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。実行計画、検証結果、実行結果、rollback 計画は、host filesystem 上の manifest、plan、log として扱う。
+
+VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可能を最低必須条件とする。SSH が使用できない環境は、標準デプロイ対象外とする。
 
 最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱い、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として host filesystem を正本にする。
 
@@ -37,7 +41,7 @@ Adlaire Deploy は Phase 10 の着手対象とする。Adlaire Git Repository �
 | 採用 | shell script + SSH | 標準デプロイ補助方式。承認済み範囲で、binary または image 転送、起動定義更新、backup、再起動、検証、manifest 記録を自動化する |
 | 補助採用 | `gh` | Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って利用する |
 | 補助採用 | systemd timer | バックアップ、定期検証、保守系の定期実行候補として利用する。アプリケーション本体の標準起動方式ではない |
-| 採用 | Adlaire Deploy | Deno製の内製デプロイメントシステム。Phase 10 の着手対象として、binary 正本成果物の取得、検証、配置、backup、rollback、manifest 記録を扱う |
+| 採用 | Adlaire Deploy | Deno製の内製デプロイメントシステム。Phase 10 の着手対象として、DB 不使用で binary 正本成果物の取得、検証、配置、backup、rollback、manifest 記録を扱う |
 | 保留 | GitHub Actions | 標準採用しない。外部CIとしての採用可否は保留し、必要時に別途提案と承認を要する |
 | 保留 | 外部デプロイフレームワーク | 標準採用しない。必要性、依存関係、運用リスクを整理し、別途承認を得るまで採用しない |
 | 採用 | systemd または同等の起動管理 | binary 直実行を選択する場合の起動管理候補。作成または変更は別途承認を得る |
@@ -61,6 +65,7 @@ Adlaire Deploy は Phase 10 の着手対象とする。Adlaire Git Repository �
 - Docker 運用を選択する場合の host bind mount による data 領域の接続
 - binary 直実行または Docker による稼働版切り替え
 - deploy manifest の記録
+- Adlaire Deploy を使う場合の DB 不使用 manifest、plan、log の記録
 
 標準配置は以下を基準とする。
 
@@ -123,17 +128,22 @@ Adlaire Deploy を進める場合でも、`scripts/deploy/` 配下の shell scri
 | `scripts/deploy/verify-release.sh` | process または container 状態、`/health`、DB quick check、Git repository 保存領域の配置後確認 |
 | `scripts/deploy/rollback.sh` | 直前 binary または Docker image / tag へ戻し、再起動と配置後確認を行う |
 
-Adlaire Deploy の Phase 10 最小実装が完了し、検証済みの移行先として承認されるまで、上記 script 群を標準デプロイ雛形として維持する。
+Adlaire Deploy の Phase 10 実装が完了し、検証済みの移行先として承認されるまで、上記 script 群を標準デプロイ雛形として維持する。
 
 標準デプロイスクリプトは、初回本番デプロイ、デプロイ先サーバ決定、SSH 接続方式、binary 直実行または Docker 運用の選択、Docker Engine / Docker Compose 導入、起動管理定義作成、バックアップ保存先決定、ロールバック実行、データ復元を自動承認するものではない。
 
 `deploy.sh` は通常デプロイの自動化雛形であり、本番データ復元を行ってはならない。libSQL database 復元、移行元 SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元を伴うロールバックは、必ず別承認を得る。
+
+Adlaire Deploy は、database を使う運用記録基盤として実装してはならない。既存 shell script から Adlaire Deploy へ移行する場合も、database file は保護対象 data file として扱い、database の中身を解釈しない。
 
 ## 5. 標準自動化範囲
 
 ユーザー承認後に限り、以下を自動実行してよい。
 
 - 本番サーバ環境の前提確認
+- SSH 接続事前検証
+- system / data 分離構成の検証
+- Adlaire Deploy の DB 不使用 manifest、plan、log 生成
 - Deno single binary 正本成果物の取得または転送
 - Docker 運用を選択する場合の Docker image の取得または転送
 - Docker 運用を選択する場合の Docker Compose 設定の確認
@@ -182,8 +192,10 @@ libSQL database のファイルバックアップは、標準雛形ではサー�
 - 対象バージョンと成果物の確認
 - checksum または同等の改ざん確認
 - 本番サーバのディスク容量確認
+- SSH 接続確認
 - 必須コマンド確認
 - バックアップ書き込み確認
+- system / data 分離構成確認
 
 デプロイ後検証は最低限以下を含む。
 
@@ -193,6 +205,8 @@ libSQL database のファイルバックアップは、標準雛形ではサー�
 - Repository 一覧または主要API確認
 - Git clone / fetch / push の代表確認
 - libSQL database と Git bare repository の参照確認
+
+Adlaire Deploy の検証では、Adlaire Deploy 専用 database が作成されていないこと、Adlaire Git Repository 本体 database へ直接接続していないこと、実行結果が host filesystem 上の manifest、plan、log として記録されることを確認する。
 
 ローカル環境に Deno が存在しない場合、実行系検証はローカルで完了扱いにしてはならない。この場合は、Deno 固定採用バージョンを満たす VPS または承認済み検証サーバ上で、実行系検証とテストを実施する。
 
@@ -226,6 +240,7 @@ system rollback は旧 Deno single binary または旧 Docker image / tag へ戻
 - 初回本番デプロイ
 - デプロイ先サーバ決定
 - SSH 接続方式、接続ユーザー、配置パス決定
+- SSH 接続先 host、port、認証方式、identity、sudo 要否の決定
 - binary 直実行または Docker 運用の選択
 - Docker Engine / Docker Compose 導入または更新
 - systemd または同等の起動管理定義の作成または変更
@@ -235,6 +250,7 @@ system rollback は旧 Deno single binary または旧 Docker image / tag へ戻
 - Git bare repository 復元
 - ロールバック実行
 - 公開経路、ドメイン、TLS 設定変更
+- Adlaire Deploy から database を直接操作する方針への変更
 
 ## 10. リリースポリシーとの関係
 
