@@ -11,8 +11,13 @@ fi
 
 DEPLOY_PORT="${DEPLOY_PORT:-22}"
 APP_ROOT="${APP_ROOT:-/opt/adlaire-git-repository}"
+SYSTEM_ROOT="${SYSTEM_ROOT:-$APP_ROOT/system}"
+SHARED_ROOT="${SHARED_ROOT:-$APP_ROOT/shared}"
 SERVICE_NAME="${SERVICE_NAME:-adlaire-git-repository}"
 TARGET_RELEASE="${TARGET_RELEASE:-}"
+RELEASES_DIR="${RELEASES_DIR:-$SYSTEM_ROOT/releases}"
+CURRENT_LINK="${CURRENT_LINK:-$SYSTEM_ROOT/current}"
+DEPLOY_LOG="${DEPLOY_LOG:-$SHARED_ROOT/logs/deploy.log}"
 
 require_value() {
   name="$1"
@@ -36,7 +41,7 @@ require_value DEPLOY_USER
 require_value TARGET_RELEASE
 
 remote_sh sh -eu <<EOF
-target="$APP_ROOT/releases/$TARGET_RELEASE"
+target="$RELEASES_DIR/$TARGET_RELEASE"
 if [ ! -d "\$target" ]; then
   echo "missing target release: \$target" >&2
   exit 1
@@ -47,9 +52,9 @@ if [ ! -x "\$target/adlaire-git-repository" ]; then
   exit 1
 fi
 
-ln -sfn "\$target" "$APP_ROOT/current"
+ln -sfn "\$target" "$CURRENT_LINK"
 systemctl restart "$SERVICE_NAME"
-printf '%s rollback %s\n' "\$(date +%Y-%m-%dT%H:%M:%S%z)" "$TARGET_RELEASE" >> "$APP_ROOT/deploy/deploy.log"
+printf '%s rollback %s\n' "\$(date +%Y-%m-%dT%H:%M:%S%z)" "$TARGET_RELEASE" >> "$DEPLOY_LOG"
 EOF
 
 "$SCRIPT_DIR/verify-release.sh"

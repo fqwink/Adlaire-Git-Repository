@@ -34,11 +34,17 @@ Docker は正本成果物ではなく、Deno single binary を Docker image に�
 
 標準デプロイ方式は、各プロジェクトの技術要件ポリシーに従い、Docker 使用時も非 Docker の binary 直実行時も同じ system / data 分離構成として定義する。
 
+標準配置は、差し替え可能な system 側と、host filesystem を正本とする data 側へ分離する。system 側には release、current、binary、Docker image、compose、service、deploy script を置き、data 側には database、Git repository 等の永続データ、config、secrets、logs、backups、manifests を置く。
+
+Docker 運用を選択する場合も、data 側は host bind mount で接続し、Docker named volume を data 正本として扱ってはならない。
+
 ## 4. 標準自動化
 
 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。
 
 自動化対象は、Deno single binary 配置、必要に応じた Docker image 配置、環境確認、バックアップ、process または container 再起動、health check、主要workflow検証、deploy manifest 記録を最低限含める。
+
+deploy log、backup、manifest は data 側の保護対象として保存する。release / current の切り替えは system 側の操作として扱い、本番 data の復元を伴う rollback は別承認対象として定義する。
 
 ## 5. 標準デプロイスクリプト
 

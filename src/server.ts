@@ -53,6 +53,7 @@ export interface App {
 export async function createApp(config: AppConfig): Promise<App> {
   await Deno.mkdir(config.dataDir, { recursive: true });
   await Deno.mkdir(config.repositoryRoot, { recursive: true });
+  await ensureLocalDatabaseDirectory(config.database.url);
 
   const database = new DatabaseGateway(createDatabaseDriver(config.database));
   await database.initialize();
@@ -106,6 +107,44 @@ export async function createApp(config: AppConfig): Promise<App> {
         gitHttp,
       ),
   };
+}
+
+async function ensureLocalDatabaseDirectory(
+  databaseUrl: string,
+): Promise<void> {
+  const databasePath = localDatabasePath(databaseUrl);
+  if (databasePath === null) {
+    return;
+  }
+
+  const separatorIndex = databasePath.lastIndexOf("/");
+  if (separatorIndex <= 0) {
+    return;
+  }
+
+  await Deno.mkdir(databasePath.slice(0, separatorIndex), {
+    recursive: true,
+  });
+}
+
+function localDatabasePath(databaseUrl: string): string | null {
+  if (databaseUrl.startsWith("file:")) {
+    const filePath = databaseUrl.slice("file:".length);
+    if (filePath.startsWith("///")) {
+      return `/${filePath.replace(/^\/+/, "")}`;
+    }
+    if (filePath.startsWith("//")) {
+      const pathStart = filePath.indexOf("/", 2);
+      return pathStart === -1 ? null : filePath.slice(pathStart);
+    }
+    return filePath;
+  }
+
+  if (/^[a-z][a-z0-9+.-]*:/i.test(databaseUrl)) {
+    return null;
+  }
+
+  return databaseUrl;
 }
 
 async function handle(
@@ -1437,7 +1476,7 @@ function renderHome(): string {
     <header>
       <div>
         <h1>Adlaire Git Repository</h1>
-        <div class="phase">Phase 8.1 / v.1.9</div>
+        <div class="phase">Phase 8.5 / v.1.9</div>
       </div>
       <div class="status" id="status" role="status" aria-live="polite"></div>
     </header>

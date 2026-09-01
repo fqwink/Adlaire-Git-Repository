@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.1.22
+**計画バージョン**: v.1.23
 **現行フェーズ基準バージョン**: v.1.9
-**ステータス**: Phase 8.1 本体整合性完了・PR確認中
+**ステータス**: Phase 8.5 システム分割完了・PR確認中
 
 ---
 
@@ -16,7 +16,7 @@
 
 実装は、1類ルールブック、2類ポリシー、3類マスター仕様書に従い、本書で定義したフェーズ計画に基づいて進める。
 
-Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱う。ユーザー承認に基づき、Phase 8 の現行フェーズ基準バージョンは `v.1.9` とし、`deno.json` の内部バージョンは `1.9.0` と対応させる。Phase 8.1 は同じ `v.1.9` baseline の本体整合性フェーズとして、Phase 8 の DB 方針を本体仕様、計画、実装、検証導線へ反映する。Phase 8 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
+Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱う。ユーザー承認に基づき、Phase 8 の現行フェーズ基準バージョンは `v.1.9` とし、`deno.json` の内部バージョンは `1.9.0` と対応させる。Phase 8.1 は同じ `v.1.9` baseline の本体整合性フェーズとして完了済みである。Phase 8.5 は同じ `v.1.9` baseline のシステム分割フェーズとして、Adlaire Git Repository 本体の system 側と host filesystem data 側を実装、デプロイ雛形、検証導線へ反映する。Phase 8 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
 
 本計画における「マスター仕様完成」は、実装承認ではない。仕様完成後にソースコード実装、DB driver 実装、schema 変更、テスト変更、デプロイ実行を行う場合は、対象範囲と検証方法を提示し、別途ユーザー承認を得る。
 
@@ -105,9 +105,9 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 | Phase 5 | v.0.6 | 完了 | デザイン関連の改良・改修、仕様整理。安定版リリース対象外 |
 | Phase 6 | v.0.7 | 完了 | 大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズ |
 | Phase 7 | v.1.8 | 完了 | 初回安定版リリース |
-| Phase 8 | v.1.9 | 実装完了・PR確認中 | DB。libSQL 標準化、SQLite 互換維持なし、DB 方針整理 |
-| Phase 8.1 | v.1.9 | 完了・PR確認中 | 本体整合性。DB 方針変更に合わせた本体仕様、計画、実装、検証導線の整合 |
-| Phase 8.5 | v.1.9 | 未着手 | システム分割。Adlaire Git Repository 本体とデータ領域の分割 |
+| Phase 8 | v.1.9 | 完了 | DB。libSQL 標準化、SQLite 互換維持なし、DB 方針整理 |
+| Phase 8.1 | v.1.9 | 完了 | 本体整合性。DB 方針変更に合わせた本体仕様、計画、実装、検証導線の整合 |
+| Phase 8.5 | v.1.9 | 完了・PR確認中 | システム分割。Adlaire Git Repository 本体とデータ領域の分割 |
 | Phase 8.7 | v.1.9 | 未着手 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
 | Phase 9 | v.2.10 | 未着手 | 安定版判定フェーズ |
 
@@ -728,7 +728,7 @@ Phase 5 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` �
 adlaire-git-repository-check-ok
 ```
 
-Phase 5 の UI 表示契約は、Phase 6 以降の安定版準備 baseline として継承し、Phase 7 では `tests/integration/phase7_release_judgment_test.ts` で表示契約を検証する。
+Phase 5 の UI 表示契約は、Phase 6 以降の安定版準備 baseline として継承した。現行フェーズでは `tests/integration/phase8_5_system_data_test.ts` で表示契約を検証する。
 
 ---
 
@@ -814,7 +814,7 @@ Phase 6 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` �
 adlaire-git-repository-check-ok
 ```
 
-Phase 6 の安定版準備 baseline は Phase 7 の安定版リリース判定 baseline として継承し、`tests/integration/phase7_release_judgment_test.ts` で検証する。
+Phase 6 の安定版準備 baseline は Phase 7 の安定版リリース判定 baseline として継承した。現行フェーズでは `tests/integration/phase8_5_system_data_test.ts` で表示契約を検証する。
 
 ### 11.10 Phase 6 再確認結果
 
@@ -1043,6 +1043,36 @@ Adlaire Git Repository 本体とデータ領域を分割する。本体は差し
 - data 側が container lifecycle に依存していない。
 - デプロイポリシー、技術要件ポリシー、3類マスター仕様書と矛盾していない。
 
+#### 13.6.5 Phase 8.5 実装完了範囲
+
+Phase 8.5 では、Adlaire Git Repository 本体の設定、デプロイ雛形、検証導線を system / data 分離構成へ整合した。
+
+実装完了範囲は以下とする。
+
+- `ADLAIRE_APP_ROOT` から `ADLAIRE_SHARED_DIR`、`ADLAIRE_DATA_DIR`、標準 libSQL database path、Git bare repository root を導出する。
+- 標準 libSQL database を `shared/data/database/adlaire.libsql` に配置する。
+- Git bare repository root を `shared/data/repositories` に配置する。
+- アプリケーション起動時に、data 側の database directory と repository root を作成する。
+- `scripts/deploy/` の release / current を `system/` 側へ移し、deploy log / manifests / backups / config / secrets / logs / data を `shared/` 側へ分離する。
+- `backup.sh` の対象に secrets、logs、manifests、現行 system release 参照を含める。
+- `verify-server.sh` と `verify-release.sh` で system 側と data 側の標準配置を確認する。
+- トップページと Operations status の現行フェーズ表記を `Phase 8.5 / v.1.9` へ更新する。
+- Phase 8.5 の system / data 分離を確認する統合テストと、設定既定値を確認する単体テストを更新する。
+
+#### 13.6.6 Phase 8.5 検証範囲
+
+Phase 8.5 の標準検証は `tools/check-adlaire-git-repository.sh` とする。
+
+最低限、以下を確認する。
+
+- `git diff --check`
+- `tools/check-adlaire-git-repository.sh`
+- `scripts/docker/verify-build.sh`
+- deploy script 群の `sh -n`
+- `ADLAIRE_APP_ROOT`、`ADLAIRE_SHARED_DIR`、`ADLAIRE_DATA_DIR`、`ADLAIRE_REPOSITORY_ROOT` の設定導出
+- `shared/data/database` と `shared/data/repositories` の作成
+- 旧 `APP_ROOT/releases`、`APP_ROOT/current`、`APP_ROOT/deploy/deploy.log` 参照が deploy script に残っていないこと
+
 ### 13.7 Phase 8.7: 安定化
 
 バグ修正、検証強化、ドキュメント整合性を行う。
@@ -1222,3 +1252,4 @@ Phase 9 はリリース実行を自動承認しない。tag 作成、GitHub Rele
 | v.1.20 | Phase 8 / Phase 9 | v.1.9 / v.2.10 | Phase 8 をDB仕様完成、Phase 8.1を本体整合性、Phase 8.5をsystem/data分離、Phase 8.7を安定化、Phase 9を安定版判定として、対象、対象外、検証範囲、完了条件まで具体化 |
 | v.1.21 | Phase 8 | v.1.9 | `@libsql/client v0.17.4` を承認済み例外ライブラリとして採用し、libSQL driver 実装、標準DB設定、検証導線、デプロイDB配置例をPhase 8現行状態へ整合 |
 | v.1.22 | Phase 8.1 | v.1.9 | Phase 8.1 本体整合性として、現行フェーズ表記、SQLite 移行元確認用ゲート、承認済み例外ライブラリ解決固定用の `deno.lock`、libSQL native loader 用の `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname`、直接 FFI API 使用禁止、Database Gateway 境界、README、検証導線、Pull Request 説明の整合対象を反映 |
+| v.1.23 | Phase 8.5 | v.1.9 | Phase 8.5 システム分割として、`ADLAIRE_APP_ROOT` / `ADLAIRE_SHARED_DIR` から data 側標準パスを導出し、deploy / backup / verify / rollback 雛形を `system/` と `shared/` へ整合 |

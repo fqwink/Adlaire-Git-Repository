@@ -78,7 +78,7 @@ check_required_paths() {
     tests/integration/issue_api_test.ts \
     tests/integration/phase2_api_test.ts \
     tests/integration/phase3_api_test.ts \
-    tests/integration/phase7_release_judgment_test.ts \
+    tests/integration/phase8_5_system_data_test.ts \
     tests/integration/repository_service_test.ts; do
     if [ ! -f "$ROOT_DIR/$path" ]; then
       echo "missing Adlaire Git Repository required path: $path" >&2
@@ -169,6 +169,38 @@ check_forbidden_direct_ffi_usage() {
   fi
 }
 
+check_system_data_split_policy() {
+  if ! grep -F 'const appRoot = env.get("ADLAIRE_APP_ROOT") ?? ".";' src/config.ts >/dev/null 2>&1; then
+    echo "config must derive shared data paths from ADLAIRE_APP_ROOT." >&2
+    exit 1
+  fi
+
+  if ! grep -F 'const sharedDir = env.get("ADLAIRE_SHARED_DIR") ?? `${appRoot}/shared`;' src/config.ts >/dev/null 2>&1; then
+    echo "config must support ADLAIRE_SHARED_DIR for the host filesystem data side." >&2
+    exit 1
+  fi
+
+  if ! grep -F 'file:${databaseDir}/adlaire.libsql' src/config.ts >/dev/null 2>&1; then
+    echo "default libSQL database must live under data/database." >&2
+    exit 1
+  fi
+
+  if grep -R -n -E '\$APP_ROOT/(releases|current|deploy/deploy\.log)' scripts/deploy >/dev/null 2>&1; then
+    echo "deploy scripts must use system/current/releases and shared logs, not APP_ROOT direct release paths." >&2
+    exit 1
+  fi
+
+  if grep -R -n 'shared/repositories' docs README.md scripts src tests >/dev/null 2>&1; then
+    echo "repository data must use shared/data/repositories, not shared/repositories." >&2
+    exit 1
+  fi
+
+  if ! grep -F 'MANIFEST_ROOT=/opt/adlaire-git-repository/shared/manifests' scripts/deploy/deploy.env.example >/dev/null 2>&1; then
+    echo "deploy.env.example must define shared manifest storage." >&2
+    exit 1
+  fi
+}
+
 check_deno_tasks() {
   if ! grep -F '"dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname src/main.ts"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the dev task." >&2
@@ -224,6 +256,7 @@ run_step "Docker standard policy check" check_docker_standard_policy
 run_step "forbidden Node.js project file check" check_forbidden_node_files
 run_step "forbidden unapproved registry dependency check" check_forbidden_unapproved_registries
 run_step "direct FFI usage check" check_forbidden_direct_ffi_usage
+run_step "system/data split policy check" check_system_data_split_policy
 run_step "deno task definition check" check_deno_tasks
 
 run_step "deploy script syntax check" \

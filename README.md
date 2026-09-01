@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**現行フェーズ**: Phase 8.1 本体整合性完了・PR確認中 / v.1.9 baseline
+**現行フェーズ**: Phase 8.5 システム分割完了・PR確認中 / v.1.9 baseline
 **直近安定版リリース**: Phase 7 / v.1.8
 
 ## ドキュメント
@@ -79,6 +79,8 @@ Phase 8 では `@libsql/client v0.17.4` を承認済み例外ライブラリと�
 ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。Docker で検証、テスト、ビルド、binary 生成をまとめて実行する場合は、`scripts/docker/verify-build.sh` を使う。
 
 標準デプロイ雛形は [scripts/deploy/](./scripts/deploy/) で管理する。`deploy.env.example` を基準に環境固有値を定義し、`deploy.sh`、`backup.sh`、`verify-server.sh`、`verify-release.sh`、`rollback.sh` を承認済み範囲で実行する。実値を含む環境設定、接続先、秘密情報はコミットしてはならない。
+
+Phase 8.5 では、標準アプリケーション設定と標準デプロイ雛形を system / data 分離構成へ整合した。`ADLAIRE_APP_ROOT=/opt/adlaire-git-repository` を基準に、稼働版 release / current は `system/` 側、libSQL database、Git bare repositories、config、secrets、logs、backups、manifests は `shared/` 側へ分離する。
 
 安定版リリースの標準 Linux バイナリは、ARM64 と x86_64 の2種類を正本成果物とする。VPS デプロイ時は `uname -m` で `aarch64` または `x86_64` を確認し、対象アーキテクチャの Deno single binary を配置する。Docker を選択する場合は、その正本 binary を Docker image に同梱して配置する。
 

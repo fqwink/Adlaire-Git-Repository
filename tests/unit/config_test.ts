@@ -1,11 +1,60 @@
 import { loadConfig } from "../../src/config.ts";
 import { assertEquals, assertRejects } from "../support/assert.ts";
 
-Deno.test("loadConfig defaults to the libSQL driver and file database URL", () => {
-  const config = loadConfig(env({ ADLAIRE_DATA_DIR: "/tmp/adlaire" }));
+Deno.test("loadConfig defaults to shared data paths for system/data split", () => {
+  const config = loadConfig(env({}));
 
   assertEquals(config.database.driver, "libsql");
-  assertEquals(config.database.url, "file:/tmp/adlaire/adlaire.libsql");
+  assertEquals(config.dataDir, "./shared/data");
+  assertEquals(config.repositoryRoot, "./shared/data/repositories");
+  assertEquals(
+    config.database.url,
+    "file:./shared/data/database/adlaire.libsql",
+  );
+});
+
+Deno.test("loadConfig derives shared data paths from the app root", () => {
+  const config = loadConfig(
+    env({ ADLAIRE_APP_ROOT: "/opt/adlaire-git-repository" }),
+  );
+
+  assertEquals(config.dataDir, "/opt/adlaire-git-repository/shared/data");
+  assertEquals(
+    config.repositoryRoot,
+    "/opt/adlaire-git-repository/shared/data/repositories",
+  );
+  assertEquals(
+    config.database.url,
+    "file:/opt/adlaire-git-repository/shared/data/database/adlaire.libsql",
+  );
+});
+
+Deno.test("loadConfig allows overriding shared and data roots explicitly", () => {
+  const sharedConfig = loadConfig(
+    env({ ADLAIRE_SHARED_DIR: "/srv/adlaire/shared" }),
+  );
+  assertEquals(sharedConfig.dataDir, "/srv/adlaire/shared/data");
+  assertEquals(
+    sharedConfig.repositoryRoot,
+    "/srv/adlaire/shared/data/repositories",
+  );
+  assertEquals(
+    sharedConfig.database.url,
+    "file:/srv/adlaire/shared/data/database/adlaire.libsql",
+  );
+
+  const dataConfig = loadConfig(
+    env({
+      ADLAIRE_DATA_DIR: "/srv/adlaire/data",
+      ADLAIRE_REPOSITORY_ROOT: "/srv/git/repositories",
+    }),
+  );
+  assertEquals(dataConfig.dataDir, "/srv/adlaire/data");
+  assertEquals(dataConfig.repositoryRoot, "/srv/git/repositories");
+  assertEquals(
+    dataConfig.database.url,
+    "file:/srv/adlaire/data/database/adlaire.libsql",
+  );
 });
 
 Deno.test("loadConfig rejects SQLite driver without migration-source approval flag", () => {
@@ -25,7 +74,7 @@ Deno.test("loadConfig allows SQLite only for approved migration-source checks", 
   );
 
   assertEquals(config.database.driver, "sqlite");
-  assertEquals(config.database.url, "/tmp/adlaire/adlaire.sqlite3");
+  assertEquals(config.database.url, "/tmp/adlaire/database/adlaire.sqlite3");
 });
 
 function env(values: Record<string, string>): Deno.Env {
