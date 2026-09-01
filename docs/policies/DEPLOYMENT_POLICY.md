@@ -68,15 +68,15 @@ Adlaire Deploy は仕様未定の将来候補とする。仕様が確定する�
 /opt/adlaire-git-repository/
 ├── system/
 │   ├── releases/
-│   │   └── v.1.9-YYYYMMDD-HHMMSS/
+│   │   └── v.2.10-YYYYMMDD-HHMMSS/
 │   │       └── adlaire-git-repository
-│   ├── current -> releases/v.1.9-YYYYMMDD-HHMMSS/
+│   ├── current -> releases/v.2.10-YYYYMMDD-HHMMSS/
 │   ├── bin/
 │   │   └── adlaire-git-repo
 │   ├── docker/
 │   │   ├── compose.yml
 │   │   └── images/
-│   │       └── adlaire-git-repo-v1.9.tar
+│   │       └── adlaire-git-repo-v2.10.tar
 │   └── service/
 │       └── adlaire-git-repository.service
 └── shared/

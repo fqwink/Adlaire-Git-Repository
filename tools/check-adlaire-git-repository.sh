@@ -78,7 +78,7 @@ check_required_paths() {
     tests/integration/issue_api_test.ts \
     tests/integration/phase2_api_test.ts \
     tests/integration/phase3_api_test.ts \
-    tests/integration/phase8_7_stabilization_test.ts \
+    tests/integration/phase9_release_judgment_test.ts \
     tests/integration/repository_service_test.ts; do
     if [ ! -f "$ROOT_DIR/$path" ]; then
       echo "missing Adlaire Git Repository required path: $path" >&2
@@ -212,6 +212,13 @@ check_system_data_split_policy() {
 }
 
 check_deno_tasks() {
+  version=$(sed -n 's/.*"version": "\([^"]*\)".*/\1/p' deno.json | sed -n '1p')
+  major_version=${version%%.*}
+  remainder=${version#*.}
+  minor_version=${remainder%%.*}
+  formal_version="v.$major_version.$minor_version"
+  artifact_version="v$major_version.$minor_version"
+
   if ! grep -F '"dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname src/main.ts"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the dev task." >&2
     exit 1
@@ -237,13 +244,18 @@ check_deno_tasks() {
     exit 1
   fi
 
-  if ! grep -F '"compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-v1.9-aarch64-unknown-linux-gnu src/main.ts"' deno.json >/dev/null 2>&1; then
+  if ! grep -F "\"compile:linux-arm64\": \"deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-$artifact_version-aarch64-unknown-linux-gnu src/main.ts\"" deno.json >/dev/null 2>&1; then
     echo "deno.json must define the Linux ARM64 release compile task." >&2
     exit 1
   fi
 
-  if ! grep -F '"compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-v1.9-x86_64-unknown-linux-gnu src/main.ts"' deno.json >/dev/null 2>&1; then
+  if ! grep -F "\"compile:linux-x86_64\": \"deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-$artifact_version-x86_64-unknown-linux-gnu src/main.ts\"" deno.json >/dev/null 2>&1; then
     echo "deno.json must define the Linux x86_64 release compile task." >&2
+    exit 1
+  fi
+
+  if ! grep -F "RELEASE_VERSION=\"\${RELEASE_VERSION:-$formal_version}\"" scripts/deploy/deploy.sh >/dev/null 2>&1; then
+    echo "deploy.sh default release version must match deno.json formal version: $formal_version" >&2
     exit 1
   fi
 

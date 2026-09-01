@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.1.24
-**現行フェーズ基準バージョン**: v.1.9
-**ステータス**: Phase 8.7 安定化完了・PR確認中
+**計画バージョン**: v.2.10
+**現行フェーズ基準バージョン**: v.2.10
+**ステータス**: Phase 9 安定版判定・リリース準備
 
 ---
 
@@ -16,7 +16,7 @@
 
 実装は、1類ルールブック、2類ポリシー、3類マスター仕様書に従い、本書で定義したフェーズ計画に基づいて進める。
 
-Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱う。ユーザー承認に基づき、Phase 8 の現行フェーズ基準バージョンは `v.1.9` とし、`deno.json` の内部バージョンは `1.9.0` と対応させる。Phase 8.1 は同じ `v.1.9` baseline の本体整合性フェーズとして完了済みである。Phase 8.5 は同じ `v.1.9` baseline のシステム分割フェーズとして完了済みである。Phase 8.7 は同じ `v.1.9` baseline の安定化フェーズとして、DB 標準化、Database Gateway 境界、system / data 分離、backup / rollback、主要 workflow、ドキュメント整合性に関するバグ精査と修正を行う。Phase 8 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
+Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。ユーザー承認に基づき、Phase 9 の現行フェーズ基準バージョンは `v.2.10` とし、`deno.json` の内部バージョンは `2.10.0` と対応させる。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備を扱う。Phase 9 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
 
 本計画における「マスター仕様完成」は、実装承認ではない。仕様完成後にソースコード実装、DB driver 実装、schema 変更、テスト変更、デプロイ実行を行う場合は、対象範囲と検証方法を提示し、別途ユーザー承認を得る。
 
@@ -108,8 +108,8 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 | Phase 8 | v.1.9 | 完了 | DB。libSQL 標準化、SQLite 互換維持なし、DB 方針整理 |
 | Phase 8.1 | v.1.9 | 完了 | 本体整合性。DB 方針変更に合わせた本体仕様、計画、実装、検証導線の整合 |
 | Phase 8.5 | v.1.9 | 完了 | システム分割。Adlaire Git Repository 本体とデータ領域の分割 |
-| Phase 8.7 | v.1.9 | 完了・PR確認中 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
-| Phase 9 | v.2.10 | 未着手 | 安定版判定フェーズ |
+| Phase 8.7 | v.1.9 | 完了 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
+| Phase 9 | v.2.10 | 安定版判定・リリース準備 | バグ修正ゼロ化、安定版判定、リリース準備 |
 
 上記は各フェーズの基準バージョンである。表の `Major` は安定版リリース系列であり、累積フェーズ番号ではない。初回安定版リリース前は `v.0.x` 系を維持する。
 
@@ -728,7 +728,7 @@ Phase 5 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` �
 adlaire-git-repository-check-ok
 ```
 
-Phase 5 の UI 表示契約は、Phase 6 以降の安定版準備 baseline として継承した。現行フェーズでは `tests/integration/phase8_7_stabilization_test.ts` で表示契約を検証する。
+Phase 5 の UI 表示契約は、Phase 6 以降の安定版準備 baseline として継承した。現行フェーズでは `tests/integration/phase9_release_judgment_test.ts` で表示契約を検証する。
 
 ---
 
@@ -814,7 +814,7 @@ Phase 6 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` �
 adlaire-git-repository-check-ok
 ```
 
-Phase 6 の安定版準備 baseline は Phase 7 の安定版リリース判定 baseline として継承した。現行フェーズでは `tests/integration/phase8_7_stabilization_test.ts` で表示契約を検証する。
+Phase 6 の安定版準備 baseline は Phase 7 の安定版リリース判定 baseline として継承した。現行フェーズでは `tests/integration/phase9_release_judgment_test.ts` で表示契約を検証する。
 
 ### 11.10 Phase 6 再確認結果
 
@@ -1175,6 +1175,23 @@ Phase 9 はリリース実行を自動承認しない。tag 作成、GitHub Rele
 - Deno single binary、必要な checksum、manifest、release notes、Docker image の扱いを説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
+### 14.8 Phase 9 実施範囲
+
+Phase 9 では、ユーザー承認に基づき、追加のバグ精査と修正ゼロ化、安定版判定、リリース準備を行う。
+
+実施範囲は以下とする。
+
+- Phase 8 系成果に対する追加バグ精査
+- 確認されたバグの修正と再発防止テスト追加
+- 追加バグが確認されない状態、または確認済みバグが修正済みである状態の説明
+- `deno.json` 内部バージョン `2.10.0` と正式表記 `v.2.10` の整合
+- ARM64 と x86_64 の Linux binary 成果物名の `v2.10` 整合
+- deploy / rollback の既定リリースバージョンと説明の `v.2.10` 整合
+- GitHub Releases を主配置とするリリース準備
+- リポジトリ全体の整合性確認と整合性向上
+
+Phase 9 PR が GitHub の `main` へ取り込まれるまで、tag 作成、GitHub Releases 作成、成果物配置、release notes 公開は実施しない。
+
 ---
 
 ## 15. 実装着手前チェック
@@ -1274,3 +1291,4 @@ Phase 9 はリリース実行を自動承認しない。tag 作成、GitHub Rele
 | v.1.22 | Phase 8.1 | v.1.9 | Phase 8.1 本体整合性として、現行フェーズ表記、SQLite 移行元確認用ゲート、承認済み例外ライブラリ解決固定用の `deno.lock`、libSQL native loader 用の `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname`、直接 FFI API 使用禁止、Database Gateway 境界、README、検証導線、Pull Request 説明の整合対象を反映 |
 | v.1.23 | Phase 8.5 | v.1.9 | Phase 8.5 システム分割として、`ADLAIRE_APP_ROOT` / `ADLAIRE_SHARED_DIR` から data 側標準パスを導出し、deploy / backup / verify / rollback 雛形を `system/` と `shared/` へ整合 |
 | v.1.24 | Phase 8.7 | v.1.9 | Phase 8.7 安定化として、現行フェーズ表記、現行 system release 実体バックアップ、rollback 例、検証導線、ドキュメント整合性を更新 |
+| v.2.10 | Phase 9 | v.2.10 | Phase 9 安定版判定・リリース準備として、バグ修正ゼロ化、現行フェーズ表記、内部バージョン、release binary 名、deploy / rollback 例、検証導線、ドキュメント整合性を更新 |
