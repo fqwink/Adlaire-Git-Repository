@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.2.12
+**計画バージョン**: v.2.13
 **現行フェーズ基準バージョン**: v.2.11
-**ステータス**: Phase 10 Adlaire Deploy DB 不使用仕様確定
+**ステータス**: Phase 10 Adlaire Deploy 仕様固定
 
 ---
 
@@ -16,7 +16,7 @@
 
 実装は、1類ルールブック、2類ポリシー、3類マスター仕様書に従い、本書で定義したフェーズ計画に基づいて進める。
 
-Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。`v.2.10` の公開配布は保留し、Phase 10 の現行フェーズ基準バージョンは `v.2.11` とする。Phase 10 は Adlaire Deploy を主対象として、DB 不使用で binary 正本成果物の配布・取得・検証・配置を内製化する。Phase 10 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
+Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。`v.2.10` の公開配布は保留し、Phase 10 の現行フェーズ基準バージョンは `v.2.11` とする。Phase 10 は Adlaire Deploy を主対象として、DB 不使用で binary 正本成果物の配布・取得・検証・配置を内製化し、実行主体、標準コマンド、manifest、artifact、SSH target、preflight、出力、error、security / data 保護を仕様固定する。Phase 10 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
 
 本計画における「マスター仕様完成」は、実装承認ではない。仕様完成後にソースコード実装、DB driver 実装、schema 変更、テスト変更、デプロイ実行を行う場合は、対象範囲と検証方法を提示し、別途ユーザー承認を得る。
 
@@ -62,7 +62,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 - 後続9系フェーズを安定版リリースフェーズとして扱う場合は、マスター開発計画と2類ポリシーに明記し、ユーザー承認を得る。
 - リリース提案、リリース配置、リリース成果物、リリース自動化は `docs/policies/RELEASE_POLICY.md` に従う。リリース履歴の正本は GitHub Releases とし、リポジトリ内に変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` に従う。
-- Deno single binary 形式を正本成果物とする。Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、1 VPS 上の差し替え可能な system 側と host filesystem data 側を分離する同じ構成にする。shell script + SSH は binary または image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer を補助採用とする。Adlaire Deploy は Phase 10 の着手対象とし、Adlaire Git Repository 本体へ統合せず、DB 不使用の付随システムとして同居・連携する。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
+- Deno single binary 形式を正本成果物とする。Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、1 VPS 上の差し替え可能な system 側と host filesystem data 側を分離する同じ構成にする。shell script + SSH は binary または image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer を補助採用とする。Adlaire Deploy は Phase 10 の着手対象とし、Adlaire Git Repository 本体へ統合せず、DB 不使用の `adlaire-deploy` CLI 付随システムとして同居・連携する。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
 - 標準データベースは libSQL とする。SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。
 - ローカルに Deno が存在しない場合、実行系検証は停止ではなく VPS または承認済み検証サーバで実施する方針とする。
 - ドキュメント参照導線は `docs/DOCUMENT_INDEX.md` を索引として確認する。AdlaireGroup 共通ガバナンス雛形の正本は `docs/tpl-governance/` 配下で管理し、現行プロジェクト固有の正本とは分離する。
@@ -110,7 +110,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 | Phase 8.5 | v.1.9 | 完了 | システム分割。Adlaire Git Repository 本体とデータ領域の分割 |
 | Phase 8.7 | v.1.9 | 完了 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
 | Phase 9 | v.2.10 | 完了 | バグ修正ゼロ化、安定版判定、リリース準備 |
-| Phase 10 | v.2.11 | 着手 | Adlaire Deploy。DB 不使用で binary 正本成果物の取得、検証、配置、backup、rollback、manifest 記録を内製化 |
+| Phase 10 | v.2.11 | 着手 | Adlaire Deploy。DB 不使用で binary 正本成果物の取得、検証、配置、backup、rollback、manifest、plan / result / error 記録を内製化 |
 
 上記は各フェーズの基準バージョンである。表の `Major` は安定版リリース系列であり、累積フェーズ番号ではない。初回安定版リリース前は `v.0.x` 系を維持する。
 
@@ -1205,7 +1205,7 @@ Phase 10 の基準バージョンは `v.2.11` とする。
 
 Phase 10 では、Adlaire Deploy を Adlaire Git Repository の付随システムとして着手する。
 
-Adlaire Deploy は Adlaire Git Repository 本体へ統合しない。Adlaire Deploy 専用 database を持たず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱い、GitHub Releases asset upload の成否だけに依存しない配布・取得・検証・展開導線を確立する。
+Adlaire Deploy は Adlaire Git Repository 本体へ統合しない。Adlaire Deploy 専用 database を持たず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。`adlaire-deploy` CLI、JSON deployment manifest、Deno single binary 正本成果物の取得、checksum 検証、preflight、配置、backup、rollback、plan / result / error 記録を扱い、GitHub Releases asset upload の成否だけに依存しない配布・取得・検証・展開導線を確立する。
 
 VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可能を最低必須条件とする。
 
@@ -1213,8 +1213,10 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 
 - `docs/specs/Adlaire_Deploy_Specification.md` の3類マスター仕様書化
 - Adlaire Deploy の DB 不使用定義
-- deployment manifest の読み込み
-- deployment manifest の構文検証
+- `adlaire-deploy` CLI の実行主体定義
+- 標準コマンドの定義
+- JSON deployment manifest の読み込み
+- JSON deployment manifest の構文検証
 - 対象 version の検証
 - 対象 architecture 判定
 - Deno single binary 成果物の取得元定義
@@ -1237,7 +1239,9 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 - deploy plan file の生成
 - verification result file の生成
 - deployment result manifest の生成
+- error 分類の定義
 - error report の生成
+- security / data 保護仕様の定義
 - `scripts/deploy/` 配下の標準デプロイ雛形との責務整理
 
 ### 15.4 対象外
@@ -1266,6 +1270,7 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 ### 15.5 検証範囲
 
 - Adlaire Deploy 仕様書、デプロイポリシー、マスター開発計画、README の整合
+- Adlaire Deploy の実行主体、標準コマンド、manifest、artifact、target / SSH、preflight、出力、error 分類、security / data 保護の整合
 - Adlaire Deploy が DB 不使用であること
 - Adlaire Deploy 専用 database を作成していないこと
 - Adlaire Git Repository 本体 database へ直接接続していないこと
@@ -1283,6 +1288,8 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 ### 15.6 完了条件
 
 - Adlaire Deploy が3類マスター仕様書として定義されている。
+- Adlaire Deploy のマスター仕様が仕様固定済みとして扱える。
+- Adlaire Deploy の実行主体、標準コマンド、manifest、artifact、target / SSH、preflight、出力、error 分類、security / data 保護が定義されている。
 - Adlaire Deploy が DB 不使用の付随システムとして定義されている。
 - Adlaire Deploy が保留候補ではなく Phase 10 の正式着手対象として整理されている。
 - Phase 10 の実装対象、対象外、検証範囲、完了条件が本書に定義されている。
@@ -1395,3 +1402,4 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 | v.2.10 | Phase 9 | v.2.10 | Phase 9 安定版判定・リリース準備として、バグ修正ゼロ化、現行フェーズ表記、内部バージョン、release binary 名、deploy / rollback 例、検証導線、ドキュメント整合性を更新 |
 | v.2.11 | Phase 10 | v.2.11 | Adlaire Deploy を付随システムとして着手し、個別3類マスター仕様書、実装対象、対象外、検証範囲、完了条件を定義 |
 | v.2.12 | Phase 10 | v.2.11 | Adlaire Deploy を DB 不使用、SSH 使用可能を最低必須条件、DB 不使用で実装可能な機能を Phase 10 対象とする仕様へ改訂 |
+| v.2.13 | Phase 10 | v.2.11 | Adlaire Deploy の実行主体、標準コマンド、JSON manifest、artifact、SSH target、preflight、出力、error、security / data 保護、scripts/deploy 移行境界を仕様固定 |

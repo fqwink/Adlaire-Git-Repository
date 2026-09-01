@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.2.12
-**ステータス**: Phase 10 Adlaire Deploy DB 不使用仕様確定
+**文書バージョン**: v.2.13
+**ステータス**: Phase 10 Adlaire Deploy 仕様固定
 
 ---
 
@@ -163,7 +163,7 @@ Git ホスティング本体は、Git bare repository の永続保存、`git` �
 
 本番サーバ環境へのデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Deno single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。Adlaire Deploy は Phase 10 の着手対象とし、DB 不使用で Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う付随システムとする。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
+標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Deno single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。Adlaire Deploy は Phase 10 の着手対象とし、DB 不使用の `adlaire-deploy` CLI として、JSON deployment manifest、Deno single binary 正本成果物の取得、checksum 検証、preflight、plan / result / error、配置、backup、rollback を扱う付随システムとする。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
 
 Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。採用を検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
 
@@ -178,7 +178,7 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 | ドキュメント | 役割 |
 |---|---|
 | `docs/specs/Adlaire_Git_Repository_Specification.md` | Git ホスティング基盤本体の仕様 |
-| `docs/specs/Adlaire_Deploy_Specification.md` | Adlaire Deploy の仕様。付随システム、binary 取得、検証、配置、backup、rollback、manifest 記録の基準 |
+| `docs/specs/Adlaire_Deploy_Specification.md` | Adlaire Deploy の仕様。付随システム、CLI、JSON manifest、binary 取得、検証、配置、backup、rollback、plan / result / error、security / data 保護の基準 |
 
 ---
 
@@ -206,11 +206,11 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 
 Adlaire Deploy は、Adlaire Git Repository の付随システムである。
 
-Adlaire Deploy は Adlaire Git Repository 本体へ統合せず、同居・連携する。Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。
+Adlaire Deploy は Adlaire Git Repository 本体へ統合せず、同居・連携する。標準実行主体は `adlaire-deploy` CLI とし、JSON deployment manifest を正規入力として、Deno single binary 正本成果物の取得、checksum 検証、preflight、配置、backup、rollback、plan / result / error 記録を扱う。
 
 Adlaire Deploy は専用 database を持たず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。計画、結果、検証記録は host filesystem 上の manifest、plan、log として扱う。
 
-VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可能を最低必須条件とする。
+VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可能を最低必須条件とする。`plan`、`verify`、`dry-run` は system 側と data 側を変更せず、`apply-system` と `rollback-system` は別途ユーザー承認を得た範囲で system 側のみを変更する候補として扱う。
 
 Adlaire Deploy の詳細仕様は `docs/specs/Adlaire_Deploy_Specification.md` を正本とする。
 
@@ -463,9 +463,9 @@ Phase 9 の完了条件は以下とする。
 
 Phase 10 は、Adlaire Deploy の着手フェーズである。
 
-Phase 10 では、Adlaire Deploy を Adlaire Git Repository の付随システムとして定義し、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う内製デプロイメントシステムとして整備する。
+Phase 10 では、Adlaire Deploy を Adlaire Git Repository の付随システムとして定義し、`adlaire-deploy` CLI、JSON deployment manifest、Deno single binary 正本成果物の取得、checksum 検証、preflight、配置、backup、rollback、plan / result / error 記録を扱う内製デプロイメントシステムとして整備する。
 
-Adlaire Deploy は DB 不使用とし、専用 database を作成せず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。連携は release manifest、checksum、health check endpoint、標準デプロイ雛形、filesystem path、command execution、SSH の境界で行う。
+Adlaire Deploy は DB 不使用とし、専用 database を作成せず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。連携は release manifest、JSON deployment manifest、artifact、checksum、health check endpoint、標準デプロイ雛形、filesystem path、command execution、SSH、plan / result / error の境界で行う。
 
 VPS、self-host、専用サーバーは SSH 使用可能を最低必須条件とする。
 
@@ -495,6 +495,7 @@ Phase 10 の対象外は以下とする。
 Phase 10 の完了条件は以下とする。
 
 - Adlaire Deploy が3類マスター仕様書として定義されている。
+- Adlaire Deploy の実行主体、標準コマンド、manifest、artifact、target / SSH、preflight、出力、error 分類、security / data 保護が仕様固定されている。
 - Adlaire Deploy が DB 不使用の付随システムとして定義されている。
 - Adlaire Deploy が保留候補ではなく Phase 10 の正式着手対象として整理されている。
 - Adlaire Git Repository 本体と Adlaire Deploy の責務境界を説明できる。

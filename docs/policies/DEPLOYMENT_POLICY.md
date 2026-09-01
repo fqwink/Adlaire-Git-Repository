@@ -2,7 +2,7 @@
 
 **位置づけ**: 2類責務別ポリシー
 **責務**: デプロイ、運用基盤、環境管理、本番サーバ反映、バックアップ、検証、ロールバック
-**ステータス**: Phase 10 Adlaire Deploy DB 不使用方針
+**ステータス**: Phase 10 Adlaire Deploy 仕様固定方針
 
 ---
 
@@ -21,6 +21,8 @@ Docker を使用する場合も、Docker を使用せず Deno single binary を 
 Adlaire Deploy は Phase 10 の着手対象とする。Adlaire Git Repository 本体へ統合せず、付随システムとして同居・連携し、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。
 
 Adlaire Deploy は DB 不使用とする。Adlaire Deploy 専用 database を持たず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。実行計画、検証結果、実行結果、rollback 計画は、host filesystem 上の manifest、plan、log として扱う。
+
+Adlaire Deploy は `adlaire-deploy` CLI として扱う。標準入力は JSON deployment manifest とし、`plan`、`verify`、`dry-run` は system 側と data 側を変更してはならない。`apply-system` と `rollback-system` は、承認済み範囲で system 側のみを変更する候補として扱い、実行には別途ユーザー承認を必要とする。
 
 VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可能を最低必須条件とする。SSH が使用できない環境は、標準デプロイ対象外とする。
 
@@ -41,7 +43,7 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 | 採用 | shell script + SSH | 標準デプロイ補助方式。承認済み範囲で、binary または image 転送、起動定義更新、backup、再起動、検証、manifest 記録を自動化する |
 | 補助採用 | `gh` | Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って利用する |
 | 補助採用 | systemd timer | バックアップ、定期検証、保守系の定期実行候補として利用する。アプリケーション本体の標準起動方式ではない |
-| 採用 | Adlaire Deploy | Deno製の内製デプロイメントシステム。Phase 10 の着手対象として、DB 不使用で binary 正本成果物の取得、検証、配置、backup、rollback、manifest 記録を扱う |
+| 採用 | Adlaire Deploy | Deno製の内製デプロイメントシステム。Phase 10 の着手対象として、DB 不使用の `adlaire-deploy` CLI、JSON manifest、binary 正本成果物の取得、検証、配置、backup、rollback、plan / result / error 記録を扱う |
 | 保留 | GitHub Actions | 標準採用しない。外部CIとしての採用可否は保留し、必要時に別途提案と承認を要する |
 | 保留 | 外部デプロイフレームワーク | 標準採用しない。必要性、依存関係、運用リスクを整理し、別途承認を得るまで採用しない |
 | 採用 | systemd または同等の起動管理 | binary 直実行を選択する場合の起動管理候補。作成または変更は別途承認を得る |
@@ -65,7 +67,7 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 - Docker 運用を選択する場合の host bind mount による data 領域の接続
 - binary 直実行または Docker による稼働版切り替え
 - deploy manifest の記録
-- Adlaire Deploy を使う場合の DB 不使用 manifest、plan、log の記録
+- Adlaire Deploy を使う場合の DB 不使用 JSON manifest、plan、result、error、log の記録
 
 標準配置は以下を基準とする。
 
@@ -134,7 +136,7 @@ Adlaire Deploy の Phase 10 実装が完了し、検証済みの移行先とし�
 
 `deploy.sh` は通常デプロイの自動化雛形であり、本番データ復元を行ってはならない。libSQL database 復元、移行元 SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元を伴うロールバックは、必ず別承認を得る。
 
-Adlaire Deploy は、database を使う運用記録基盤として実装してはならない。既存 shell script から Adlaire Deploy へ移行する場合も、database file は保護対象 data file として扱い、database の中身を解釈しない。
+Adlaire Deploy は、database を使う運用記録基盤として実装してはならない。既存 shell script から Adlaire Deploy へ移行する場合も、database file は保護対象 data file として扱い、database の中身を解釈しない。Adlaire Deploy の詳細な実行主体、標準コマンド、manifest、artifact、target / SSH、preflight、出力、error 分類、security / data 保護は `docs/specs/Adlaire_Deploy_Specification.md` を正本とする。
 
 ## 5. 標準自動化範囲
 
@@ -143,7 +145,7 @@ Adlaire Deploy は、database を使う運用記録基盤として実装して�
 - 本番サーバ環境の前提確認
 - SSH 接続事前検証
 - system / data 分離構成の検証
-- Adlaire Deploy の DB 不使用 manifest、plan、log 生成
+- Adlaire Deploy の DB 不使用 JSON manifest、plan、result、error、log 生成
 - Deno single binary 正本成果物の取得または転送
 - Docker 運用を選択する場合の Docker image の取得または転送
 - Docker 運用を選択する場合の Docker Compose 設定の確認
