@@ -99,9 +99,15 @@ fi
 if [ -L "$CURRENT_LINK" ] || [ -d "$CURRENT_LINK" ]; then
   current_target=\$(readlink "$CURRENT_LINK" 2>/dev/null || printf '%s' "$CURRENT_LINK")
   printf '%s\n' "\$current_target" > "\$backup_dir/system/current-target.txt"
-  current_parent=\$(dirname "$CURRENT_LINK")
-  current_name=\$(basename "$CURRENT_LINK")
-  tar -C "\$current_parent" -czf "\$backup_dir/system/current-release.tar.gz" "\$current_name"
+  case "\$current_target" in
+    /*) resolved_current="\$current_target" ;;
+    *) resolved_current="\$(dirname "$CURRENT_LINK")/\$current_target" ;;
+  esac
+  if [ -e "\$resolved_current" ]; then
+    current_parent=\$(dirname "\$resolved_current")
+    current_name=\$(basename "\$resolved_current")
+    tar -C "\$current_parent" -czf "\$backup_dir/system/current-release.tar.gz" "\$current_name"
+  fi
 fi
 
 trap - EXIT HUP INT TERM

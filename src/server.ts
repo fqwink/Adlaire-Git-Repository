@@ -1476,7 +1476,7 @@ function renderHome(): string {
     <header>
       <div>
         <h1>Adlaire Git Repository</h1>
-        <div class="phase">Phase 8.5 / v.1.9</div>
+        <div class="phase">Phase 8.7 / v.1.9</div>
       </div>
       <div class="status" id="status" role="status" aria-live="polite"></div>
     </header>

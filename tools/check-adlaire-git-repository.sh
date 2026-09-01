@@ -78,7 +78,7 @@ check_required_paths() {
     tests/integration/issue_api_test.ts \
     tests/integration/phase2_api_test.ts \
     tests/integration/phase3_api_test.ts \
-    tests/integration/phase8_5_system_data_test.ts \
+    tests/integration/phase8_7_stabilization_test.ts \
     tests/integration/repository_service_test.ts; do
     if [ ! -f "$ROOT_DIR/$path" ]; then
       echo "missing Adlaire Git Repository required path: $path" >&2
@@ -197,6 +197,16 @@ check_system_data_split_policy() {
 
   if ! grep -F 'MANIFEST_ROOT=/opt/adlaire-git-repository/shared/manifests' scripts/deploy/deploy.env.example >/dev/null 2>&1; then
     echo "deploy.env.example must define shared manifest storage." >&2
+    exit 1
+  fi
+
+  if ! grep -F 'resolved_current=' scripts/deploy/backup.sh >/dev/null 2>&1; then
+    echo "backup.sh must archive the resolved current release target, not only the current symlink." >&2
+    exit 1
+  fi
+
+  if grep -R -n 'TARGET_IMAGE=.*scripts/deploy/rollback.sh' README.md docs >/dev/null 2>&1; then
+    echo "rollback examples must use TARGET_RELEASE for the current rollback script." >&2
     exit 1
   fi
 }

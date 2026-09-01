@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.1.23
-**ステータス**: Phase 8.5 システム分割完了・PR確認中
+**文書バージョン**: v.1.24
+**ステータス**: Phase 8.7 安定化完了・PR確認中
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -781,7 +781,7 @@ Phase 9 で安定版リリースを行う場合、リリース履歴の正本は
 
 ---
 
-## deno.json v.1.9 Phase 8.5 baseline
+## deno.json v.1.9 Phase 8.7 baseline
 
 正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。
 
@@ -984,7 +984,7 @@ Git repos: /opt/adlaire-git-repository/shared/data/repositories/
 **バックアップ戦略**
 標準バックアップ雛形は `scripts/deploy/backup.sh` とする。
 
-バックアップ対象は libSQL database、移行元 SQLite database、Git bare repository、設定、secrets、logs、manifests、現行 system release、backup manifest とする。標準雛形では service が稼働していた場合に一時停止し、data 側の主要保護対象と現行 system release 参照を取得してから service を再起動する。libSQL database のファイルバックアップは cold backup とし、`sqlite3` CLI による SQLite backup API を標準前提にしない。
+バックアップ対象は libSQL database、移行元 SQLite database、Git bare repository、設定、secrets、logs、manifests、現行 system release、backup manifest とする。標準雛形では service が稼働していた場合に一時停止し、data 側の主要保護対象、現行 system release 参照、現行 system release 実体を取得してから service を再起動する。libSQL database のファイルバックアップは cold backup とし、`sqlite3` CLI による SQLite backup API を標準前提にしない。
 
 定期実行は systemd timer を補助採用候補とし、実行間隔、保持期間、外部保管、暗号化、復元手順は `docs/policies/DEPLOYMENT_POLICY.md` に従い、ユーザー承認後に確定する。
 
@@ -1130,10 +1130,10 @@ $ scripts/deploy/verify-release.sh
 
 ### ロールバック手順
 
-通常ロールバックは、`scripts/deploy/rollback.sh` により直前 Docker image / tag へ戻し、container 再作成と配置後検証を行う。
+通常ロールバックは、`scripts/deploy/rollback.sh` により指定した release directory へ戻し、process または container 再起動と配置後検証を行う。
 
 ```bash
-TARGET_IMAGE=adlaire-git-repo:v.1.8-YYYYMMDD-HHMMSS scripts/deploy/rollback.sh
+TARGET_RELEASE=v.1.9-YYYYMMDD-HHMMSS scripts/deploy/rollback.sh
 ```
 
 ロールバック実行は、必ず別途ユーザー承認を得る。

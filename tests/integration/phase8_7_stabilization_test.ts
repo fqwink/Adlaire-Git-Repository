@@ -1,7 +1,7 @@
 import { createApp } from "../../src/server.ts";
 import { assert, assertEquals } from "../support/assert.ts";
 
-Deno.test("home UI exposes current Phase 8.5 baseline and workflow layout", async () => {
+Deno.test("home UI exposes current Phase 8.7 baseline and workflow layout", async () => {
   const root = await Deno.makeTempDir();
   const dataDir = `${root}/shared/data`;
   const app = await createApp({
@@ -25,8 +25,8 @@ Deno.test("home UI exposes current Phase 8.5 baseline and workflow layout", asyn
 
     const html = await response.text();
     assert(
-      html.includes("Phase 8.5 / v.1.9"),
-      "Home UI must expose the current Phase 8.5 baseline.",
+      html.includes("Phase 8.7 / v.1.9"),
+      "Home UI must expose the current Phase 8.7 baseline.",
     );
     assert(html.includes('id="register-form"'));
     assert(html.includes('id="token-form"'));
@@ -62,4 +62,31 @@ Deno.test("application initializes host filesystem data directories", async () =
   } finally {
     await Deno.remove(root, { recursive: true }).catch(() => undefined);
   }
+});
+
+Deno.test("deployment scripts preserve current release target and rollback by release id", async () => {
+  const backupScript = await Deno.readTextFile("scripts/deploy/backup.sh");
+  const rollbackScript = await Deno.readTextFile("scripts/deploy/rollback.sh");
+  const specification = await Deno.readTextFile(
+    "docs/specs/Adlaire_Git_Repository_Specification.md",
+  );
+
+  assert(
+    backupScript.includes("resolved_current="),
+    "Backup must resolve system/current before archiving the current release.",
+  );
+  assert(
+    backupScript.includes("current-release.tar.gz"),
+    "Backup must preserve the current system release artifact.",
+  );
+  assert(
+    rollbackScript.includes('TARGET_RELEASE="${TARGET_RELEASE:-}"'),
+    "Rollback must use release ids as its public input contract.",
+  );
+  assert(
+    specification.includes(
+      "TARGET_RELEASE=v.1.9-YYYYMMDD-HHMMSS scripts/deploy/rollback.sh",
+    ),
+    "Rollback documentation must match the TARGET_RELEASE script contract.",
+  );
 });
