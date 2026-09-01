@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.1.24
-**ステータス**: Phase 8.7 安定化完了・PR確認中
+**文書バージョン**: v.2.10
+**ステータス**: Phase 9 安定版判定・リリース準備
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -781,16 +781,16 @@ Phase 9 で安定版リリースを行う場合、リリース履歴の正本は
 
 ---
 
-## deno.json v.1.9 Phase 8.7 baseline
+## deno.json v.2.10 Phase 9 baseline
 
 正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。
 
-初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。安定版リリース系列では正式表記を `v.{Major}.{Minor}` とし、`deno.json` 側では `{Major}.{Minor}.0` に対応させる。たとえば `1.9.0` は正式表記 `v.1.9` に対応する。
+初回安定版リリース前は正式表記を `v.0.{Minor}` とし、`deno.json` 側では `0.{Minor}.0` に対応させる。安定版リリース系列では正式表記を `v.{Major}.{Minor}` とし、`deno.json` 側では `{Major}.{Minor}.0` に対応させる。たとえば `2.10.0` は正式表記 `v.2.10` に対応する。
 
 ```json
 {
   "name": "adlaire-git-repository",
-  "version": "1.9.0",
+  "version": "2.10.0",
   "license": "CLOSED",
   "exports": "./src/main.ts",
   "imports": {
@@ -802,8 +802,8 @@ Phase 9 で安定版リリースを行う場合、リリース履歴の正本は
     "lint": "deno lint",
     "test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname tests/",
     "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo src/main.ts",
-    "compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-v1.9-aarch64-unknown-linux-gnu src/main.ts",
-    "compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-v1.9-x86_64-unknown-linux-gnu src/main.ts",
+    "compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-v2.10-aarch64-unknown-linux-gnu src/main.ts",
+    "compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-v2.10-x86_64-unknown-linux-gnu src/main.ts",
     "compile:release": "deno task compile:linux-arm64 && deno task compile:linux-x86_64",
     "docker:verify-build": "sh scripts/docker/verify-build.sh"
   },
@@ -1133,7 +1133,7 @@ $ scripts/deploy/verify-release.sh
 通常ロールバックは、`scripts/deploy/rollback.sh` により指定した release directory へ戻し、process または container 再起動と配置後検証を行う。
 
 ```bash
-TARGET_RELEASE=v.1.9-YYYYMMDD-HHMMSS scripts/deploy/rollback.sh
+TARGET_RELEASE=v.2.10-YYYYMMDD-HHMMSS scripts/deploy/rollback.sh
 ```
 
 ロールバック実行は、必ず別途ユーザー承認を得る。
