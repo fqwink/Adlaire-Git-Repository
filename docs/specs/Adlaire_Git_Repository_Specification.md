@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.15
-**ステータス**: Phase 10 JSR Deno runtime 前提方針整合
+**文書バージョン**: v.2.16
+**ステータス**: libSQL 標準DB確定と Deno 専用 driver 条件整合
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -58,7 +58,7 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - 基本的な機能互換は GitHub 互換基準とする。
 - UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換対象外とする。
 - 標準ランタイムは Deno、標準言語は TypeScript とする。
-- 標準データベースは libSQL とする。
+- 標準データベースは libSQL とし、DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは現行正本仕様の採用候補として扱わない。
 - SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。
 - DBアクセスは Database Gateway、Repository 層、driver 層を経由し、SQLite または libSQL を上位層から直接触らない。
 - `DB_DRIVER=libsql` を標準 driver とする。
@@ -551,6 +551,8 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 
 標準採用するデータベースエンジンは libSQL とする。
 
+libSQL は本プロジェクトの唯一の標準DBとして完全確定する。DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは、現行正本仕様における採用候補として扱わない。
+
 SQLite は既存データ移行元確認用としてのみ扱う。
 
 標準データベースは libSQL とする。
@@ -561,7 +563,13 @@ libSQL は必要最小限の外部依存に該当するが、DB抽象化設計�
 
 libSQL driver は Phase 8 の承認済み実装対象とする。libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、内製 `libsql` driver と Database Gateway の内部に閉じ込め、サービス層やRepository層へ直接露出させない。
 
+`@libsql/client` 等の npm 互換 libSQL client の問題は、DB 選定の問題ではなく、client / driver の依存経路と runtime 前提の問題として扱う。libSQL 採用は撤回せず、Node.js runtime が存在しない前提で Deno runtime だけで動作する driver 経路へ置換することを仕様上の是正方針とする。
+
 `@libsql/client` 等の npm 互換 libSQL client は採用禁止とする。既存実装または設定に npm 由来の libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱い、別途承認を得て撤去または置換する。
+
+libSQL client / driver 候補は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Deno runtime だけで動作することを必須条件とする。JSR 経由の公開ライブラリであっても、npm 互換 package、`npm:` specifier、Node.js runtime 前提、native loader 前提を含む場合は採用しない。
+
+Turso 公式の `@tursodatabase/serverless/compat` および `@tursodatabase/serverless` は、`fetch` のみで動作する libSQL over HTTP 系 client 候補として調査対象にできる。ただし、npm package としての取得経路、Deno runtime only 条件、固定バージョン、権限、self-host / VPS 上の libSQL server 接続可否を確認し、別途ユーザー承認を得るまで採用確定または実装反映してはならない。
 
 Turso Cloud 等のクラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングは新しいデータベースエンジンではなく、libSQL の接続先または運用形態の候補として扱う。採用する場合は、外部サービス依存、データ所在、認証トークン管理、バックアップ、障害時の復旧、運用費用を評価し、例外採用としてユーザー承認を得る。
 
@@ -639,6 +647,8 @@ Phase 8 は、Adlaire Git Repository 本体の DB 仕様完成フェーズであ
 
 Phase 8 では、標準データベースを libSQL として扱い、SQLite 互換維持を行わない。SQLite は既存データ移行元確認用に限定し、標準運用、互換維持、最小ローカル検証用として扱わない。
 
+libSQL は唯一の標準DBとして完全確定する。DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは Phase 8 以降の採用候補として扱わない。DB 選定を再検討する場合は、通常の依存置換ではなく、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂する方針変更として扱い、ユーザー承認を得る。
+
 Phase 8 の DB 接続仕様は以下とする。
 
 | 項目 | 仕様 |
@@ -646,7 +656,7 @@ Phase 8 の DB 接続仕様は以下とする。
 | 標準 driver | `DB_DRIVER=libsql` |
 | 接続先 | `DB_URL` |
 | 認証情報 | `DB_AUTH_TOKEN` |
-| driver ライブラリ | npm 依存を含まない内製 libSQL driver / libSQL 外部依存例外を使用 |
+| driver ライブラリ | Node.js runtime が存在しない前提で Deno runtime だけで動作する内製 libSQL driver / libSQL 外部依存例外を使用 |
 | migration 適用 | Database Gateway 経由 |
 | schema / seed | 専用ディレクトリへ集約 |
 | SQLite | 既存データ移行元確認用。利用時は別途承認 |
@@ -654,11 +664,18 @@ Phase 8 の DB 接続仕様は以下とする。
 
 Phase 8 では、DB driver の外部ライブラリ API を Database Gateway より上位へ露出させない。Repository 層は永続化要求を表現し、接続、SQL 実行、トランザクション、migration、driver 差し替えは Database Gateway と driver 層の責務とする。
 
+`@libsql/client` 等の npm 互換 libSQL client の問題は、標準DBとしての libSQL 採用可否ではなく、client / driver の依存経路と runtime 前提の問題として扱う。libSQL 採用は撤回せず、Node.js runtime が存在しない前提で Deno runtime だけで動作する driver 経路へ置換する。
+
+libSQL client / driver 候補は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Deno runtime だけで動作することを必須条件とする。JSR 経由の公開ライブラリであっても、npm 互換 package、`npm:` specifier、Node.js runtime 前提、native loader 前提を含む場合は採用しない。
+
+Turso 公式の `@tursodatabase/serverless/compat` および `@tursodatabase/serverless` は、`fetch` のみで動作する libSQL over HTTP 系 client 候補として調査対象にできる。ただし、npm package としての取得経路、Deno runtime only 条件、固定バージョン、権限、self-host / VPS 上の libSQL server 接続可否を確認し、別途ユーザー承認を得るまで採用確定または実装反映してはならない。
+
 Phase 8 の対象外は以下とする。
 
 - SQLite 互換維持
 - SQLite 標準DB運用
 - SQLite 最小ローカル検証用運用
+- PostgreSQL、Key-value DB、DB 使用なし案、その他のデータベースエンジン採用
 - `DB_DRIVER=sqlite` の標準化
 - `DB_DRIVER=turso` 等のホスティングサービス名の driver 化
 - Deno Deploy 環境対応

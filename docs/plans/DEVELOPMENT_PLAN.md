@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.2.15
+**計画バージョン**: v.2.16
 **現行フェーズ基準バージョン**: v.2.10
-**ステータス**: Phase 10 JSR Deno runtime 前提方針整合
+**ステータス**: libSQL 標準DB確定と Deno 専用 driver 条件整合
 
 ---
 
@@ -63,7 +63,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 - リリース提案、リリース配置、リリース成果物、リリース自動化は `docs/policies/RELEASE_POLICY.md` に従う。リリース履歴の正本は GitHub Releases とし、リポジトリ内に変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` に従う。
 - Deno single binary 形式を正本成果物とする。Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、1 VPS 上の差し替え可能な system 側と host filesystem data 側を分離する同じ構成にする。shell script + SSH は binary または image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer を補助採用とする。Adlaire Deploy は Phase 10 の着手対象とし、Adlaire Git Repository 本体へ統合せず、DB 不使用の `adlaire-deploy` CLI 付随システムとして同居・連携する。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
-- 標準データベースは libSQL とする。SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。
+- 標準データベースは libSQL とし、唯一の標準DBとして完全確定する。SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは採用候補として扱わない。
 - ローカルに Deno が存在しない場合、実行系検証は停止ではなく VPS または承認済み検証サーバで実施する方針とする。
 - ドキュメント参照導線は `docs/DOCUMENT_INDEX.md` を索引として確認する。AdlaireGroup 共通ガバナンス雛形の正本は `docs/tpl-governance/` 配下で管理し、現行プロジェクト固有の正本とは分離する。
 - `docs/tpl-governance/` は AdlaireGroup 共通ガバナンス雛形の正本とし、本プロジェクトの変更が共通方針に該当する場合は更新要否を判定し、必要な場合は同一変更範囲で雛形も整合させる。
@@ -922,7 +922,7 @@ Phase 8 の基準バージョンは `v.1.9` とする。Phase 7 で初回安定�
 
 ### 13.2 目的
 
-libSQL 標準化を中心に DB 仕様を完成させる。SQLite 互換維持は行わない。
+libSQL 標準化を中心に DB 仕様を完成させる。SQLite 互換維持は行わない。libSQL は唯一の標準DBとして完全確定し、DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは採用候補として扱わない。
 
 ### 13.3 リリース方針
 
@@ -933,7 +933,8 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 - libSQL 標準DB仕様の確定
 - `DB_DRIVER=libsql` を標準 driver とする接続仕様
 - `DB_URL` と `DB_AUTH_TOKEN` による接続先・認証情報の扱い
-- npm 依存を含まない libSQL 外部依存例外と内製 libSQL driver 境界
+- Node.js runtime が存在しない前提で Deno runtime だけで動作する libSQL 外部依存例外と内製 libSQL driver 境界
+- `@libsql/client` 等の問題を DB 選定ではなく client / driver 依存経路の是正問題として扱う方針
 - Database Gateway、Repository 層、driver 層の責務境界
 - libSQL 前提の schema、migration、seed 管理方針
 - 既存データ移行元確認用 SQLite の取扱境界
@@ -946,6 +947,7 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 - SQLite 互換維持
 - SQLite 標準DB運用
 - SQLite 最小ローカル検証用運用
+- DB 使用なし案、PostgreSQL、Key-value DB、その他のデータベースエンジン採用
 - `DB_DRIVER=sqlite` の標準運用化
 - `DB_DRIVER=turso` 等のクラウドDBホスティング名を driver 名にすること
 - Deno Deploy 環境対応
@@ -957,7 +959,7 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 ### 13.4.2 必須検証
 
 - 標準 driver が `DB_DRIVER=libsql` として定義されていること
-- npm 依存を含まない libSQL driver 境界が内製 `LibsqlDriver` の内部に閉じていること
+- Node.js runtime が存在しない前提で Deno runtime だけで動作する libSQL driver 境界が内製 `LibsqlDriver` の内部に閉じていること
 - SQLite が既存データ移行元確認用に限定されていること
 - Database Gateway、Repository 層、driver 層の責務境界が仕様書と矛盾していないこと
 - DB driver 固有 API が上位層へ漏れない構成になっていること
@@ -1405,3 +1407,4 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 | v.2.13 | Phase 10 | v.2.11 | Adlaire Deploy の実行主体、標準コマンド、JSON manifest、artifact、SSH target、preflight、出力、error、security / data 保護、scripts/deploy 移行境界を仕様固定 |
 | v.2.14 | Phase 10 / Phase 8 | v.2.14 / v.1.9 | Deno Deploy 環境対応を白紙化し、オンプレミス、VPS、専用サーバー前提へ再固定。標準採用を Deno 標準ライブラリ（`jsr:@std/*`）に限定し、libSQL は npm 依存を含まない外部依存例外、npm 互換 package と全 npm 依存は禁止として整合 |
 | v.2.15 | Phase 10 / 全フェーズ共通 | v.2.10 | JSR レジストリ公開ライブラリの採用条件として、Node.js ランタイム環境が存在しない前提で Deno runtime だけで動作することを必須化 |
+| v.2.16 | Phase 8 / Phase 10 | v.2.10 | libSQL を唯一の標準DBとして完全確定し、`@libsql/client` 等の問題をDB選定ではなく Deno runtime only の client / driver 依存経路是正問題として整理 |

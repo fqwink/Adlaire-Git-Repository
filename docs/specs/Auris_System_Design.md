@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.2.15
-**ステータス**: Phase 10 JSR Deno runtime 前提方針整合
+**文書バージョン**: v.2.16
+**ステータス**: libSQL 標準DB確定と Deno 専用 driver 条件整合
 
 ---
 
@@ -119,6 +119,8 @@ Deno single binary 形式を正本成果物とする。Docker は正本成果物
 
 標準採用するデータベースエンジンは libSQL とする。
 
+libSQL は本プロジェクトの唯一の標準DBとして完全確定する。DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは、現行正本仕様における採用候補として扱わない。
+
 SQLite は既存データ移行元確認用としてのみ扱う。
 
 標準データベースは libSQL とする。
@@ -129,7 +131,13 @@ libSQL は、移行容易性、将来の同期・分散構成への拡張余地�
 
 libSQL driver は Phase 8 の承認済み実装対象とする。libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、内製 `libsql` driver と Database Gateway の内部に閉じ込める。
 
+`@libsql/client` 等の npm 互換 libSQL client の問題は、DB 選定の問題ではなく、client / driver の依存経路と runtime 前提の問題として扱う。libSQL 採用は撤回せず、Node.js runtime が存在しない前提で Deno runtime だけで動作する driver 経路へ置換することを仕様上の是正方針とする。
+
 `@libsql/client` 等の npm 互換 libSQL client は採用禁止とする。既存実装または設定に npm 由来の libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱い、別途承認を得て撤去または置換する。
+
+libSQL client / driver 候補は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Deno runtime だけで動作することを必須条件とする。JSR 経由の公開ライブラリであっても、npm 互換 package、`npm:` specifier、Node.js runtime 前提、native loader 前提を含む場合は採用しない。
+
+Turso 公式の `@tursodatabase/serverless/compat` および `@tursodatabase/serverless` は、`fetch` のみで動作する libSQL over HTTP 系 client 候補として調査対象にできる。ただし、npm package としての取得経路、Deno runtime only 条件、固定バージョン、権限、self-host / VPS 上の libSQL server 接続可否を確認し、別途ユーザー承認を得るまで採用確定または実装反映してはならない。
 
 Turso Cloud 等の libSQL 系クラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングはデータベースエンジンの追加採用ではなく、libSQL の接続先または運用形態の候補として扱う。検討する場合は、標準運用方針、クローズドライセンス、データ管理責任、認証情報管理、運用コスト、障害時の復旧方針を3類マスター仕様書に追記してから判断する。
 
