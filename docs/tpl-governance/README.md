@@ -26,6 +26,8 @@
 
 policy slots は、各プロジェクトで共通方針を維持したまま具体化する2類ポリシーの必須枠である。policy slots は方針を自由に変更する場所ではない。採用技術、固定バージョン、ライセンス、デプロイ方式、データ保存、依存関係、セキュリティ要件は AdlaireGroup 共通方針として扱い、各プロジェクトではプロジェクト名、配置先、サーバ名、ドメイン、仕様書名、Phase 計画、実装対象機能などの固有値を具体化する。
 
+デプロイ方式とデータ保存を持つプロジェクトでは、差し替え可能な system 側と host filesystem を正本とする data 側を分離する。Docker 使用時も非 Docker の binary 直実行時も、data 側の正本は同じ構成とし、Docker named volume に丸投げしてはならない。
+
 ```text
 docs/tpl-governance/
   core/

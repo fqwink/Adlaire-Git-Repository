@@ -13,7 +13,9 @@ export interface DatabaseConfig {
 }
 
 export function loadConfig(env: Deno.Env = Deno.env): AppConfig {
-  const dataDir = env.get("ADLAIRE_DATA_DIR") ?? "./data";
+  const appRoot = env.get("ADLAIRE_APP_ROOT") ?? ".";
+  const sharedDir = env.get("ADLAIRE_SHARED_DIR") ?? `${appRoot}/shared`;
+  const dataDir = env.get("ADLAIRE_DATA_DIR") ?? `${sharedDir}/data`;
   const databaseDriver = readDatabaseDriver(
     env.get("DB_DRIVER"),
     env.get("ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE") === "1",
@@ -70,8 +72,9 @@ function defaultDatabaseUrl(
   driver: "libsql" | "sqlite",
   dataDir: string,
 ): string {
+  const databaseDir = `${dataDir}/database`;
   if (driver === "sqlite") {
-    return `${dataDir}/adlaire.sqlite3`;
+    return `${databaseDir}/adlaire.sqlite3`;
   }
-  return `file:${dataDir}/adlaire.libsql`;
+  return `file:${databaseDir}/adlaire.libsql`;
 }

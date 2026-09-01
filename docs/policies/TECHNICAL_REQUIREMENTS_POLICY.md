@@ -139,6 +139,8 @@ Docker Desktop は本番サーバ標準構成として採用しない。Docker �
 
 system 側と data 側を分離する。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として扱う。Docker 運用を選択する場合、data 側は原則として host bind mount で container へ接続し、Docker named volume へ丸投げしてはならない。
 
+標準アプリケーション設定では、`ADLAIRE_APP_ROOT` から `ADLAIRE_SHARED_DIR` と `ADLAIRE_DATA_DIR` を導き、libSQL database は `shared/data/database/adlaire.libsql`、Git bare repositories は `shared/data/repositories` に配置する。Docker 使用時も binary 直実行時も、この data 側パスを共通化する。
+
 ## 4. データベース方針
 
 標準採用するデータベースエンジンは libSQL とする。

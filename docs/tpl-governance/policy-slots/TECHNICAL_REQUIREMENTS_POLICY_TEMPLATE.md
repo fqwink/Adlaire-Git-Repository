@@ -43,6 +43,8 @@ Deno single binary 形式、Docker 形式のいずれでも、プロジェクト
 
 保護対象 data 側は host filesystem を正本として system 側から分離する。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。
 
+各プロジェクトは、system 側と data 側の標準パス、設定環境変数、database 保存先、repository 保存先、config、secrets、logs、backups、manifests の配置を技術要件またはデプロイポリシーに定義する。
+
 Docker named volume を標準の data 正本として扱ってはならない。data 側は原則として host bind mount で container へ接続する。
 
 禁止対象には、最低限以下を含める。

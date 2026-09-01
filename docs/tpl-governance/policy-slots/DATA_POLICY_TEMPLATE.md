@@ -25,6 +25,10 @@
 
 データベースを利用するプロジェクトは、標準データベースと互換・移行元データベースの保存先、バックアップ対象、復元対象、migration 方針、rollback 方針を区別して定義する。
 
+データは、差し替え可能な system 側から分離し、host filesystem を正本とする data 側へ保存する。最低限、database、repository 実体、config、secrets、logs、backups、manifests の扱いを定義する。
+
+Docker 運用を選択する場合も、data 側は container lifecycle に依存させず、host bind mount を基本とする。Docker named volume を data 正本として扱ってはならない。
+
 クラウドDBホスティングを採用するか未定の場合は、未定であること、採用時に評価すべきデータ所在、認証情報管理、バックアップ、復旧、運用費用、承認条件を明記する。
 
 ## 3. 承認

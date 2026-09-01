@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.1.22
-**ステータス**: Phase 8.1 本体整合性完了・PR確認中
+**文書バージョン**: v.1.23
+**ステータス**: Phase 8.5 システム分割完了・PR確認中
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -717,6 +717,18 @@ data 側は保護対象として扱い、host filesystem を正本とする。
 
 Docker 使用時も、Docker を使用しない binary 直実行時も、同じ data 側構成を使用する。Docker named volume を data 正本として扱ってはならない。
 
+標準パスは以下とする。
+
+```text
+ADLAIRE_APP_ROOT=/opt/adlaire-git-repository
+ADLAIRE_SHARED_DIR=/opt/adlaire-git-repository/shared
+ADLAIRE_DATA_DIR=/opt/adlaire-git-repository/shared/data
+ADLAIRE_REPOSITORY_ROOT=/opt/adlaire-git-repository/shared/data/repositories
+DB_URL=file:/opt/adlaire-git-repository/shared/data/database/adlaire.libsql
+```
+
+標準デプロイ雛形では、`system/releases` と `system/current` を稼働版差し替え単位とし、`shared/logs/deploy.log` と `shared/manifests` を運用記録の保存先とする。
+
 ### Phase 8.7 安定化仕様
 
 Phase 8.7 は、Phase 8、Phase 8.1、Phase 8.5 の成果を対象にした安定化フェーズである。
@@ -769,7 +781,7 @@ Phase 9 で安定版リリースを行う場合、リリース履歴の正本は
 
 ---
 
-## deno.json v.1.9 Phase 8.1 baseline
+## deno.json v.1.9 Phase 8.5 baseline
 
 正式バージョン表記は `v.{Major}.{Minor}` とする。`deno.json` に互換性上 `Major.Minor.Patch` 形式を記載する場合は、正式表記に対応する内部表記として扱う。
 
@@ -972,7 +984,7 @@ Git repos: /opt/adlaire-git-repository/shared/data/repositories/
 **バックアップ戦略**
 標準バックアップ雛形は `scripts/deploy/backup.sh` とする。
 
-バックアップ対象は libSQL database、移行元 SQLite database、Git bare repository、設定、現行 release、backup manifest とする。libSQL database のファイルバックアップは、標準雛形ではサービス停止を伴う cold backup とし、`sqlite3` CLI による SQLite backup API を標準前提にしない。
+バックアップ対象は libSQL database、移行元 SQLite database、Git bare repository、設定、secrets、logs、manifests、現行 system release、backup manifest とする。標準雛形では service が稼働していた場合に一時停止し、data 側の主要保護対象と現行 system release 参照を取得してから service を再起動する。libSQL database のファイルバックアップは cold backup とし、`sqlite3` CLI による SQLite backup API を標準前提にしない。
 
 定期実行は systemd timer を補助採用候補とし、実行間隔、保持期間、外部保管、暗号化、復元手順は `docs/policies/DEPLOYMENT_POLICY.md` に従い、ユーザー承認後に確定する。
 
@@ -1055,7 +1067,10 @@ VPS: Xserver 2GB プラン × 3台
 - libSQL database
 - Git bare repository 保存領域
 - 設定ファイル
-- 現行 release
+- secrets
+- logs
+- manifests
+- 現行 system release
 - backup manifest
 
 `cron` ではなく、systemd timer を補助採用候補として扱う。定期バックアップの有効化、実行間隔、保存先、保持世代、暗号化、外部退避は、デプロイ先決定時にユーザー承認を得る。
@@ -1086,7 +1101,7 @@ NAS は自動複製機能 or スナップショット機能を活用
 
 ### アップグレード手順
 
-標準アップグレードは、`scripts/deploy/deploy.sh` を用いた Deno single binary 入り Docker image の配置、compose 設定確認、container 再作成、配置後検証を基本とする。
+標準アップグレードは、`scripts/deploy/deploy.sh` を用いた Deno single binary 配置、必要に応じた Deno single binary 入り Docker image の配置、compose 設定確認、process または container 再起動、配置後検証を基本とする。
 
 ```bash
 # 1. 新バイナリの compile と Docker image 生成

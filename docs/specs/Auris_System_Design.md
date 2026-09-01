@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.1.22
-**ステータス**: Phase 8.1 本体整合性完了・PR確認中
+**文書バージョン**: v.1.23
+**ステータス**: Phase 8.5 システム分割完了・PR確認中
 
 ---
 
@@ -393,6 +393,10 @@ Phase 8.5 はシステム分割フェーズである。
 Phase 8.5 では、Adlaire Git Repository 本体とデータ領域を分割する。Deno single binary、Docker image、container、compose、service、起動管理定義は差し替え可能な system 側として扱う。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として扱う。
 
 Phase 8.5 の標準構成は、1 VPS 上に system 側と host filesystem data 側を同居させる最小構成とする。Docker 使用時も非 Docker の binary 直実行時も、data 側の正本は host filesystem とし、Docker named volume を data 正本として扱わない。
+
+標準アプリケーション設定では、`ADLAIRE_APP_ROOT` から `ADLAIRE_SHARED_DIR` と `ADLAIRE_DATA_DIR` を導き、libSQL database は `shared/data/database/adlaire.libsql`、Git bare repositories は `shared/data/repositories` に配置する。
+
+標準デプロイ雛形では、`system/releases` と `system/current` を system 側、`shared/config`、`shared/secrets`、`shared/logs`、`shared/backups`、`shared/manifests` を data 側として扱う。
 
 Phase 8.5 の完了条件は以下とする。
 

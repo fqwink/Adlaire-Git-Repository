@@ -67,6 +67,10 @@ Adlaire Deploy は仕様未定の将来候補とする。仕様が確定する�
 ```text
 /opt/adlaire-git-repository/
 ├── system/
+│   ├── releases/
+│   │   └── v.1.9-YYYYMMDD-HHMMSS/
+│   │       └── adlaire-git-repository
+│   ├── current -> releases/v.1.9-YYYYMMDD-HHMMSS/
 │   ├── bin/
 │   │   └── adlaire-git-repo
 │   ├── docker/
@@ -75,17 +79,22 @@ Adlaire Deploy は仕様未定の将来候補とする。仕様が確定する�
 │   │       └── adlaire-git-repo-v1.9.tar
 │   └── service/
 │       └── adlaire-git-repository.service
-├── env/
-│   └── production.env
 └── shared/
     ├── data/
-    ├── repositories/
+    │   ├── database/
+    │   │   └── adlaire.libsql
+    │   └── repositories/
     ├── config/
+    │   └── adlaire.env
     ├── secrets/
     ├── logs/
     ├── backups/
     └── manifests/
 ```
+
+`system/releases` と `system/current` は差し替え可能な system 側として扱う。`shared/data/database`、`shared/data/repositories`、`shared/config`、`shared/secrets`、`shared/logs`、`shared/backups`、`shared/manifests` は保護対象 data 側として扱う。
+
+標準アプリケーション設定では、`ADLAIRE_APP_ROOT=/opt/adlaire-git-repository` から `ADLAIRE_SHARED_DIR=/opt/adlaire-git-repository/shared`、`ADLAIRE_DATA_DIR=/opt/adlaire-git-repository/shared/data`、`ADLAIRE_REPOSITORY_ROOT=/opt/adlaire-git-repository/shared/data/repositories` を導く。標準 libSQL database は `file:/opt/adlaire-git-repository/shared/data/database/adlaire.libsql` とする。
 
 Docker 運用を選択する場合の container 内配置は以下を基準とする。
 
@@ -158,7 +167,9 @@ Adlaire Deploy の仕様が確定するまで、上記 script 群を標準デプ
 - Docker 運用を選択している場合の現行 Docker image または image tag 情報
 - deploy manifest
 
-libSQL database のファイルバックアップは、標準雛形ではサービス停止を伴う cold backup とする。`sqlite3` CLI による SQLite backup API を標準前提にしてはならない。バックアップ前に service が稼働していた場合は、DB ファイルと関連 sidecar のコピー後に service を再起動する。
+標準雛形では、service が稼働していた場合は一時停止し、libSQL database と関連 sidecar、Git bare repository、config、secrets、logs、manifests、現行 system release 参照を取得してから service を再起動する。
+
+libSQL database のファイルバックアップは、標準雛形ではサービス停止を伴う cold backup とする。`sqlite3` CLI による SQLite backup API を標準前提にしてはならない。
 
 バックアップは、復元可能性を検証できる形式で保存する。保存先、保持世代、暗号化、外部退避の有無は、デプロイ先決定時にユーザー承認を得る。
 
