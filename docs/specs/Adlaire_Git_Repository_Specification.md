@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.14
-**ステータス**: Phase 10 npm 依存全面禁止方針整合
+**文書バージョン**: v.2.15
+**ステータス**: Phase 10 JSR Deno runtime 前提方針整合
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -521,6 +521,7 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 - フレームワーク採用禁止（内製化のみ）
 - 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。ただし、個別モジュールの採用はユーザー承認を必須とする
 - JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う
+- JSR レジストリの公開ライブラリを採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする
 - JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする
 - JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする
 - クローズドライセンス、内部専用、非公開資産は JSR へ公開しない

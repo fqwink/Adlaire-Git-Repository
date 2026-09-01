@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.2.14
-**現行フェーズ基準バージョン**: v.2.14
-**ステータス**: Phase 10 npm 依存全面禁止方針整合
+**計画バージョン**: v.2.15
+**現行フェーズ基準バージョン**: v.2.10
+**ステータス**: Phase 10 JSR Deno runtime 前提方針整合
 
 ---
 
@@ -16,7 +16,7 @@
 
 実装は、1類ルールブック、2類ポリシー、3類マスター仕様書に従い、本書で定義したフェーズ計画に基づいて進める。
 
-Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。`v.2.10` の公開配布は保留し、Phase 10 の現行フェーズ基準バージョンは `v.2.11` とする。Phase 10 は Adlaire Deploy を主対象として、DB 不使用で binary 正本成果物の配布・取得・検証・配置を内製化し、実行主体、標準コマンド、manifest、artifact、SSH target、preflight、出力、error、security / data 保護を仕様固定する。Phase 10 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
+Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。`v.2.10` の公開配布は保留し、Phase 10 の現行フェーズ基準バージョンは `v.2.10` とする。Phase 10 は Adlaire Deploy を主対象として、DB 不使用で binary 正本成果物の配布・取得・検証・配置を内製化し、実行主体、標準コマンド、manifest、artifact、SSH target、preflight、出力、error、security / data 保護を仕様固定する。Phase 10 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
 
 本計画における「マスター仕様完成」は、実装承認ではない。仕様完成後にソースコード実装、DB driver 実装、schema 変更、テスト変更、デプロイ実行を行う場合は、対象範囲と検証方法を提示し、別途ユーザー承認を得る。
 
@@ -110,7 +110,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 | Phase 8.5 | v.1.9 | 完了 | システム分割。Adlaire Git Repository 本体とデータ領域の分割 |
 | Phase 8.7 | v.1.9 | 完了 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
 | Phase 9 | v.2.10 | 完了 | バグ修正ゼロ化、安定版判定、リリース準備 |
-| Phase 10 | v.2.14 | 着手 | Adlaire Deploy。DB 不使用で binary 正本成果物の取得、検証、配置、backup、rollback、manifest、plan / result / error 記録を内製化。Deno Deploy 環境対応は白紙 |
+| Phase 10 | v.2.10 | 着手 | Adlaire Deploy。DB 不使用で binary 正本成果物の取得、検証、配置、backup、rollback、manifest、plan / result / error 記録を内製化。Deno Deploy 環境対応は白紙 |
 
 上記は各フェーズの基準バージョンである。表の `Major` は安定版リリース系列であり、累積フェーズ番号ではない。初回安定版リリース前は `v.0.x` 系を維持する。
 
@@ -142,7 +142,7 @@ Deno single binary 形式を正本成果物とする。Docker は、正本成果
 
 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 
-JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認を得るまで採用禁止とする。JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする。JSR へ公開する package は、公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
+JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認を得るまで採用禁止とする。JSR レジストリの公開ライブラリを採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする。JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする。JSR へ公開する package は、公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
 
 クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
 
@@ -1404,3 +1404,4 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 | v.2.12 | Phase 10 | v.2.11 | Adlaire Deploy を DB 不使用、SSH 使用可能を最低必須条件、DB 不使用で実装可能な機能を Phase 10 対象とする仕様へ改訂 |
 | v.2.13 | Phase 10 | v.2.11 | Adlaire Deploy の実行主体、標準コマンド、JSON manifest、artifact、SSH target、preflight、出力、error、security / data 保護、scripts/deploy 移行境界を仕様固定 |
 | v.2.14 | Phase 10 / Phase 8 | v.2.14 / v.1.9 | Deno Deploy 環境対応を白紙化し、オンプレミス、VPS、専用サーバー前提へ再固定。標準採用を Deno 標準ライブラリ（`jsr:@std/*`）に限定し、libSQL は npm 依存を含まない外部依存例外、npm 互換 package と全 npm 依存は禁止として整合 |
+| v.2.15 | Phase 10 / 全フェーズ共通 | v.2.10 | JSR レジストリ公開ライブラリの採用条件として、Node.js ランタイム環境が存在しない前提で Deno runtime だけで動作することを必須化 |

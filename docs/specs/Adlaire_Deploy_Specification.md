@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.2.14
-**ステータス**: Phase 10 Adlaire Deploy オンプレミス / VPS 前提固定
+**文書バージョン**: v.2.15
+**ステータス**: Phase 10 JSR Deno runtime 前提方針整合
 
 ---
 
@@ -69,7 +69,7 @@ Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考�
 - Docker image 配布は正式化しない。
 - Docker は運用選択肢の一つであり、配布正本ではない。
 - 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。
-- 必要な parser 等の外部ライブラリは、非 npm 依存であることを条件に、明示的な例外採用として管理する。
+- 必要な parser 等の外部ライブラリは、非 npm 依存であること、Node.js ランタイム環境が存在しない前提で Deno runtime だけで動作することを条件に、明示的な例外採用として管理する。
 - Node.js runtime、npm ecosystem、npm 互換 package、`npm:` specifier、`package.json`、`node_modules`、外部デプロイフレームワークを採用しない。
 - Adlaire Deploy 専用 database を持たない。
 - Adlaire Git Repository 本体の libSQL database を直接操作しない。

@@ -27,7 +27,9 @@
 
 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。
 
-必要な parser 等の外部ライブラリは、非 npm 依存であることを条件に、明示的な例外採用として管理する。JSR レジストリの公開 package であっても、Deno 標準ライブラリ（`jsr:@std/*`）以外は外部ライブラリ例外採用として扱う。
+必要な parser 等の外部ライブラリは、非 npm 依存であること、Node.js ランタイム環境が存在しない前提で Deno runtime だけで動作することを条件に、明示的な例外採用として管理する。JSR レジストリの公開 package であっても、Deno 標準ライブラリ（`jsr:@std/*`）以外は外部ライブラリ例外採用として扱う。
+
+JSR レジストリの公開 package を採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする。
 
 Node.js runtime、npm ecosystem、npm 互換 package、`npm:` specifier、`package.json`、`node_modules` を伴う依存は、実行時、開発時、検証時、ビルド時のいずれでも採用してはならない。
 

@@ -132,6 +132,7 @@
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 - 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。ただし、個別モジュールの採用はユーザー承認なしに行ってはならない。
 - JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。
+- JSR レジストリの公開ライブラリを採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする。
 - JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする。
 - クローズド資産は JSR へ公開してはならず、クローズドな Adlaire 内製 Deno package の中長期配布基盤は Adlaire 内製 Deno Module Registry とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
 - npm registry 互換レジストリは Node.js / npm ecosystem リスクと衝突するため標準採用しない。

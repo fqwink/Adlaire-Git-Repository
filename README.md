@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**現行フェーズ**: Phase 10 Adlaire Deploy 仕様固定 / v.2.14 baseline
+**現行フェーズ**: Phase 10 Adlaire Deploy 仕様固定 / v.2.10 baseline
 **直近安定版リリース**: Phase 7 / v.1.8
 
 ## ドキュメント
@@ -73,7 +73,7 @@ Deno single binary を正本成果物とする。Docker は正本成果物であ
 
 標準データベースは libSQL とする。SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。`DB_DRIVER=sqlite` は通常運用では拒否し、承認済みの移行元確認時に `ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` を指定した場合のみ扱う。クラウドDBホスティングは未定であり、採用する場合も `DB_DRIVER=libsql` の接続先差し替えとして扱う。
 
-標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。必要な parser 等の外部ライブラリは、非 npm 依存であることを条件に、明示的な例外採用として管理する。npm 互換 package、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem を伴う依存は例外なく採用しない。
+標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。必要な parser 等の外部ライブラリは、非 npm 依存であること、Node.js ランタイム環境が存在しない前提で Deno runtime だけで動作することを条件に、明示的な例外採用として管理する。npm 互換 package、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem を伴う依存は例外なく採用しない。
 
 libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、Database Gateway と内製 `libsql` driver 境界に閉じ込める。`@libsql/client` 等の npm 互換 libSQL client、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱う。
 

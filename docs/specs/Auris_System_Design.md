@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.2.14
-**ステータス**: Phase 10 npm 依存全面禁止方針整合
+**文書バージョン**: v.2.15
+**ステータス**: Phase 10 JSR Deno runtime 前提方針整合
 
 ---
 
@@ -92,7 +92,7 @@ Node.js ランタイムは採用しない。
 
 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。ただし、個別モジュールの採用は自動承認ではなく、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 
-JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認を得るまで採用してはならない。JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする。JSR へ公開する package は公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
+JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認を得るまで採用してはならない。JSR レジストリの公開ライブラリを採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする。JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする。JSR へ公開する package は公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
 
 クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
 
