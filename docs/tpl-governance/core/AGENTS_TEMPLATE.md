@@ -64,7 +64,9 @@ Docker は正本成果物ではなく、Deno single binary を Docker image に�
 
 禁止対象と運用詳細は、2類の技術要件ポリシーを正本として定義する。
 
-Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とする方式は採用禁止とする。詳細は、2類の技術要件ポリシーおよび依存関係ポリシーを正本として定義する。
+標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。必要な外部ライブラリは、非 npm 依存であることを条件に、2類の技術要件ポリシーで例外採用として管理する。
+
+Node.js runtime、npm ecosystem、npm 互換 package、`npm:` specifier、`package.json`、`node_modules` を前提とする方式は例外なく採用禁止とする。詳細は、2類の技術要件ポリシーおよび依存関係ポリシーを正本として定義する。
 
 ---
 

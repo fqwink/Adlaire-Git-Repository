@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**現行フェーズ**: Phase 10 Adlaire Deploy 仕様固定 / v.2.11 baseline
+**現行フェーズ**: Phase 10 Adlaire Deploy 仕様固定 / v.2.14 baseline
 **直近安定版リリース**: Phase 7 / v.1.8
 
 ## ドキュメント
@@ -57,7 +57,7 @@
 
 `AGENTS.md` は本リポジトリの最上位ルールブックである。`docs/DOCUMENT_INDEX.md` は参照索引であり、正本ではない。`docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` は2類ドキュメント群の総則であり、ドキュメント憲章と責務別ポリシーは `docs/policies/` 配下で管理する。`docs/specs/Auris_System_Design.md` は、3類マスター仕様書群におけるシステム全体の最上位マスター仕様書である。`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` は候補整理の正本であり、実装承認ではない。`docs/tpl-governance/` は AdlaireGroup 関連プロジェクト、プロダクトへ共通展開する共通ガバナンス雛形の正本であり、現行プロジェクト固有の正本ではない。ソースコード実装作業は、1類ルールブック、2類ドキュメント群、3類マスター仕様書、`docs/plans/DEVELOPMENT_PLAN.md` の承認済みフェーズ計画に基づいて行う。
 
-Adlaire Deploy は Phase 10 の着手対象である。Adlaire Git Repository 本体へ統合せず、DB 不使用の付随システムとして同居・連携し、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。Adlaire Deploy 専用 database は持たず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。標準実行主体は `adlaire-deploy` CLI とし、JSON deployment manifest を正規入力として、`plan`、`verify`、`dry-run`、`apply-system`、`rollback-system` を扱う。VPS、self-host、専用サーバーでは SSH 使用可能を最低必須条件とする。詳細は [docs/specs/Adlaire_Deploy_Specification.md](./docs/specs/Adlaire_Deploy_Specification.md) を参照する。
+Adlaire Deploy は Phase 10 の着手対象である。Adlaire Git Repository 本体へ統合せず、DB 不使用の付随システムとして同居・連携し、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。Adlaire Deploy 専用 database は持たず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。標準実行主体は `adlaire-deploy` CLI とし、JSON deployment manifest を正規入力として、`plan`、`verify`、`dry-run`、`apply-system`、`rollback-system` を扱う。VPS、self-host、専用サーバーでは SSH 使用可能を最低必須条件とする。Deno Deploy 環境対応は白紙とする。詳細は [docs/specs/Adlaire_Deploy_Specification.md](./docs/specs/Adlaire_Deploy_Specification.md) を参照する。
 
 3類マスター仕様書は、Phase 8 の現行正本仕様、フェーズ別履歴、保留候補、対象外範囲を分離して管理する。Phase 7 / `v.1.8` は初回安定版リリース済みの履歴であり、Phase 8 以降の仕様判断では現行正本仕様を参照する。
 
@@ -73,9 +73,9 @@ Deno single binary を正本成果物とする。Docker は正本成果物であ
 
 標準データベースは libSQL とする。SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。`DB_DRIVER=sqlite` は通常運用では拒否し、承認済みの移行元確認時に `ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` を指定した場合のみ扱う。クラウドDBホスティングは未定であり、採用する場合も `DB_DRIVER=libsql` の接続先差し替えとして扱う。
 
-Phase 8 では `@libsql/client v0.17.4` を承認済み例外ライブラリとして採用し、`src/database/libsql_driver.ts` と Database Gateway の内部に閉じ込める。これは npm ecosystem の一般採用を意味しない。`deno.lock` は承認済み例外ライブラリの解決結果を固定するために管理し、未承認の依存追加を許可するものではない。
+標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。必要な parser 等の外部ライブラリは、非 npm 依存であることを条件に、明示的な例外採用として管理する。npm 互換 package、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem を伴う依存は例外なく採用しない。
 
-`@libsql/client` の native loader に必要な実行権限として、Deno task では `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname` を追加する。`--allow-ffi` は libSQL native loader のための承認済み権限であり、アプリケーションコードから Deno FFI API を直接使うことは認めない。`--allow-sys` 全許可は標準化しない。
+libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、Database Gateway と内製 `libsql` driver 境界に閉じ込める。`@libsql/client` 等の npm 互換 libSQL client、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱う。
 
 ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。Docker で検証、テスト、ビルド、binary 生成をまとめて実行する場合は、`scripts/docker/verify-build.sh` を使う。
 

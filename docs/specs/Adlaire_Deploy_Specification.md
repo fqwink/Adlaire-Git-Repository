@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.2.13
-**ステータス**: Phase 10 Adlaire Deploy 仕様固定
+**文書バージョン**: v.2.14
+**ステータス**: Phase 10 Adlaire Deploy オンプレミス / VPS 前提固定
 
 ---
 
@@ -57,7 +57,9 @@ VPS、self-host、専用サーバーを対象にする場合は、最低必須�
 
 SSH を利用する場合は、接続先 host、port、user、認証方式、鍵の扱い、配置 root、実行可能コマンド、sudo 要否、system / data の path を事前に提示し、ユーザー承認を得る。
 
-Adlaire Deploy は、Deno single binary または Deno runtime 上の TypeScript CLI として実行する。Node.js runtime、npm ecosystem、外部デプロイフレームワークを前提にしてはならない。
+Adlaire Deploy は、Deno single binary または Deno runtime 上の TypeScript CLI として実行する。Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules`、外部デプロイフレームワークを前提にしてはならない。
+
+Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
 ---
 
@@ -66,13 +68,16 @@ Adlaire Deploy は、Deno single binary または Deno runtime 上の TypeScript
 - Deno single binary を正本成果物として扱う。
 - Docker image 配布は正式化しない。
 - Docker は運用選択肢の一つであり、配布正本ではない。
-- Node.js runtime、npm ecosystem、外部デプロイフレームワークを採用しない。
+- 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。
+- 必要な parser 等の外部ライブラリは、非 npm 依存であることを条件に、明示的な例外採用として管理する。
+- Node.js runtime、npm ecosystem、npm 互換 package、`npm:` specifier、`package.json`、`node_modules`、外部デプロイフレームワークを採用しない。
 - Adlaire Deploy 専用 database を持たない。
 - Adlaire Git Repository 本体の libSQL database を直接操作しない。
 - GitHub Releases は配置先候補の一つとして扱うが、唯一の配布経路として固定しない。
 - system 側と data 側を分離する。
 - data 側は host filesystem を正本とする。
 - VPS、self-host、専用サーバーは SSH 使用可能を最低必須条件とする。
+- Deno Deploy 環境対応は白紙とする。
 - 承認工程を省かず、対象、配置先、検証、backup、rollback 範囲を提示してから実行する。
 
 ---

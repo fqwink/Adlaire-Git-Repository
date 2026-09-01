@@ -2,7 +2,7 @@
 
 **位置づけ**: 2類責務別ポリシー
 **責務**: デプロイ、運用基盤、環境管理、本番サーバ反映、バックアップ、検証、ロールバック
-**ステータス**: Phase 10 Adlaire Deploy 仕様固定方針
+**ステータス**: Phase 10 Adlaire Deploy オンプレミス / VPS 前提固定方針
 
 ---
 
@@ -20,9 +20,13 @@ Docker を使用する場合も、Docker を使用せず Deno single binary を 
 
 Adlaire Deploy は Phase 10 の着手対象とする。Adlaire Git Repository 本体へ統合せず、付随システムとして同居・連携し、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。
 
+Adlaire Deploy の標準対象環境は、オンプレミス、VPS、専用サーバーとする。Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。
+
 Adlaire Deploy は DB 不使用とする。Adlaire Deploy 専用 database を持たず、Adlaire Git Repository 本体の libSQL database へ直接接続しない。実行計画、検証結果、実行結果、rollback 計画は、host filesystem 上の manifest、plan、log として扱う。
 
 Adlaire Deploy は `adlaire-deploy` CLI として扱う。標準入力は JSON deployment manifest とし、`plan`、`verify`、`dry-run` は system 側と data 側を変更してはならない。`apply-system` と `rollback-system` は、承認済み範囲で system 側のみを変更する候補として扱い、実行には別途ユーザー承認を必要とする。
+
+Adlaire Deploy の標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。必要な parser 等の外部ライブラリは、非 npm 依存であることを条件に、明示的な例外採用として管理する。Node.js runtime、npm ecosystem、npm 互換 package、`npm:` specifier、`package.json`、`node_modules`、外部デプロイフレームワークは採用してはならない。
 
 VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可能を最低必須条件とする。SSH が使用できない環境は、標準デプロイ対象外とする。
 
@@ -48,7 +52,7 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 | 保留 | 外部デプロイフレームワーク | 標準採用しない。必要性、依存関係、運用リスクを整理し、別途承認を得るまで採用しない |
 | 採用 | systemd または同等の起動管理 | binary 直実行を選択する場合の起動管理候補。作成または変更は別途承認を得る |
 | 不採用 | Docker named volume 標準運用 | data 正本を Docker named volume に丸投げする運用は禁止 |
-| 不採用 | Node.js系 | Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とする方式は採用禁止 |
+| 不採用 | Node.js系 / npm 依存 | Node.js runtime、npm ecosystem、npm 互換 package、`npm:` specifier、`package.json`、`node_modules` を前提とする方式は例外なく採用禁止 |
 
 `gh` は GitHub 上のリリース、Pull Request、tag、成果物配置を補助するためのツールとして扱い、本番サーバ上のアプリケーション実行基盤、依存関係管理、デプロイフレームワークとして扱ってはならない。
 

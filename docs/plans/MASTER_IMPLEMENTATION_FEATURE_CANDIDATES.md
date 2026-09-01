@@ -2,8 +2,8 @@
 
 **位置づけ**: マスター実装機能候補リスト
 **対象**: Auris / Adlaire Git Repository
-**文書バージョン**: v.0.24
-**ステータス**: Phase 10 Adlaire Deploy 仕様固定候補整理
+**文書バージョン**: v.0.25
+**ステータス**: Phase 10 Adlaire Deploy npm 依存全面禁止候補整理
 
 ---
 
@@ -175,6 +175,8 @@ Phase 10 推奨候補は、Adlaire Git Repository の配布、取得、検証、
 | 6 | backup / rollback 計画 | 優先 | data 復元や database restore を自動実行せず、承認前に backup と system rollback の範囲を説明するため |
 | 7 | 標準デプロイ雛形との責務整理 | 優先 | `scripts/deploy/` 配下の shell script を移行元・暫定標準として維持しつつ、Adlaire Deploy へ段階移行するため |
 | 8 | CLI / manifest / result 仕様固定 | 優先 | `adlaire-deploy` CLI、JSON deployment manifest、plan / result / error JSON、error 分類、security / data 保護を正式仕様として追跡できる状態にするため |
+| 9 | オンプレミス / VPS 前提固定 | 優先 | Deno Deploy 環境対応を白紙化し、self-host、VPS、専用サーバー上で再現性のある配布、検証、配置を優先するため |
+| 10 | npm 依存ゼロ化 | 優先 | Adlaire Deploy と Adlaire Git Repository の実行時、開発時、検証時、ビルド時に npm 互換 package と npm 依存を持ち込まないため |
 
 ## 4. 保留候補
 
@@ -227,7 +229,7 @@ Phase 10 推奨候補は、Adlaire Git Repository の配布、取得、検証、
 | v.0.14 | Adlaire Deploy を仕様未定の保留候補へ戻し、当面は Adlaire Git Repository 本体優先の候補整理へ修正 |
 | v.0.15 | Phase 8 をDBフェーズへ再定義し、libSQL標準化、SQLite互換維持なし、Phase 8.1本体整合性、Phase 8.5システム分割、Phase 8.7安定化、Phase 9安定版判定へ整理 |
 | v.0.16 | Phase 8 / Phase 9 仕様完成に合わせ、Phase 8 をDB仕様完成候補として整理し、正式仕様・実装対象・検証範囲・完了条件は3類マスター仕様書とマスター開発計画を正とする関係を維持 |
-| v.0.17 | Phase 8 libSQL driver 実装中に合わせ、`@libsql/client v0.17.4` を承認済み例外ライブラリとして扱う現行状態と整合 |
+| v.0.17 | Phase 8 libSQL driver 実装中の旧方針として、当時の npm 互換 libSQL client 採用状態を記録 |
 | v.0.18 | Phase 8.1 本体整合性完了に合わせ、DB仕様完成後の本体整合性候補と正式仕様・計画の責務分離を維持 |
 | v.0.19 | Phase 8.5 システム分割完了に合わせ、system / data 分離候補と正式仕様・計画の責務分離を維持 |
 | v.0.20 | Phase 8.7 安定化完了に合わせ、DB 標準化、Database Gateway 境界、system / data 分離、backup / rollback の安定化候補と正式仕様・計画の責務分離を維持 |
@@ -235,3 +237,4 @@ Phase 10 推奨候補は、Adlaire Git Repository の配布、取得、検証、
 | v.0.22 | Phase 10 Adlaire Deploy 着手に合わせ、Adlaire Deploy を保留候補から外し、付随システムの優先候補として整理 |
 | v.0.23 | Phase 10 Adlaire Deploy を DB 不使用、SSH 必須、DB 不使用で実装可能な機能を優先対象とする候補整理へ改訂 |
 | v.0.24 | Phase 10 Adlaire Deploy の CLI、JSON manifest、preflight、plan / result / error、security / data 保護を仕様固定候補として整理 |
+| v.0.25 | Phase 10 Adlaire Deploy の Deno Deploy 環境対応を白紙化し、オンプレミス、VPS、専用サーバー前提、Deno 標準ライブラリ（`jsr:@std/*`）限定、npm 依存全面禁止の候補整理へ改訂 |

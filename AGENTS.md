@@ -254,7 +254,6 @@ TypeScript は **6系の最新安定版** を採用方針とする。Deno に同
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
-| `@libsql/client` | `v0.17.4` | Phase 8 DB driver 実装の承認済み例外ライブラリ |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
@@ -268,7 +267,7 @@ Deno single binary を正本成果物とする。Docker は正本成果物では
 
 Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として扱い、host filesystem を正本として system 側から分離する。
 
-Docker を利用する場合も、Node.js runtime、npm ecosystem、`package.json`、`node_modules` を導入してはならない。承認済み例外ライブラリとして明記された場合を除き、`npm:` specifier を導入してはならない。
+Docker を利用する場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
 
 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
@@ -278,9 +277,9 @@ Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用
 
 最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Docker を使用する場合も、Docker を使用しない binary 直実行の場合も、この構成を変えてはならない。Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、data 側は container lifecycle に依存させず、host filesystem 上で直接保全できる構成を基準にする。
 
-Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。採用を検討する場合は、3類マスター仕様書とマスター開発計画へ採用理由、対象範囲、対象外、リスク、検証範囲を反映し、ユーザー承認を得る。
+Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
-Deno Deploy を採用候補にする場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提にしてはならない。
+Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。採用を検討する場合は、3類マスター仕様書とマスター開発計画へ採用理由、対象範囲、対象外、リスク、検証範囲を反映し、ユーザー承認を得る。
 
 Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、Database Gateway と内製 `libsql` driver の接続先差し替えとして扱い、アプリケーション上位層へサービス固有APIやサービス名を露出してはならない。
 
@@ -290,18 +289,18 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 
 - フレームワークは、内製したもの以外の採用を禁止する。
 - 内製フレームワークを採用する場合も、1類ルールブックおよび2類ポリシーに違反せず、3類マスター仕様書に採用理由・責務範囲・保守方針を記載する。
-- Deno 標準ライブラリを優先する。
+- 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。
 - Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
-- JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用してはならない。JSR は Deno / TypeScript / ESM と相性がよいが、承認なしの外部依存導入経路として扱ってはならない。
-- JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。
+- JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認を得るまで採用してはならない。
+- JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする。
 - JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする。クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
 - クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期計画として Adlaire 内製 Deno Module Registry を Adlaire Git Repository 本体へ早期実装する方針とする。
 - npm registry 互換レジストリは、Node.js / npm ecosystem リスクと衝突するため標準採用しない。
 - 外部ライブラリを採用する場合は、必要最小限であることを前提とし、必ず **例外採用** として指定したうえでユーザー承認を得る。
 - 例外採用した外部ライブラリは、アプリケーション全体へ直接露出させず、内製ラッパー、内製driver、または内製Gatewayの内部に閉じ込める。外部ライブラリを使う場合も、設計上は内製化された境界を通して利用する。
-- Phase 8 DB driver 実装に限り、`@libsql/client v0.17.4` を承認済み例外ライブラリとする。この承認は npm ecosystem の一般採用を意味せず、利用範囲は2類技術要件ポリシーと3類マスター仕様書に従う。
+- libSQL は Adlaire Git Repository の標準データベースとして、必要最小限の外部依存例外に含める。ただし、npm 互換 package、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem を伴う libSQL client は採用禁止とする。
 - Node.js ランタイムの採用は禁止する。
-- npm パッケージ、Node.js 前提ツール、webpack、jest 等の導入は禁止する。ただし、実行時ランタイムに Node.js を含まず、Deno 方針を破らない開発補助用途に限り、外部ツールの例外採用として1類ルールブックおよび2類ポリシーで許可し、3類マスター仕様書に承認理由を記載し、ユーザー承認を得てから行う。
+- npm パッケージ、Node.js 前提ツール、webpack、jest 等の導入は禁止する。npm 依存は、実行時、開発時、検証時、ビルド時のいずれでも例外なく採用してはならない。
 - セキュリティ・暗号・認証に関わる処理を独自実装する場合は、3類マスター仕様書にリスクと検証方針を記載する。
 
 ---

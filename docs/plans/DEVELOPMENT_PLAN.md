@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.2.13
-**現行フェーズ基準バージョン**: v.2.11
-**ステータス**: Phase 10 Adlaire Deploy 仕様固定
+**計画バージョン**: v.2.14
+**現行フェーズ基準バージョン**: v.2.14
+**ステータス**: Phase 10 npm 依存全面禁止方針整合
 
 ---
 
@@ -78,7 +78,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 - リポジトリ整合性確認で矛盾が見つかった場合、補正が完了するまでフェーズを完了扱いにしてはならない。
 - リポジトリ整合性が取れていない状態で、次のフェーズに進んではならない。
 - Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用サーバーを前提とする。Docker 使用時も非 Docker の binary 直実行時も、保護対象 data 側は host filesystem を正本として system 側から分離する。
-- Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
+- Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Node.js / npm 非依存方針との整合を確認する。
 - Turso Cloud 等のクラウドDBサービスを検討する場合も、Database Gateway と内製 `libsql` driver の接続先差し替えとして扱い、アプリケーション上位層へサービス固有APIやサービス名を露出してはならない。
 
 ---
@@ -110,7 +110,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 | Phase 8.5 | v.1.9 | 完了 | システム分割。Adlaire Git Repository 本体とデータ領域の分割 |
 | Phase 8.7 | v.1.9 | 完了 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
 | Phase 9 | v.2.10 | 完了 | バグ修正ゼロ化、安定版判定、リリース準備 |
-| Phase 10 | v.2.11 | 着手 | Adlaire Deploy。DB 不使用で binary 正本成果物の取得、検証、配置、backup、rollback、manifest、plan / result / error 記録を内製化 |
+| Phase 10 | v.2.14 | 着手 | Adlaire Deploy。DB 不使用で binary 正本成果物の取得、検証、配置、backup、rollback、manifest、plan / result / error 記録を内製化。Deno Deploy 環境対応は白紙 |
 
 上記は各フェーズの基準バージョンである。表の `Major` は安定版リリース系列であり、累積フェーズ番号ではない。初回安定版リリース前は `v.0.x` 系を維持する。
 
@@ -140,9 +140,9 @@ Deno、SQLite、libSQL、Git、Deno 標準ライブラリ、Deno で利用する
 
 Deno single binary 形式を正本成果物とする。Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として分離する。
 
-Deno 標準ライブラリを最優先候補とする。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
+標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 
-JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする。JSR レジストリの公開ライブラリであっても、npm 互換、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。承認済み例外ライブラリとして明記された場合を除き、`npm:` specifier を導入してはならない。JSR へ公開する package は、公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
+JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認を得るまで採用禁止とする。JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする。JSR へ公開する package は、公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
 
 クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
 
@@ -158,7 +158,6 @@ TypeScript は **6系の最新安定版** を採用方針とする。Deno に同
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
-| `@libsql/client` | `v0.17.4` | Phase 8 DB driver 実装の承認済み例外ライブラリ |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 エージェントは、候補提示、比較、調査、リスク整理、推奨案の提示を行ってよい。ただし、ユーザーの明示承認なしに採用決定、バージョン固定、方針確定、実装反映を行ってはならない。
 
@@ -934,7 +933,7 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 - libSQL 標準DB仕様の確定
 - `DB_DRIVER=libsql` を標準 driver とする接続仕様
 - `DB_URL` と `DB_AUTH_TOKEN` による接続先・認証情報の扱い
-- `@libsql/client v0.17.4` の承認済み例外ライブラリ採用
+- npm 依存を含まない libSQL 外部依存例外と内製 libSQL driver 境界
 - Database Gateway、Repository 層、driver 層の責務境界
 - libSQL 前提の schema、migration、seed 管理方針
 - 既存データ移行元確認用 SQLite の取扱境界
@@ -949,7 +948,8 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 - SQLite 最小ローカル検証用運用
 - `DB_DRIVER=sqlite` の標準運用化
 - `DB_DRIVER=turso` 等のクラウドDBホスティング名を driver 名にすること
-- Turso Cloud、Deno Deploy、その他クラウドDBホスティングの標準採用
+- Deno Deploy 環境対応
+- Turso Cloud、その他クラウドDBホスティングの標準採用
 - Database Gateway を経由しない DB 直接アクセス
 - 承認なしの libSQL 外部ライブラリ導入
 - 承認なしの schema、migration、seed、テストコード、実装設定変更
@@ -957,7 +957,7 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 ### 13.4.2 必須検証
 
 - 標準 driver が `DB_DRIVER=libsql` として定義されていること
-- `@libsql/client v0.17.4` が内製 `LibsqlDriver` の内部だけで利用されていること
+- npm 依存を含まない libSQL driver 境界が内製 `LibsqlDriver` の内部に閉じていること
 - SQLite が既存データ移行元確認用に限定されていること
 - Database Gateway、Repository 層、driver 層の責務境界が仕様書と矛盾していないこと
 - DB driver 固有 API が上位層へ漏れない構成になっていること
@@ -999,9 +999,9 @@ Phase 8.1 では、Phase 8 の libSQL driver 実装後に残る本体整合性�
 
 - 現行フェーズ表記を `Phase 8.1 / v.1.9` へ整合する。
 - `DB_DRIVER=sqlite` を通常運用で拒否し、承認済みの移行元確認時のみ `ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` で許可する。
-- `@libsql/client v0.17.4` の利用範囲が `src/database/libsql_driver.ts` の内部に閉じていることを確認する。
-- `deno.lock` を承認済み例外ライブラリの解決固定として管理し、未承認依存追加ではないことを明記する。
-- `@libsql/client` の native loader に必要な `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname` を Deno task と検証導線へ反映し、アプリケーションコードからの直接 FFI API 使用を禁止する。
+- `@libsql/client` 等の npm 互換 libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱う。
+- libSQL driver の利用範囲が、npm 依存を含まない内製 `LibsqlDriver` と Database Gateway の内部に閉じる計画であることを確認する。
+- 実装または設定の撤去・置換へ進む場合は、別途ソースコード実装承認を得る。
 - Database Gateway、Repository 層、driver 層の境界を確認する。
 - 1類ルールブック、2類ポリシー、3類マスター仕様書、README、テスト、検証導線、Pull Request 説明の整合性を確認する。
 
@@ -1365,7 +1365,7 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 | v.0.28 | Phase 5 | v.0.6 | Phase 5 にデザイン関連の改良・改修方針を追加 |
 | v.0.29 | Phase 5 / Phase 6 | v.0.6 / v.0.7 | 5系フェーズを安定版リリース対象外とし、6系フェーズを大規模バグ修正、ドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズとして定義 |
 | v.0.30 | Phase 3 / Phase 4 / Phase 8 | v.0.4 / v.0.5 / v.0.9 | マスター実装機能候補リストに合わせ、Phase 3 を最小運用と内製 Deno Module Registry、Phase 4 を統合・仕様整合・移行準備、Phase 8 を長期運用準備と保留解除候補再評価へ再編 |
-| v.0.31 | 全フェーズ共通 | - | Adlaire Git Repository 本体は self-host、VPS、専用サーバーを標準運用基盤とし、Deno Deploy、Turso Cloud、libSQL 系クラウドDBサービスは将来候補として保留する方針を反映 |
+| v.0.31 | 全フェーズ共通 | - | Adlaire Git Repository 本体は self-host、VPS、専用サーバーを標準運用基盤とし、当時のクラウド実行環境と libSQL 系クラウドDBサービスを将来候補として保留する旧方針を反映 |
 | v.0.32 | Phase 3 | v.0.4 | Phase 3 を実装中へ更新し、Organizations 最小運用の実装済み範囲、未実装範囲、検証範囲を反映 |
 | v.0.33 | Phase 3 | v.0.4 | Teams、Projects、Adlaire 内製 Deno Module Registry、Webhook event dispatch、Audit log 参照、Operations status、libSQL 再評価参照の最小運用を実装し、Phase 3 完了へ更新 |
 | v.0.34 | Phase 4 | v.0.5 | Phase 1 から Phase 3 までの統合として Organization 所有 private repository の権限境界を Issue、Pull Request、Code Review、Wiki、Webhook、Release へ統合し、仕様整合、移行境界、検証導線を整理して Phase 4 完了へ更新 |
@@ -1395,11 +1395,12 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 | v.1.18 | Phase 8 | v.1.9 | Adlaire Deploy を仕様未定の将来候補へ戻し、当面は Adlaire Git Repository 本体優先の長期運用準備へ整理 |
 | v.1.19 | Phase 8 / Phase 9 | v.1.9 / v.2.10 | Phase 8 をDBフェーズへ再定義し、Phase 8.1本体整合性、Phase 8.5システム分割、Phase 8.7安定化、Phase 9安定版判定へ整理 |
 | v.1.20 | Phase 8 / Phase 9 | v.1.9 / v.2.10 | Phase 8 をDB仕様完成、Phase 8.1を本体整合性、Phase 8.5をsystem/data分離、Phase 8.7を安定化、Phase 9を安定版判定として、対象、対象外、検証範囲、完了条件まで具体化 |
-| v.1.21 | Phase 8 | v.1.9 | `@libsql/client v0.17.4` を承認済み例外ライブラリとして採用し、libSQL driver 実装、標準DB設定、検証導線、デプロイDB配置例をPhase 8現行状態へ整合 |
-| v.1.22 | Phase 8.1 | v.1.9 | Phase 8.1 本体整合性として、現行フェーズ表記、SQLite 移行元確認用ゲート、承認済み例外ライブラリ解決固定用の `deno.lock`、libSQL native loader 用の `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname`、直接 FFI API 使用禁止、Database Gateway 境界、README、検証導線、Pull Request 説明の整合対象を反映 |
+| v.1.21 | Phase 8 | v.1.9 | Phase 8 当時の旧方針として、npm 互換 libSQL client を用いた driver 実装、標準DB設定、検証導線、デプロイDB配置例を整合 |
+| v.1.22 | Phase 8.1 | v.1.9 | Phase 8.1 本体整合性として、当時の現行フェーズ表記、SQLite 移行元確認用ゲート、旧 npm 互換 libSQL client 解決固定用の `deno.lock`、旧 native loader 用権限、Database Gateway 境界、README、検証導線、Pull Request 説明の整合対象を反映 |
 | v.1.23 | Phase 8.5 | v.1.9 | Phase 8.5 システム分割として、`ADLAIRE_APP_ROOT` / `ADLAIRE_SHARED_DIR` から data 側標準パスを導出し、deploy / backup / verify / rollback 雛形を `system/` と `shared/` へ整合 |
 | v.1.24 | Phase 8.7 | v.1.9 | Phase 8.7 安定化として、現行フェーズ表記、現行 system release 実体バックアップ、rollback 例、検証導線、ドキュメント整合性を更新 |
 | v.2.10 | Phase 9 | v.2.10 | Phase 9 安定版判定・リリース準備として、バグ修正ゼロ化、現行フェーズ表記、内部バージョン、release binary 名、deploy / rollback 例、検証導線、ドキュメント整合性を更新 |
 | v.2.11 | Phase 10 | v.2.11 | Adlaire Deploy を付随システムとして着手し、個別3類マスター仕様書、実装対象、対象外、検証範囲、完了条件を定義 |
 | v.2.12 | Phase 10 | v.2.11 | Adlaire Deploy を DB 不使用、SSH 使用可能を最低必須条件、DB 不使用で実装可能な機能を Phase 10 対象とする仕様へ改訂 |
 | v.2.13 | Phase 10 | v.2.11 | Adlaire Deploy の実行主体、標準コマンド、JSON manifest、artifact、SSH target、preflight、出力、error、security / data 保護、scripts/deploy 移行境界を仕様固定 |
+| v.2.14 | Phase 10 / Phase 8 | v.2.14 / v.1.9 | Deno Deploy 環境対応を白紙化し、オンプレミス、VPS、専用サーバー前提へ再固定。標準採用を Deno 標準ライブラリ（`jsr:@std/*`）に限定し、libSQL は npm 依存を含まない外部依存例外、npm 互換 package と全 npm 依存は禁止として整合 |

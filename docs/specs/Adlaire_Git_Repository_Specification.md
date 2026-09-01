@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.13
-**ステータス**: Phase 10 Adlaire Deploy 仕様固定
+**文書バージョン**: v.2.14
+**ステータス**: Phase 10 npm 依存全面禁止方針整合
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -67,8 +67,9 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - Docker は正本成果物である Deno single binary を image に同梱して実行する運用選択肢の一つとする。
 - Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成とする。
 - data 側は host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
-- Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。
-- Node.js runtime、npm ecosystem、外部フレームワーク、無承認外部ライブラリは採用しない。
+- Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。
+- Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。
+- Node.js runtime、npm ecosystem、npm 依存、外部フレームワーク、無承認外部ライブラリは採用しない。
 - Adlaire Deploy は Phase 10 の着手対象であり、Adlaire Git Repository 本体へ統合せず、DB 不使用の `adlaire-deploy` CLI 付随システムとして同居・連携する。
 
 ## マスター仕様完成条件
@@ -516,11 +517,11 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 | **UI** | HTML + Vanilla JavaScript（内製） |
 
 **原則**:
-- Deno 標準機能と承認済みの最小外部依存のみ
+- Deno 標準機能、Deno 標準ライブラリ（`jsr:@std/*`）、承認済みの最小外部依存のみ
 - フレームワーク採用禁止（内製化のみ）
-- Deno 標準ライブラリを最優先候補とする。ただし、個別モジュールの採用はユーザー承認を必須とする
-- JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする
-- JSR レジストリの公開ライブラリであっても、npm 互換、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。承認済み例外ライブラリとして明記された場合を除き、`npm:` specifier を導入してはならない
+- 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。ただし、個別モジュールの採用はユーザー承認を必須とする
+- JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う
+- JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする
 - JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする
 - クローズドライセンス、内部専用、非公開資産は JSR へ公開しない
 - クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする
@@ -542,7 +543,6 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
-| `@libsql/client` | `v0.17.4` | Phase 8 DB driver 実装の承認済み例外ライブラリ |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
@@ -558,9 +558,9 @@ SQLite 互換維持、SQLite 最小ローカル検証用運用、SQLite 標準DB
 
 libSQL は必要最小限の外部依存に該当するが、DB抽象化設計との相性、将来の同期・分散構成への拡張余地という採用メリットが高いため、標準データベースとして扱う。
 
-libSQL driver は Phase 8 の承認済み実装対象とする。`@libsql/client v0.17.4` は承認済み例外ライブラリとして採用する。外部ライブラリAPIは内製 `libsql` driver と Database Gateway の内部に閉じ込め、サービス層やRepository層へ直接露出させない。`deno.lock` は承認済み例外ライブラリの解決結果を固定するために管理し、未承認の依存追加を許可するものではない。
+libSQL driver は Phase 8 の承認済み実装対象とする。libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、内製 `libsql` driver と Database Gateway の内部に閉じ込め、サービス層やRepository層へ直接露出させない。
 
-`@libsql/client` の native loader が Deno 実行時に FFI と system 情報の `cpus`、`networkInterfaces`、`hostname` 参照を要求するため、Deno task では `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname` を許可対象に加える。`--allow-ffi` は libSQL native loader のための承認済み権限であり、アプリケーションコードから Deno FFI API を直接使うことは認めない。これは libSQL driver 実行に必要な最小権限であり、`--allow-sys` 全許可や libSQL driver 以外の system 情報参照を標準化するものではない。
+`@libsql/client` 等の npm 互換 libSQL client は採用禁止とする。既存実装または設定に npm 由来の libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱い、別途承認を得て撤去または置換する。
 
 Turso Cloud 等のクラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングは新しいデータベースエンジンではなく、libSQL の接続先または運用形態の候補として扱う。採用する場合は、外部サービス依存、データ所在、認証トークン管理、バックアップ、障害時の復旧、運用費用を評価し、例外採用としてユーザー承認を得る。
 
@@ -576,9 +576,9 @@ Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用
 
 Adlaire Deploy は Phase 10 の着手対象であり、個別3類マスター仕様書 `docs/specs/Adlaire_Deploy_Specification.md` を正本とする。Adlaire Git Repository 本体へ統合せず、DB 不使用の `adlaire-deploy` CLI 付随システムとして同居・連携し、JSON deployment manifest、artifact、checksum、health check endpoint、Audit log、標準デプロイ雛形、SSH、filesystem path、plan / result / error の境界を保持する。
 
-Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
+Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
-Deno Deploy を採用候補にする場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提にしてはならない。
+Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Node.js / npm 非依存方針との整合を確認する。
 
 Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、Database Gateway と内製 `libsql` driver の接続先差し替えとして扱い、アプリケーション上位層へサービス固有APIやサービス名を露出してはならない。
 
@@ -645,7 +645,7 @@ Phase 8 の DB 接続仕様は以下とする。
 | 標準 driver | `DB_DRIVER=libsql` |
 | 接続先 | `DB_URL` |
 | 認証情報 | `DB_AUTH_TOKEN` |
-| driver ライブラリ | `@libsql/client v0.17.4` を承認済み例外ライブラリとして使用 |
+| driver ライブラリ | npm 依存を含まない内製 libSQL driver / libSQL 外部依存例外を使用 |
 | migration 適用 | Database Gateway 経由 |
 | schema / seed | 専用ディレクトリへ集約 |
 | SQLite | 既存データ移行元確認用。利用時は別途承認 |
@@ -660,7 +660,8 @@ Phase 8 の対象外は以下とする。
 - SQLite 最小ローカル検証用運用
 - `DB_DRIVER=sqlite` の標準化
 - `DB_DRIVER=turso` 等のホスティングサービス名の driver 化
-- Turso Cloud、Deno Deploy、その他クラウドDBホスティングの標準採用
+- Deno Deploy 環境対応
+- Turso Cloud、その他クラウドDBホスティングの標準採用
 - HTTP ハンドラー、Web UI、サービス層、Git 操作処理からの DB 直接アクセス
 - 承認なしの schema、migration、seed、テストコード、外部依存の変更
 
@@ -819,17 +820,15 @@ Phase 10 では、Adlaire Deploy 専用 database、Adlaire Git Repository 本体
   "version": "2.10.0",
   "license": "CLOSED",
   "exports": "./src/main.ts",
-  "imports": {
-    "@libsql/client": "npm:@libsql/client@0.17.4"
-  },
+  "imports": {},
   "tasks": {
-    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname src/main.ts",
+    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run src/main.ts",
     "fmt": "deno fmt deno.json src/ tests/",
     "lint": "deno lint",
-    "test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname tests/",
-    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo src/main.ts",
-    "compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-v2.10-aarch64-unknown-linux-gnu src/main.ts",
-    "compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-v2.10-x86_64-unknown-linux-gnu src/main.ts",
+    "test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/",
+    "compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo src/main.ts",
+    "compile:linux-arm64": "deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v2.10-aarch64-unknown-linux-gnu src/main.ts",
+    "compile:linux-x86_64": "deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-v2.10-x86_64-unknown-linux-gnu src/main.ts",
     "compile:release": "deno task compile:linux-arm64 && deno task compile:linux-x86_64",
     "docker:verify-build": "sh scripts/docker/verify-build.sh"
   },
@@ -1762,7 +1761,7 @@ GitHub Actions と外部デプロイフレームワークは保留とする。Do
 
 Adlaire Deploy は Phase 10 の着手対象とし、DB 不使用で Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。VPS、self-host、専用サーバーでは SSH 使用可能を最低必須条件とする。GitHub Actions と外部デプロイフレームワークは保留とし、必要性、依存関係、運用リスクを整理し、ユーザー承認を得るまで標準採用しない。
 
-Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Node.js系は不採用とする。Node.js runtime、npm ecosystem、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。承認済み例外ライブラリとして明記された場合を除き、`npm:` specifier を導入してはならない。
+Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Node.js系は不採用とする。Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。
 
 ローカルに Deno が存在しない場合、実行系検証はローカルで完了扱いにしない。この場合は、Deno 固定採用バージョンを満たす VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で、Deno task、内製検証スクリプト、`/health`、主要workflow確認を実施する。
 
