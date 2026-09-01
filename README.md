@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**現行フェーズ**: Phase 8.5 システム分割完了・PR確認中 / v.1.9 baseline
+**現行フェーズ**: Phase 8.7 安定化完了・PR確認中 / v.1.9 baseline
 **直近安定版リリース**: Phase 7 / v.1.8
 
 ## ドキュメント

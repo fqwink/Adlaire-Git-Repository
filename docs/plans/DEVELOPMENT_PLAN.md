@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.1.23
+**計画バージョン**: v.1.24
 **現行フェーズ基準バージョン**: v.1.9
-**ステータス**: Phase 8.5 システム分割完了・PR確認中
+**ステータス**: Phase 8.7 安定化完了・PR確認中
 
 ---
 
@@ -16,7 +16,7 @@
 
 実装は、1類ルールブック、2類ポリシー、3類マスター仕様書に従い、本書で定義したフェーズ計画に基づいて進める。
 
-Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱う。ユーザー承認に基づき、Phase 8 の現行フェーズ基準バージョンは `v.1.9` とし、`deno.json` の内部バージョンは `1.9.0` と対応させる。Phase 8.1 は同じ `v.1.9` baseline の本体整合性フェーズとして完了済みである。Phase 8.5 は同じ `v.1.9` baseline のシステム分割フェーズとして、Adlaire Git Repository 本体の system 側と host filesystem data 側を実装、デプロイ雛形、検証導線へ反映する。Phase 8 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
+Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱う。ユーザー承認に基づき、Phase 8 の現行フェーズ基準バージョンは `v.1.9` とし、`deno.json` の内部バージョンは `1.9.0` と対応させる。Phase 8.1 は同じ `v.1.9` baseline の本体整合性フェーズとして完了済みである。Phase 8.5 は同じ `v.1.9` baseline のシステム分割フェーズとして完了済みである。Phase 8.7 は同じ `v.1.9` baseline の安定化フェーズとして、DB 標準化、Database Gateway 境界、system / data 分離、backup / rollback、主要 workflow、ドキュメント整合性に関するバグ精査と修正を行う。Phase 8 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
 
 本計画における「マスター仕様完成」は、実装承認ではない。仕様完成後にソースコード実装、DB driver 実装、schema 変更、テスト変更、デプロイ実行を行う場合は、対象範囲と検証方法を提示し、別途ユーザー承認を得る。
 
@@ -107,8 +107,8 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 | Phase 7 | v.1.8 | 完了 | 初回安定版リリース |
 | Phase 8 | v.1.9 | 完了 | DB。libSQL 標準化、SQLite 互換維持なし、DB 方針整理 |
 | Phase 8.1 | v.1.9 | 完了 | 本体整合性。DB 方針変更に合わせた本体仕様、計画、実装、検証導線の整合 |
-| Phase 8.5 | v.1.9 | 完了・PR確認中 | システム分割。Adlaire Git Repository 本体とデータ領域の分割 |
-| Phase 8.7 | v.1.9 | 未着手 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
+| Phase 8.5 | v.1.9 | 完了 | システム分割。Adlaire Git Repository 本体とデータ領域の分割 |
+| Phase 8.7 | v.1.9 | 完了・PR確認中 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
 | Phase 9 | v.2.10 | 未着手 | 安定版判定フェーズ |
 
 上記は各フェーズの基準バージョンである。表の `Major` は安定版リリース系列であり、累積フェーズ番号ではない。初回安定版リリース前は `v.0.x` 系を維持する。
@@ -728,7 +728,7 @@ Phase 5 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` �
 adlaire-git-repository-check-ok
 ```
 
-Phase 5 の UI 表示契約は、Phase 6 以降の安定版準備 baseline として継承した。現行フェーズでは `tests/integration/phase8_5_system_data_test.ts` で表示契約を検証する。
+Phase 5 の UI 表示契約は、Phase 6 以降の安定版準備 baseline として継承した。現行フェーズでは `tests/integration/phase8_7_stabilization_test.ts` で表示契約を検証する。
 
 ---
 
@@ -814,7 +814,7 @@ Phase 6 完了時点の標準検証は `tools/check-adlaire-git-repository.sh` �
 adlaire-git-repository-check-ok
 ```
 
-Phase 6 の安定版準備 baseline は Phase 7 の安定版リリース判定 baseline として継承した。現行フェーズでは `tests/integration/phase8_5_system_data_test.ts` で表示契約を検証する。
+Phase 6 の安定版準備 baseline は Phase 7 の安定版リリース判定 baseline として継承した。現行フェーズでは `tests/integration/phase8_7_stabilization_test.ts` で表示契約を検証する。
 
 ### 11.10 Phase 6 再確認結果
 
@@ -1087,7 +1087,27 @@ Phase 8.5 の標準検証は `tools/check-adlaire-git-repository.sh` とする�
 - 意味のあるテストまたは代替検証の整理
 - ドキュメント整合性向上
 
-#### 13.7.2 完了条件
+#### 13.7.2 Phase 8.7 実施完了範囲
+
+Phase 8.7 では、Phase 8 系の安定化として以下を実施した。
+
+- トップページと Operations status の現行フェーズ表記を `Phase 8.7 / v.1.9` へ更新する。
+- `backup.sh` が `system/current` の symlink だけではなく、解決後の現行 system release 実体をバックアップするように修正する。
+- `rollback.sh` の実引数である `TARGET_RELEASE` と、仕様書・README のロールバック例を整合する。
+- DB 標準化、Database Gateway 境界、system / data 分離、backup / rollback に関する検証導線を強化する。
+- Phase 8.7 の安定化作業に伴い、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、README、実装、テスト、検証導線、バージョン表記の整合性を確認した。
+
+#### 13.7.3 Phase 8.7 検証結果
+
+Phase 8.7 の標準検証では、以下を確認した。
+
+- DB driver 直接利用、未承認依存、Node.js project files、旧 system / data path、rollback 例の不整合を精査した。
+- `tools/check-adlaire-git-repository.sh` は静的チェックを通過し、ローカル Deno 不在の既知条件で停止した。
+- 承認済み固定 Deno Docker image による `scripts/docker/verify-build.sh` は成功した。
+- Docker 検証では `deno task fmt`、`deno task lint`、`deno task test`、`deno task compile`、`deno task compile:release` が成功した。
+- テスト結果は `39 passed | 0 failed` である。
+
+#### 13.7.4 完了条件
 
 - DB 標準化、Database Gateway 境界、system / data 分離に関する既知バグが残っていない。
 - 主要 workflow と DB 永続化境界を、意味のあるテストまたは代替検証により説明できる。
@@ -1253,3 +1273,4 @@ Phase 9 はリリース実行を自動承認しない。tag 作成、GitHub Rele
 | v.1.21 | Phase 8 | v.1.9 | `@libsql/client v0.17.4` を承認済み例外ライブラリとして採用し、libSQL driver 実装、標準DB設定、検証導線、デプロイDB配置例をPhase 8現行状態へ整合 |
 | v.1.22 | Phase 8.1 | v.1.9 | Phase 8.1 本体整合性として、現行フェーズ表記、SQLite 移行元確認用ゲート、承認済み例外ライブラリ解決固定用の `deno.lock`、libSQL native loader 用の `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname`、直接 FFI API 使用禁止、Database Gateway 境界、README、検証導線、Pull Request 説明の整合対象を反映 |
 | v.1.23 | Phase 8.5 | v.1.9 | Phase 8.5 システム分割として、`ADLAIRE_APP_ROOT` / `ADLAIRE_SHARED_DIR` から data 側標準パスを導出し、deploy / backup / verify / rollback 雛形を `system/` と `shared/` へ整合 |
+| v.1.24 | Phase 8.7 | v.1.9 | Phase 8.7 安定化として、現行フェーズ表記、現行 system release 実体バックアップ、rollback 例、検証導線、ドキュメント整合性を更新 |

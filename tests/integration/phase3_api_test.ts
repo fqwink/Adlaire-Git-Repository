@@ -133,7 +133,7 @@ Deno.test("phase 3 API supports teams, projects, registry, webhook events, and o
       undefined,
       aliceToken,
     ) as { phase: string; databaseDriver: string; nodeRuntime: string };
-    assertEquals(operations.phase, "Phase 8.5");
+    assertEquals(operations.phase, "Phase 8.7");
     assertEquals(operations.databaseDriver, "libsql");
     assertEquals(operations.nodeRuntime, "forbidden");
 

@@ -167,7 +167,7 @@ Adlaire Deploy の仕様が確定するまで、上記 script 群を標準デプ
 - Docker 運用を選択している場合の現行 Docker image または image tag 情報
 - deploy manifest
 
-標準雛形では、service が稼働していた場合は一時停止し、libSQL database と関連 sidecar、Git bare repository、config、secrets、logs、manifests、現行 system release 参照を取得してから service を再起動する。
+標準雛形では、service が稼働していた場合は一時停止し、libSQL database と関連 sidecar、Git bare repository、config、secrets、logs、manifests、現行 system release 参照、現行 system release 実体を取得してから service を再起動する。
 
 libSQL database のファイルバックアップは、標準雛形ではサービス停止を伴う cold backup とする。`sqlite3` CLI による SQLite backup API を標準前提にしてはならない。
 

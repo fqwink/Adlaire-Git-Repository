@@ -369,18 +369,18 @@ export class Phase3Service {
       driver: "libsql",
       candidate: "libsql",
       conclusion:
-        "Phase 8.5 keeps libSQL behind the Database Gateway and separates system from host filesystem data.",
+        "Phase 8.7 stabilizes libSQL behind the Database Gateway and the system/data split before the Phase 9 judgment.",
     };
   }
 
   operationsStatus(): {
-    readonly phase: "Phase 8.5";
+    readonly phase: "Phase 8.7";
     readonly runtime: "Deno";
     readonly databaseDriver: "libsql";
     readonly nodeRuntime: "forbidden";
   } {
     return {
-      phase: "Phase 8.5",
+      phase: "Phase 8.7",
       runtime: "Deno",
       databaseDriver: "libsql",
       nodeRuntime: "forbidden",
