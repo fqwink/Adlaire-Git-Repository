@@ -25,9 +25,11 @@
 - 更新方針
 - 承認済み例外ライブラリ
 
-標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。
+各プロジェクトは、Deno + TypeScript または Go 単体のどちらかを開発言語として選定する。選定はプロジェクト特性、成果物形式、運用要件、依存関係、セキュリティ要件に基づき、ユーザー承認を得て行う。
 
-必要な parser 等の外部ライブラリは、非 npm 依存であること、Node.js ランタイム環境が存在しない前提で Deno runtime だけで動作することを条件に、明示的な例外採用として管理する。JSR レジストリの公開 package であっても、Deno 標準ライブラリ（`jsr:@std/*`）以外は外部ライブラリ例外採用として扱う。
+Go 採用プロジェクトでは Go 標準ライブラリを優先する。Deno + TypeScript 採用プロジェクトでは Deno 標準ライブラリ（`jsr:@std/*`）を優先する。
+
+必要な parser 等の外部ライブラリは、明示的な例外採用として管理する。Go module、JSR レジストリの公開 package、その他外部ライブラリは、採用言語に関係なく必要最小限とし、ユーザー承認を得る。
 
 JSR レジストリの公開 package を採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする。
 
@@ -41,15 +43,15 @@ Node.js runtime、npm ecosystem、npm 互換 package、`npm:` specifier、`packa
 
 ## 3. 共通 Binary / Docker 方針
 
-Deno single binary 形式を正本成果物とする。
+Go 採用プロジェクトでは Go single binary 形式を正本成果物とする。Deno + TypeScript 採用プロジェクトでは Deno single binary 形式を正本成果物候補として扱う。
 
-Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
+Docker は正本成果物ではなく、承認済み正本 binary を Docker image に同梱して実行する運用選択肢の一つである。
 
 Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成にする。
 
-Deno single binary 形式、Docker 形式のいずれでも、プロジェクトの禁止ランタイム、禁止 package ecosystem、依存関係方針に違反してはならない。
+binary 形式、Docker 形式のいずれでも、プロジェクトの禁止ランタイム、禁止 package ecosystem、依存関係方針に違反してはならない。
 
-保護対象 data 側は host filesystem を正本として system 側から分離する。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。
+保護対象 data 側は host filesystem を正本として system 側から分離する。正本 binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。
 
 各プロジェクトは、system 側と data 側の標準パス、設定環境変数、database 保存先、repository 保存先、config、secrets、logs、backups、manifests の配置を技術要件またはデプロイポリシーに定義する。
 

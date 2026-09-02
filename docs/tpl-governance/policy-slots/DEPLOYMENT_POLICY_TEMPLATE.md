@@ -12,7 +12,7 @@
 
 各プロジェクトは、共通方針を破らない範囲で配置先、接続方式、サーバ名、ドメイン、環境変数などの固有値を具体化する。
 
-Adlaire Pipeline を採用候補にする場合は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` の将来機能群に分けて定義する。初期方針で付随システムとして扱う場合は、プロジェクト本体への統合、開発言語、ランタイム、データベース、依存関係、実行基盤を自動的に固定してはならない。
+Adlaire Pipeline を採用候補にする場合は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` の将来機能群に分けて定義する。Adlaire Pipeline の開発言語は Go 採用方針とする。初期方針で付随システムとして扱う場合は、プロジェクト本体への統合、データベース、依存関係、実行基盤を自動的に固定してはならない。
 
 ## 2. 個別具体化必須項目
 
@@ -29,13 +29,13 @@ Adlaire Pipeline を採用候補にする場合は、`Adlaire Pipeline Release`�
 - 障害対応
 - Adlaire Pipeline の採用候補範囲
 - Adlaire Pipeline の本体統合判断
-- Adlaire Pipeline の未定技術項目
+- Adlaire Pipeline の未定技術項目。ただし開発言語は Go 採用方針とする
 
 ## 3. 共通デプロイ制約
 
-Deno single binary 形式を正本成果物とする。
+Go 採用プロジェクトでは Go single binary 形式を正本成果物とする。Deno + TypeScript 採用プロジェクトでは Deno single binary 形式を正本成果物候補として扱う。
 
-Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
+Docker は正本成果物ではなく、承認済み正本 binary を Docker image に同梱して実行する運用選択肢の一つである。
 
 標準デプロイ方式は、各プロジェクトの技術要件ポリシーに従い、Docker 使用時も非 Docker の binary 直実行時も同じ system / data 分離構成として定義する。
 
@@ -47,13 +47,13 @@ Docker 運用を選択する場合も、data 側は host bind mount で接続し
 
 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。
 
-自動化対象は、Deno single binary 配置、必要に応じた Docker image 配置、環境確認、バックアップ、process または container 再起動、health check、主要workflow検証、deploy manifest 記録を最低限含める。
+自動化対象は、正本 binary 配置、必要に応じた Docker image 配置、環境確認、バックアップ、process または container 再起動、health check、主要workflow検証、deploy manifest 記録を最低限含める。
 
 deploy log、backup、manifest は data 側の保護対象として保存する。release / current の切り替えは system 側の操作として扱い、本番 data の復元を伴う rollback は別承認対象として定義する。
 
 ## 5. 標準デプロイスクリプト
 
-各プロジェクトは、Deno single binary 正本方針、Docker 運用選択肢、Node.js 系禁止方針に従う標準デプロイスクリプトの配置、責務、実行条件を定義する。
+各プロジェクトは、承認済み正本 binary 方針、Docker 運用選択肢、Node.js 系禁止方針に従う標準デプロイスクリプトの配置、責務、実行条件を定義する。
 
 最低限、以下の責務を分離する。
 

@@ -2,7 +2,7 @@
 
 **位置づけ**: 2類責務別ポリシー
 **責務**: 採用技術、ランタイム、依存関係、固定採用バージョン、技術承認
-**ステータス**: JSR Deno runtime 前提方針整合
+**ステータス**: Go 採用方針 / Deno + TypeScript 終了方針整合
 
 ---
 
@@ -14,17 +14,20 @@
 
 ## 2. 採用技術方針
 
-- 標準ランタイムは Deno とする。
-- 標準言語は TypeScript とする。
-- TypeScript は 6系の最新安定版を採用方針とする。
+- Adlaire Git Repository 本体の標準開発言語は Go とする。
+- Adlaire Git Repository 本体は Go single binary を正本成果物とする。
+- Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする。
+- Adlaire Pipeline は、リリース基盤システムおよび自動実行基盤システムを担う内製付随システムとして、Go を採用方針とする。
+- AdlaireGroup 関連プロジェクト、プロダクトでは、Deno + TypeScript と Go 単体の2系統を有効な開発言語選択肢として扱う。各プロジェクトは、成果物形式、運用要件、保守性、依存関係、セキュリティ要件に基づいて個別に選定する。
 - Node.js ランタイムは採用禁止とする。
-- Deno single binary 形式を正本成果物とする。
-- Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。
+- Go single binary 形式を正本成果物とする。
+- Docker は、正本成果物である Go single binary を Docker image に同梱して実行する運用選択肢の一つとする。
 - Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成にする。
 - libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として分離する。
 - フレームワークは、内製したもの以外の採用を禁止する。
-- 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
-- JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認を得るまで採用禁止とする。
+- Go 標準ライブラリを優先する。
+- Deno + TypeScript を採用する別プロジェクトでは、Deno 標準ライブラリ（`jsr:@std/*`）を優先する。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
+- Go module、JSR レジストリの公開ライブラリ、その他外部ライブラリは、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認を得るまで採用禁止とする。
 - JSR レジストリの公開ライブラリを採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする。
 - JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする。
 - JSR は公開可能なオープンソース package の公開候補に限る。クローズドライセンス、内部専用、非公開資産は JSR へ公開しない。
@@ -37,12 +40,13 @@
 
 | 技術 | 固定採用バージョン | 扱い |
 |---|---:|---|
-| Deno | `v2.9.5` | 標準ランタイム |
-| TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
+| Go | 未確定 | 標準開発言語。固定採用バージョンは別途承認を得る |
+| Deno | `v2.9.5` | 旧標準ランタイム。本体開発言語として終了方針。既存資産確認用 |
+| TypeScript | `v6.0.3` | 旧標準言語。本体開発言語として終了方針。既存資産確認用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
-上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
+上記にない技術、Go で利用する外部コマンド、Deno + TypeScript 旧資産確認に必要な Deno 標準ライブラリの個別モジュール、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
 ### 3.1 承認済み例外外部依存
 
@@ -66,14 +70,21 @@ libSQL に接続する実装は、内製 `LibsqlDriver` と Database Gateway の
 
 ## 3.2 レジストリ方針
 
-Deno ランタイムにおける外部依存は、以下の優先順位で検討する。
+外部依存は、採用言語に関係なく必要最小限とする。Go 採用方針では、以下の優先順位で検討する。
+
+1. Go 標準ライブラリ
+2. 内製実装
+3. 承認済みの Go module
+4. その他の外部依存
+
+Deno + TypeScript を採用する別プロジェクトでは、以下の優先順位で検討する。
 
 1. Deno 標準ライブラリ（`jsr:@std/*`）
 2. 内製実装
 3. 承認済みの非 npm 依存 JSR レジストリ package
 4. その他の外部依存
 
-Deno 標準ライブラリ（`jsr:@std/*`）は標準採用の唯一の外部 module 群である。ただし、個別モジュールの採用は自動承認ではない。採用する場合は、対象モジュール、固定バージョン、利用範囲、検証方法、ライセンス影響を整理し、ユーザー承認を得る。
+Go 標準ライブラリおよび Deno 標準ライブラリ（`jsr:@std/*`）を優先する。ただし、個別モジュール、外部コマンド、外部ライブラリ、Go module の採用は自動承認ではない。採用する場合は、対象、固定バージョン、利用範囲、検証方法、ライセンス影響を整理し、ユーザー承認を得る。
 
 JSR レジストリの公開 package は、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認なしに採用してはならない。必要な parser 等を採用する場合も、3類マスター仕様書とマスター開発計画に利用範囲を反映する。
 
@@ -93,34 +104,33 @@ npm registry 互換レジストリ、`npm:` specifier、`package.json` 前提運
 
 ## 3.3 Binary / Docker 標準採用方針
 
-Deno single binary 形式を、本プロジェクトおよび AdlaireGroup 共通方針における正本成果物とする。
+Go single binary 形式を、本プロジェクトにおける正本成果物とする。
 
-Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
+AdlaireGroup 共通方針では、プロジェクトごとに Go single binary または Deno single binary を選定できる。ただし、Adlaire Git Repository 本体と Adlaire Pipeline は Go single binary 方針とする。
 
-Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。
+Docker は正本成果物ではなく、Go single binary を Docker image に同梱して実行する運用選択肢の一つである。
 
-Deno single binary 形式、Docker 形式のいずれでも、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
+Docker を使用する場合も、Docker を使用せず Go single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Go single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。
+
+Go single binary 形式、Docker 形式のいずれでも、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
 
 標準対象は、最低限以下とする。
 
-- Deno single binary
-- host OS 上での Deno single binary 直実行
+- Go single binary
+- host OS 上での Go single binary 直実行
 - `docker run`
 - `docker compose`
 - Dockerfile
 - Docker image
 - Docker container
-- Deno single binary を含む Docker image
+- Go single binary を含む Docker image
 - 1 VPS 上での system 側と host filesystem data 側の同居構成
-- 固定 Deno Docker image による `deno task fmt`
-- 固定 Deno Docker image による `deno task lint`
-- 固定 Deno Docker image による `deno task test`
-- 固定 Deno Docker image による `deno task compile`
-- 固定 Deno Docker image による `deno task compile:linux-arm64`
-- 固定 Deno Docker image による `deno task compile:linux-x86_64`
-- 固定 Deno Docker image による `deno task compile:release`
+- Go fmt / test / build
+- Go single binary の Linux ARM64 build
+- Go single binary の Linux x86_64 build
+- Go single binary の release build
 
-検証・ビルド用の標準 Docker image は `denoland/deno:2.9.5` とする。本番用 Docker image は、承認済み Deno single binary を同梱する最小 image とし、実行時に Node.js / npm ecosystem を含めてはならない。
+検証・ビルド用の標準 Docker image は、Go 固定採用バージョン承認後に別途定義する。本番用 Docker image は、承認済み Go single binary を同梱する最小 image とし、実行時に Node.js / npm ecosystem を含めてはならない。
 
 禁止対象には、最低限以下を含む。
 
@@ -132,11 +142,11 @@ Deno single binary 形式、Docker 形式のいずれでも、Node.js runtime、
 
 Docker Desktop は本番サーバ標準構成として採用しない。Docker 運用を選択する場合、本番サーバでは Docker Engine と Docker Compose または同等の Docker 実行基盤を用いる。
 
-検証、テスト、ビルド、Deno single binary 生成は、ホストOS上の固定採用バージョン Deno、または承認済み固定 Deno Docker image のいずれかで実行できる。
+検証、テスト、ビルド、Go single binary 生成は、ホストOS上の固定採用バージョン Go、または承認済み固定 Go Docker image のいずれかで実行できる。
 
-本番とデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、事前バックアップ、health check、rollback 手順を基本構成とする。デプロイ、検証、バックアップ、ロールバックの詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
+本番とデプロイは、Go single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、事前バックアップ、health check、rollback 手順を基本構成とする。デプロイ、検証、バックアップ、ロールバックの詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-system 側と data 側を分離する。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として扱う。Docker 運用を選択する場合、data 側は原則として host bind mount で container へ接続し、Docker named volume へ丸投げしてはならない。
+system 側と data 側を分離する。Go single binary、Docker image、container、起動管理定義は差し替え可能な system 側とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として扱う。Docker 運用を選択する場合、data 側は原則として host bind mount で container へ接続し、Docker named volume へ丸投げしてはならない。
 
 標準アプリケーション設定では、`ADLAIRE_APP_ROOT` から `ADLAIRE_SHARED_DIR` と `ADLAIRE_DATA_DIR` を導き、アプリケーションの標準 `DB_URL` は `http://127.0.0.1:8081` の libSQL server endpoint とする。libSQL database の保護対象ファイルは `shared/data/database/adlaire.libsql`、Git bare repositories は `shared/data/repositories` に配置する。Docker 使用時も binary 直実行時も、この data 側パスを共通化する。
 

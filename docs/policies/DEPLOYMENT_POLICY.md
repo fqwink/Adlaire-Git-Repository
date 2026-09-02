@@ -2,7 +2,7 @@
 
 **位置づけ**: 2類責務別ポリシー
 **責務**: デプロイ、運用基盤、環境管理、本番サーバ反映、バックアップ、検証、ロールバック
-**ステータス**: GitHub Releases 現行配置 / Adlaire Pipeline 付随システム移行候補方針整合
+**ステータス**: Go single binary デプロイ方針 / Adlaire Pipeline Go 採用方針整合
 
 ---
 
@@ -12,21 +12,21 @@
 
 自動化は、承認工程を省略するためのものではない。デプロイ先、対象バージョン、成果物、バックアップ範囲、検証範囲、ロールバック条件、自動実行範囲を提示し、ユーザー承認を得てから実行する。
 
-Deno single binary を正本成果物とする。
+Go single binary を正本成果物とする。
 
-Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
+Docker は正本成果物ではなく、Go single binary を Docker image に同梱して実行する運用選択肢の一つである。
 
-Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。
+Docker を使用する場合も、Docker を使用せず Go single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。
 
 VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可能を最低必須条件とする。SSH が使用できない環境は、標準デプロイ対象外とする。
 
-最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱い、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として host filesystem を正本にする。
+最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Go single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱い、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として host filesystem を正本にする。
 
-標準デプロイは、Deno single binary 正本成果物を self-host、VPS、専用サーバーへ配置する方式を基準とする。Docker を利用する場合は、正本成果物である Deno single binary を Docker image に同梱し、host filesystem 上の data 領域を bind mount して実行する。
+標準デプロイは、Go single binary 正本成果物を self-host、VPS、専用サーバーへ配置する方式を基準とする。Docker を利用する場合は、正本成果物である Go single binary を Docker image に同梱し、host filesystem 上の data 領域を bind mount して実行する。
 
 Adlaire Pipeline は、リリース基盤システムと自動実行基盤システムを担う付随システムとして検討する。将来的な機能群は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。初期方針では Adlaire Git Repository 本体へ統合せず、外側の付随システムとして定義する。将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は、Adlaire Pipeline の仕様確定後に別途判断する。
 
-Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は現時点では未定とする。Deno、TypeScript、libSQL、Docker、GitHub Actions 等を Adlaire Pipeline の採用技術として勝手に固定してはならない。
+Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は現時点では未定とする。libSQL、Docker、GitHub Actions 等を Adlaire Pipeline の採用技術として勝手に固定してはならない。
 
 ## 2. デプロイ実行方式の採用区分
 
@@ -34,15 +34,15 @@ Adlaire Pipeline の開発言語、ランタイム、データベース、依存
 
 | 区分 | 対象 | 扱い |
 |---|---|---|
-| 採用 | Deno single binary | 正本成果物。Docker 使用有無に関係なく system 側の基準成果物とする |
+| 採用 | Go single binary | 正本成果物。Docker 使用有無に関係なく system 側の基準成果物とする |
 | 採用 | host OS 上の binary 直実行 | Docker を使用しない標準運用選択肢。data 側は Docker 使用時と同じ host filesystem 構成にする |
-| 採用 | Docker | 標準運用選択肢の一つ。Deno single binary を Docker image に同梱して実行する |
+| 採用 | Docker | 標準運用選択肢の一つ。Go single binary を Docker image に同梱して実行する |
 | 採用 | Docker Compose | Docker 運用選択時の 1 VPS 最小構成起動方式。compose 設定は system 側として扱い、data 側は host bind mount で接続する |
 | 採用 | shell script + SSH | 標準デプロイ補助方式。承認済み範囲で、binary または image 転送、起動定義更新、backup、再起動、検証、manifest 記録を自動化する |
 | 補助採用 | `gh` | Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って利用する |
 | 補助採用 | systemd timer | バックアップ、定期検証、保守系の定期実行候補として利用する。アプリケーション本体の標準起動方式ではない |
 | 保留 | GitHub Actions | 標準採用しない。外部CIとしての採用可否は保留し、必要時に別途提案と承認を要する |
-| 将来候補 | Adlaire Pipeline | `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を含む内製付随システム候補。技術選定、統合方針、実装時期は未定 |
+| 将来候補 | Adlaire Pipeline | `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を含む内製付随システム候補。開発言語は Go 採用方針。データベース、依存関係、実行基盤、統合方針、実装時期は未定 |
 | 保留 | 外部デプロイフレームワーク | 標準採用しない。必要性、依存関係、運用リスクを整理し、別途承認を得るまで採用しない |
 | 採用 | systemd または同等の起動管理 | binary 直実行を選択する場合の起動管理候補。作成または変更は別途承認を得る |
 | 不採用 | Docker named volume 標準運用 | data 正本を Docker named volume に丸投げする運用は禁止 |
@@ -54,7 +54,7 @@ Adlaire Pipeline の開発言語、ランタイム、データベース、依存
 
 標準デプロイは、最低限以下を対象とする。
 
-- Deno single binary 正本成果物の配置
+- Go single binary 正本成果物の配置
 - Docker 運用を選択する場合の Docker image 配置または読み込み
 - Docker 運用を選択する場合の Docker Compose 設定の配置または確認
 - binary 直実行を選択する場合の起動管理定義の配置または確認
@@ -138,7 +138,7 @@ Docker 運用を選択する場合の container 内配置は以下を基準と�
 - 本番サーバ環境の前提確認
 - SSH 接続事前検証
 - system / data 分離構成の検証
-- Deno single binary 正本成果物の取得または転送
+- Go single binary 正本成果物の取得または転送
 - Docker 運用を選択する場合の Docker image の取得または転送
 - Docker 運用を選択する場合の Docker Compose 設定の確認
 - binary 直実行を選択する場合の起動管理定義の確認
@@ -167,7 +167,7 @@ Docker 運用を選択する場合の container 内配置は以下を基準と�
 - secrets
 - logs
 - manifests
-- 現行 Deno single binary
+- 現行 Go single binary
 - Docker 運用を選択している場合の現行 Docker image または image tag 情報
 - deploy manifest
 
@@ -200,7 +200,7 @@ libSQL database のファイルバックアップは、標準雛形ではサー�
 - Git clone / fetch / push の代表確認
 - libSQL database と Git bare repository の参照確認
 
-ローカル環境に Deno が存在しない場合、実行系検証はローカルで完了扱いにしてはならない。この場合は、Deno 固定採用バージョンを満たす VPS または承認済み検証サーバ上で、実行系検証とテストを実施する。
+ローカル環境に Go が存在しない場合、実行系検証はローカルで完了扱いにしてはならない。この場合は、Go 固定採用バージョンを満たす VPS または承認済み検証サーバ上で、実行系検証とテストを実施する。
 
 VPS で実施する実行系検証は、最低限以下を含む。
 
@@ -221,9 +221,9 @@ VPS 接続先、接続方式、配置パス、検証対象バージョン、検�
 
 デプロイに失敗した場合、またはデプロイ後検証に失敗した場合は、ロールバックを実行できる状態にしておく。
 
-標準ロールバックは、直前の Deno single binary、Docker 運用を選択している場合の直前 Docker image または image tag、直前起動定義、直前バックアップ、host filesystem data 領域を用いる。
+標準ロールバックは、直前の Go single binary、Docker 運用を選択している場合の直前 Docker image または image tag、直前起動定義、直前バックアップ、host filesystem data 領域を用いる。
 
-system rollback は旧 Deno single binary または旧 Docker image / tag へ戻す操作とする。data rollback は別承認を必須とする。本番データへ影響するロールバック、libSQL database 復元、移行元 SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元は、必ずユーザー承認を得てから実行する。
+system rollback は旧 Go single binary または旧 Docker image / tag へ戻す操作とする。data rollback は別承認を必須とする。本番データへ影響するロールバック、libSQL database 復元、移行元 SQLite database 復元、Git bare repository 復元、設定復元、secrets 復元は、必ずユーザー承認を得てから実行する。
 
 ## 9. 別承認が必要な範囲
 

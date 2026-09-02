@@ -1,9 +1,9 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.21
-**ステータス**: GitHub Releases 現行配置 / Adlaire Pipeline 付随システム移行候補方針整合
+**文書バージョン**: v.2.22
+**ステータス**: Go 採用方針 / Deno + TypeScript 終了方針整合
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
-**技術スタック**: Deno + TypeScript + libSQL + Git
+**技術スタック**: Go + libSQL + Git
 
 ---
 
@@ -24,7 +24,7 @@
 - オープンソース Git プロバイダーはサブの機能互換インスパイア対象とする
 - Git 基本操作と開発支援機能を段階的に実装する
 - UI は GitHub 互換の対象外とし、本プロジェクト独自の利用体験として段階的に拡張する
-- 外部依存は必要最小限とし、Deno 標準ライブラリ、標準DBの libSQL、既存データ移行元確認用の SQLite を中心に扱う
+- 外部依存は必要最小限とし、Go 標準ライブラリ、標準DBの libSQL、既存データ移行元確認用の SQLite を中心に扱う
 - ワンバイナリで起動
 
 **対象ユーザー**
@@ -57,14 +57,15 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - Adlaire Group 内部向けのセルフホスト型 Git ホスティング基盤とする。
 - 基本的な機能互換は GitHub 互換基準とする。
 - UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換対象外とする。
-- 標準ランタイムは Deno、標準言語は TypeScript とする。
+- 標準開発言語は Go とする。
+- Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする。
 - 標準データベースは libSQL とし、DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは現行正本仕様の採用候補として扱わない。
 - SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。
 - DBアクセスは Database Gateway、Repository 層、driver 層を経由し、SQLite または libSQL を上位層から直接触らない。
 - `DB_DRIVER=libsql` を標準 driver とする。
 - `DB_DRIVER=sqlite` は標準運用、互換維持、最小ローカル検証用として扱わず、既存データ移行元確認が必要な場合に限って別途承認を得て扱う。実装上も通常運用では拒否し、承認済みの移行元確認時に `ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` を指定した場合のみ許可する。
-- Deno single binary を正本成果物とする。
-- Docker は正本成果物である Deno single binary を image に同梱して実行する運用選択肢の一つとする。
+- Go single binary を正本成果物とする。
+- Docker は正本成果物である Go single binary を image に同梱して実行する運用選択肢の一つとする。
 - Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成とする。
 - data 側は host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
 - Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。
@@ -73,7 +74,7 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - リリース配置は現行では GitHub Releases を正式配置元とする。
 - Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ付随システム候補として扱う。
 - Adlaire Pipeline は初期方針では本体へ統合せず、将来の統合、一部統合、付随維持、AdlaireGroup 共通基盤化を仕様確定後に判断する。
-- Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は現時点では未定とする。
+- Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は現時点では未定とする。
 
 ## マスター仕様完成条件
 
@@ -83,7 +84,7 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - GitHub 機能互換方針と GitHub UI 非互換方針を同時に定義している。
 - Repository、User、Auth、Git Smart HTTP、Issue、Pull Request、Code Review、Wiki、Webhook、Release、Organizations、Teams、Projects、Adlaire 内製 Deno Module Registry、Audit、Operations、REST API、Web UI、Deployment、Database の主要境界を追跡できる。
 - libSQL 標準DB方針と SQLite 互換維持なし方針が矛盾していない。
-- Deno single binary 正本成果物方針、Docker 運用選択肢、host filesystem data 正本方針が矛盾していない。
+- Go single binary 正本成果物方針、Docker 運用選択肢、host filesystem data 正本方針が矛盾していない。
 - 保留候補は、保留解除とユーザー承認なしに実装対象へ戻らない。
 - 仕様書、マスター開発計画、マスター実装機能候補リスト、README の参照関係が整合している。
 
@@ -511,19 +512,19 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 
 | 層 | 技術 |
 |----|------|
-| **言語** | TypeScript |
-| **ランタイム** | Deno |
-| **HTTP** | Deno.serve |
+| **言語 / ランタイム** | Go |
+| **HTTP** | Go 標準ライブラリ |
 | **DB** | libSQL（Database Gateway / libSQL driver 経由） |
-| **Git** | Deno.Command |
+| **Git** | Go 標準ライブラリによる外部 `git` コマンド実行 |
 | **認証** | SSH / HTTP Basic |
 | **UI** | HTML + Vanilla JavaScript（内製） |
 
 **原則**:
-- Deno 標準機能、Deno 標準ライブラリ（`jsr:@std/*`）、承認済みの最小外部依存のみ
+- Go 標準ライブラリ、承認済みの最小外部依存のみ
 - フレームワーク採用禁止（内製化のみ）
-- 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。ただし、個別モジュールの採用はユーザー承認を必須とする
-- JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う
+- Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする
+- AdlaireGroup 関連プロジェクト、プロダクトでは、Deno + TypeScript と Go 単体の2系統を有効な開発言語選択肢として扱う
+- Go module、JSR レジストリの公開ライブラリ、その他外部ライブラリは、必要最小限の外部ライブラリ例外採用として扱う
 - JSR レジストリの公開ライブラリを採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする
 - JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする
 - JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする
@@ -533,22 +534,22 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 - npm registry 互換レジストリは標準採用しない
 - 必要最小限の外部ライブラリ
 - 外部ライブラリは内製ラッパー、内製driver、または Database Gateway の内部に閉じ込める
-- Deno、SQLite、libSQL、Git、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリは、各技術の最新の安定版を採用方針とする
-- TypeScript は 6系の最新安定版を採用方針とする
-- Deno single binary 形式を正本成果物とする
-- Docker は正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする
+- Go、SQLite、libSQL、Git、Go で利用する外部コマンド、例外採用する外部ライブラリは、各技術の最新の安定版を採用方針とする
+- Go single binary 形式を正本成果物とする
+- Docker は正本成果物である Go single binary を Docker image に同梱して実行する運用選択肢の一つとする
 - Docker 使用時も非 Docker の binary 直実行時も同じ system / data 分離構成にする
 - libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として system 側から分離する
 - 承認済み固定採用バージョンは、下表に従う
 
 | 技術 | 固定採用バージョン | 扱い |
 |---|---:|---|
-| Deno | `v2.9.5` | 標準ランタイム |
-| TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
+| Go | 未確定 | 標準開発言語。固定採用バージョンは別途承認を得る |
+| Deno | `v2.9.5` | 旧標準ランタイム。本体開発言語として終了方針。既存資産確認用 |
+| TypeScript | `v6.0.3` | 旧標準言語。本体開発言語として終了方針。既存資産確認用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
-上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
+上記にない技術、Go で利用する外部コマンド、Deno + TypeScript 旧資産確認に必要な Deno 標準ライブラリの個別モジュール、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
 ### データベース採用方針
 
@@ -584,11 +585,11 @@ Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用
 
 最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Docker 使用時も非 Docker の binary 直実行時も、この構成を変えてはならない。Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、data 側は container lifecycle に依存させず、host filesystem 上で直接保全できる構成を基準にする。
 
-本番サーバ環境へのデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
+本番サーバ環境へのデプロイは、Go single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-リリース配置は現行では GitHub Releases を正式配置元とする。Deno single binary、release notes、checksum、manifest は GitHub Releases 側へ配置し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない。
+リリース配置は現行では GitHub Releases を正式配置元とする。Go single binary、release notes、checksum、manifest は GitHub Releases 側へ配置し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない。
 
-Adlaire Pipeline は、将来的にリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う内製付随システム候補とする。機能群は `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。Adlaire Pipeline は Adlaire Git Repository 本体とは分離して検討し、統合可否は仕様確定後に判断する。Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は未定であり、本体の採用技術を自動的に適用しない。
+Adlaire Pipeline は、将来的にリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う内製付随システム候補とする。機能群は `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。Adlaire Pipeline は Adlaire Git Repository 本体とは分離して検討し、統合可否は仕様確定後に判断する。Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は未定であり、別途ユーザー承認なしに固定しない。
 
 Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
@@ -719,7 +720,7 @@ system 側は差し替え可能な構成要素として扱う。
 
 | system 側 | 扱い |
 |---|---|
-| Deno single binary | 正本成果物 |
+| Go single binary | 正本成果物 |
 | Docker image | 正本 binary を同梱する運用選択肢 |
 | Docker container | 実行単位 |
 | docker compose | Docker 運用時の起動定義 |
@@ -771,7 +772,7 @@ Phase 9 では、以下を判定対象とする。
 - SQLite 互換維持なし方針
 - Database Gateway、Repository 層、driver 層の責務境界
 - system / data 分離構成
-- Deno single binary 正本成果物
+- Go single binary 正本成果物
 - Docker image を運用選択肢とする方針
 - backup、restore、rollback の説明可能性
 - 主要 workflow の検証結果
@@ -786,15 +787,15 @@ Phase 9 で安定版リリースを行う場合、リリース履歴の正本は
 
 Phase 10 は、現行リリース配置を GitHub Releases に整合しつつ、将来の Adlaire Pipeline 付随システム化を検討可能にするための整合フェーズである。
 
-Adlaire Git Repository 本体は、Deno single binary、release notes、checksum、manifest の現行配置先を GitHub Releases とする。リポジトリ内には、変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
+Adlaire Git Repository 本体は、Go single binary、release notes、checksum、manifest の現行配置先を GitHub Releases とする。リポジトリ内には、変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
 
-標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Deno single binary を本番サーバへ反映する補助導線として維持する。デプロイ先、SSH 接続方式、binary 直実行または Docker 運用の選択、バックアップ、ロールバック、本番サーバ反映は、2類デプロイポリシーに従い、別途ユーザー承認を得る。
+標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Go single binary を本番サーバへ反映する補助導線として維持する。デプロイ先、SSH 接続方式、binary 直実行または Docker 運用の選択、バックアップ、ロールバック、本番サーバ反映は、2類デプロイポリシーに従い、別途ユーザー承認を得る。
 
-Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ内製付随システム候補として扱う。Phase 10 では Adlaire Pipeline の概念と責務を整理するが、実装、技術選定、本体統合、GitHub Releases 廃止は行わない。
+Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ内製付随システム候補として扱う。Phase 10 では Adlaire Pipeline の概念と責務を整理するが、実装、本体統合、GitHub Releases 廃止は行わない。開発言語は Go 採用方針とする。
 
 Phase 10 では、database schema 変更、database migration 実行、database restore 自動実行、Docker image 配布の正式化、Container registry、GitHub Actions、外部デプロイフレームワーク、Node.js / npm 前提ツール、本番データ復元の自動実行は対象外とする。
 
-`deno.json` の内部バージョン更新、デプロイ実行、成果物配置は、対象範囲と検証方法を提示し、別途ユーザー承認を得てから行う。
+実装設定の内部バージョン更新、デプロイ実行、成果物配置は、対象範囲と検証方法を提示し、別途ユーザー承認を得てから行う。
 
 ---
 
@@ -803,8 +804,8 @@ Phase 10 では、database schema 変更、database migration 実行、database 
 ```
 [Git Client]
     ↓
-[Deno Runtime]
-  ├─ HTTP Server (Deno.serve)
+[Go Runtime]
+  ├─ HTTP Server (Go 標準ライブラリ)
   ├─ Git Smart HTTP Protocol handler
   ├─ Git Ops (clone / push / pull)
   ├─ Auth (SSH / Basic)
@@ -1137,7 +1138,7 @@ NAS は自動複製機能 or スナップショット機能を活用
 
 ### アップグレード手順
 
-標準アップグレードは、`scripts/deploy/deploy.sh` を用いた Deno single binary 配置、必要に応じた Deno single binary 入り Docker image の配置、compose 設定確認、process または container 再起動、配置後検証を基本とする。
+標準アップグレードは、`scripts/deploy/deploy.sh` を用いた Go single binary 配置、必要に応じた Go single binary 入り Docker image の配置、compose 設定確認、process または container 再起動、配置後検証を基本とする。
 
 ```bash
 # 1. 新バイナリの compile と Docker image 生成
@@ -1732,11 +1733,11 @@ Phase 別の実装対象、対象外、完了条件、検証範囲は `docs/plan
 
 CI/CD とデプロイ自動化は、`docs/policies/DEPLOYMENT_POLICY.md` を正本として扱う。
 
-標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。Deno single binary 正本成果物の配置、必要に応じた Docker image 配置、環境確認、バックアップ、process または container 再起動、health check、主要workflow検証、deploy manifest 記録を、承認済み範囲で自動化する。
+標準運用方式は、Go single binary 直実行と Docker 実行の双方を標準化対象とする。Go single binary 正本成果物の配置、必要に応じた Docker image 配置、環境確認、バックアップ、process または container 再起動、health check、主要workflow検証、deploy manifest 記録を、承認済み範囲で自動化する。
 
 shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とする。`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
 
-GitHub Actions と外部デプロイフレームワークは保留とする。Docker は運用選択肢の一つとし、正本成果物は Deno single binary とする。Node.js系は不採用とする。
+GitHub Actions と外部デプロイフレームワークは保留とする。Docker は運用選択肢の一つとし、正本成果物は Go single binary とする。Node.js系は不採用とする。
 
 ---
 
@@ -1747,7 +1748,7 @@ GitHub Actions と外部デプロイフレームワークは保留とする。Do
 標準自動化は以下を含む。
 
 - 本番サーバ環境の前提確認
-- Deno single binary 正本成果物の取得または転送
+- Go single binary 正本成果物の取得または転送
 - Docker 運用を選択する場合の Docker image の取得または転送
 - Docker 運用を選択する場合の Docker Compose 設定の確認
 - binary 直実行を選択する場合の起動管理定義の確認
@@ -1766,11 +1767,11 @@ GitHub Actions と外部デプロイフレームワークは保留とする。Do
 
 初回本番デプロイ、デプロイ先サーバ、SSH接続方式、接続ユーザー、配置パス、binary 直実行または Docker 運用の選択、Docker Engine / Docker Compose 導入または更新、起動管理定義作成、バックアップ保存先、保持世代、暗号化方針、ロールバック実行、本番データへ影響する操作は、必ず別途ユーザー承認を得る。
 
-デプロイ実行方式は、Deno single binary 正本成果物の配置を基準とする。Docker は標準運用選択肢の一つであり、Docker Compose は Docker 運用選択時の 1 VPS 最小構成起動方式とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とする。`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
+デプロイ実行方式は、Go single binary 正本成果物の配置を基準とする。Docker は標準運用選択肢の一つであり、Docker Compose は Docker 運用選択時の 1 VPS 最小構成起動方式とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とする。`gh` は Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って補助採用する。systemd timer は、バックアップ、定期検証、保守系の定期実行候補として補助採用する。
 
 GitHub Actions と外部デプロイフレームワークは保留とし、必要性、依存関係、運用リスクを整理し、ユーザー承認を得るまで標準採用しない。
 
-Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Node.js系は不採用とする。Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。
+Docker は、正本成果物である Go single binary を Docker image に同梱して実行する運用選択肢の一つとする。Node.js系は不採用とする。Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提とするデプロイ方式は採用してはならない。
 
 ローカルに Deno が存在しない場合、実行系検証はローカルで完了扱いにしない。この場合は、Deno 固定採用バージョンを満たす VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で、Deno task、内製検証スクリプト、`/health`、主要workflow確認を実施する。
 
@@ -1798,14 +1799,14 @@ Docker は、正本成果物である Deno single binary を Docker image に同
 
 ### 基本方針
 
-Deno single binary 形式を正本成果物とする。Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。標準デプロイは、Deno single binary を VPS または専用サーバーへ配置し、host filesystem 上の data 領域を正本として実行する方式を基準とする。Docker を選択する場合は、同じ data 領域を host bind mount で接続する。
+Go single binary 形式を正本成果物とする。Docker は、正本成果物である Go single binary を Docker image に同梱して実行する運用選択肢の一つである。標準デプロイは、Go single binary を VPS または専用サーバーへ配置し、host filesystem 上の data 領域を正本として実行する方式を基準とする。Docker を選択する場合は、同じ data 領域を host bind mount で接続する。
 
 標準構成は以下を基本とする。
 
 - `deno compile` による single binary 生成
 - 安定版リリースでは ARM64 Linux と x86_64 Linux の2種類の single binary 生成
-- Docker 運用を選択する場合の Deno single binary を含む Docker image 生成
-- 承認済み固定 Deno Docker image による検証、テスト、ビルド、Deno single binary 生成
+- Docker 運用を選択する場合の Go single binary を含む Docker image 生成
+- 承認済み固定 Go Docker image による検証、テスト、ビルド、Go single binary 生成
 - binary 直実行または Docker Compose による起動
 - Docker 運用を選択する場合の host bind mount による data 領域接続
 - libSQL database、移行元 SQLite database、Git repository、config、secrets、log、backups、manifests の host filesystem 上での永続保存
@@ -1852,7 +1853,7 @@ Docker named volume を標準の data 正本として扱ってはならない。
 
 ```
 ✅ Adlaire Group 内部向け Git ホスティングプロバイダー
-✅ Deno + TypeScript + libSQL + Git
+✅ Go + libSQL + Git
 ✅ ソースコード管理に特化
 ✅ シンプル・軽量（GitPrep ベース）
 ✅ ワンバイナリ起動

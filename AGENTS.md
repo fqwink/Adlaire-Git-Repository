@@ -231,40 +231,44 @@ GitHub 互換はマスター仕様書に定義された範囲に限る。GitHub 
 
 | 領域 | 技術 |
 |---|---|
-| Runtime | Deno |
-| Language | TypeScript |
-| HTTP | `Deno.serve` |
+| Language / Runtime | Go |
+| HTTP | Go 標準ライブラリ |
 | Database | libSQL |
-| Git 操作 | `Deno.Command` |
+| Git 操作 | Go 標準ライブラリによる外部 `git` コマンド実行 |
 | Frontend | HTML / CSS / Vanilla JavaScript |
-| Packaging | Deno single binary |
+| Packaging | Go single binary |
 
 採用バージョンは、原則として各技術の **最新の安定版** を採用方針とする。
 
-Deno、SQLite、libSQL、Git、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリ、その他ユーザー承認を得て採用する技術は、採用または更新の時点で公式情報を確認し、最新の安定版を採用候補とする。
+Go、SQLite、libSQL、Git、Go で利用する外部コマンド、例外採用する外部ライブラリ、その他ユーザー承認を得て採用する技術は、採用または更新の時点で公式情報を確認し、最新の安定版を採用候補とする。
 
-TypeScript は **6系の最新安定版** を採用方針とする。Deno に同梱される TypeScript を利用する場合も、TypeScript 6系の最新安定版であることを採用条件とする。
+Adlaire Git Repository 本体は、バイナリー形式リリースを軸にする本番環境基盤システムとして、Go を標準開発言語とする。Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする。
+
+Adlaire Pipeline は、リリース基盤システムおよび自動実行基盤システムを担う内製付随システムとして、Go を採用方針とする。
+
+AdlaireGroup 関連プロジェクト、プロダクトの共通方針では、Deno + TypeScript と Go 単体の2系統を有効な開発言語選択肢として扱う。各プロジェクトは、プロジェクト特性、成果物形式、運用要件、依存関係、セキュリティ要件に基づき、どちらかを個別に選定し、ユーザー承認を得る。
 
 承認済み固定採用バージョンは以下とする。
 
 | 技術 | 固定採用バージョン | 扱い |
 |---|---:|---|
-| Deno | `v2.9.5` | 標準ランタイム |
-| TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
+| Go | 未確定 | 標準開発言語。固定採用バージョンは別途承認を得る |
+| Deno | `v2.9.5` | 旧標準ランタイム。本体開発言語として終了方針。既存資産確認用 |
+| TypeScript | `v6.0.3` | 旧標準言語。本体開発言語として終了方針。既存資産確認用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
-上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
+上記にない技術、Go で利用する外部コマンド、Deno + TypeScript 旧資産確認に必要な Deno 標準ライブラリの個別モジュール、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
 固定採用バージョンを更新する場合は、採用または更新の時点で公式情報を確認し、ユーザー承認を得てからマスター開発計画、3類マスター仕様書、実装設定へ反映する。
 
 Node.js ランタイムは、セキュリティ上のリスクによるプロジェクト方針として採用を禁止する。
 
-本番サーバ運用、デプロイ、運用基盤では、Deno single binary 形式と Docker 形式の双方を標準化対象とする。
+本番サーバ運用、デプロイ、運用基盤では、Go single binary 形式と Docker 形式の双方を標準化対象とする。
 
-Deno single binary を正本成果物とする。Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。
+Go single binary を正本成果物とする。Docker は正本成果物ではなく、Go single binary を Docker image に同梱して実行する運用選択肢の一つである。
 
-Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として扱い、host filesystem を正本として system 側から分離する。
+Docker を使用する場合も、Docker を使用せず Go single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Go single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として扱い、host filesystem を正本として system 側から分離する。
 
 Docker を利用する場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
 
@@ -288,9 +292,9 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 
 - フレームワークは、内製したもの以外の採用を禁止する。
 - 内製フレームワークを採用する場合も、1類ルールブックおよび2類ポリシーに違反せず、3類マスター仕様書に採用理由・責務範囲・保守方針を記載する。
-- 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。
-- Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
-- JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認を得るまで採用してはならない。
+- Go 標準ライブラリを優先する。
+- Deno + TypeScript を採用する別プロジェクトでは、Deno 標準ライブラリ（`jsr:@std/*`）を優先する。
+- Go module、JSR レジストリの公開ライブラリ、その他外部ライブラリは、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認を得るまで採用してはならない。
 - JSR レジストリの公開ライブラリを採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする。
 - JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする。
 - JSR へ公開する package は、公開可能なオープンソースコードであることを前提とする。クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
@@ -514,10 +518,9 @@ Phase 9 は、ユーザー承認に基づく安定版判定フェーズとして
 正式実装後は、原則として以下の導線を維持する。
 
 ```bash
-deno task fmt
-deno task lint
-deno task test
-deno task compile
+go fmt ./...
+go test ./...
+go build ./...
 ```
 
 コマンドが存在しない初期段階では、作業内容に応じて代替検証を行い、最終報告で未実施理由を明記する。
@@ -536,7 +539,7 @@ deno task compile
 
 ### 7.2 Git 操作
 
-- `Deno.Command` に渡す引数は配列で扱い、shell 展開に依存しない。
+- 外部 `git` コマンドへ渡す引数は配列で扱い、shell 展開に依存しない。
 - リポジトリ名、ブランチ名、タグ名、パスは検証する。
 - パストラバーサルを禁止する。
 - bare repository と作業ディレクトリの境界を明確にする。
@@ -616,9 +619,9 @@ codex/fix-auth-permission-check
 3. `docs/specs/Auris_System_Design.md` を3類マスター仕様書として作成する
 4. `docs/plans/DEVELOPMENT_PLAN.md` をマスター開発計画として作成する
 5. 既存仕様書を3類マスター仕様書として `docs/specs/` 配下へ移行・統合する
-6. Deno only 方針と Node.js ランタイム禁止方針を2類ポリシーおよび3類マスター仕様書へ反映する
+6. Go 採用方針、Deno + TypeScript 本体終了方針、Node.js ランタイム禁止方針を2類ポリシーおよび3類マスター仕様書へ反映する
 7. Phase 1 の実装範囲と対応バージョンを確定する
-8. `deno.json`、`src/`、`tests/`、`public/` の最小構成を作成する
+8. Go 方針に基づく実装設定、`src/`、`tests/`、`public/` の最小構成を作成する
 
 ---
 

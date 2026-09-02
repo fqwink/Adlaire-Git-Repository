@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**現行フェーズ**: Phase 10 GitHub Releases 現行配置 / Adlaire Pipeline 付随システム候補整理 / v.2.10 baseline
+**現行フェーズ**: Phase 10 Go 採用方針 / GitHub Releases 現行配置 / Adlaire Pipeline 付随システム候補整理 / v.2.10 baseline
 **直近安定版リリース**: Phase 7 / v.1.8
 
 ## ドキュメント
@@ -64,13 +64,15 @@
 
 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は [docs/policies/DEPLOYMENT_POLICY.md](./docs/policies/DEPLOYMENT_POLICY.md) を参照する。
 
-Deno single binary を正本成果物とする。Docker は正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。Docker を使用する場合も、Docker を使用せず binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。
+Go single binary を正本成果物とする。Docker は正本成果物である Go single binary を Docker image に同梱して実行する運用選択肢の一つである。Docker を使用する場合も、Docker を使用せず binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。
 
-最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として `shared/` 配下に分離し、host filesystem を正本とする。Deno single binary、Docker image / container、起動管理定義は差し替え可能な system 側として扱う。
+最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として `shared/` 配下に分離し、host filesystem を正本とする。Go single binary、Docker image / container、起動管理定義は差し替え可能な system 側として扱う。
 
 標準データベースは libSQL とし、唯一の標準DBとして完全確定する。DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは採用候補として扱わない。SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。`DB_DRIVER=sqlite` は通常運用では拒否し、承認済みの移行元確認時に `ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` を指定した場合のみ扱う。クラウドDBホスティングは未定であり、採用する場合も `DB_DRIVER=libsql` の接続先差し替えとして扱う。
 
-標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。必要な parser 等の外部ライブラリは、非 npm 依存であること、Node.js ランタイム環境が存在しない前提で Deno runtime だけで動作することを条件に、明示的な例外採用として管理する。npm 互換 package、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem を伴う依存は例外なく採用しない。
+Adlaire Git Repository 本体は Go を標準開発言語とし、Deno + TypeScript は本体開発言語として終了方針とする。Adlaire Pipeline も Go 採用方針とする。AdlaireGroup 関連プロジェクトでは、Deno + TypeScript と Go 単体の2系統を有効な開発言語選択肢として扱う。
+
+Go 標準ライブラリを優先する。Go module、JSR レジストリの公開ライブラリ、その他外部ライブラリは必要最小限とし、明示的な例外採用としてユーザー承認を得る。npm 互換 package、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem を伴う依存は例外なく採用しない。
 
 libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、Database Gateway と内製 `libsql` driver 境界に閉じ込める。`@libsql/client` 等の npm 互換 client は撤去済みであり、再導入しない。libSQL 接続は、Node.js runtime が存在しない前提で、Deno runtime だけで動作する内製 HTTP/Hrana driver 経路へ集約する。
 
@@ -78,12 +80,12 @@ libSQL は必要最小限の外部依存例外として扱うが、npm 互換 pa
 
 標準デプロイ雛形は [scripts/deploy/](./scripts/deploy/) で管理する。`deploy.env.example` を基準に環境固有値を定義し、`deploy.sh`、`backup.sh`、`verify-server.sh`、`verify-release.sh`、`rollback.sh` を承認済み範囲で実行する。実値を含む環境設定、接続先、秘密情報はコミットしてはならない。
 
-リリース配置は現行では GitHub Releases を正式配置元とする。Deno single binary、release notes、checksum、manifest は GitHub Releases 側へ配置し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない。
+リリース配置は現行では GitHub Releases を正式配置元とする。Go single binary、release notes、checksum、manifest は GitHub Releases 側へ配置し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない。
 
-Adlaire Pipeline は、リリース基盤システムと自動実行基盤システムを担う内製付随システム候補として扱う。将来的な機能群は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。`Adlaire Pipeline Artifact` は成果物管理、`Adlaire Pipeline Deploy` はデプロイ反映、`Adlaire Pipeline Audit` は実行履歴・監査を扱う候補とする。初期方針では Adlaire Git Repository 本体へ統合せず、将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は仕様確定後に判断する。Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は現時点では未定であり、別途承認なしに固定しない。
+Adlaire Pipeline は、リリース基盤システムと自動実行基盤システムを担う内製付随システム候補として扱う。将来的な機能群は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。`Adlaire Pipeline Artifact` は成果物管理、`Adlaire Pipeline Deploy` はデプロイ反映、`Adlaire Pipeline Audit` は実行履歴・監査を扱う候補とする。初期方針では Adlaire Git Repository 本体へ統合せず、将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は仕様確定後に判断する。Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は現時点では未定であり、別途承認なしに固定しない。
 
 Phase 8.5 では、標準アプリケーション設定と標準デプロイ雛形を system / data 分離構成へ整合した。`ADLAIRE_APP_ROOT=/opt/adlaire-git-repository` を基準に、稼働版 release / current は `system/` 側、libSQL database、Git bare repositories、config、secrets、logs、backups、manifests は `shared/` 側へ分離する。
 
-安定版リリースの標準 Linux バイナリは、ARM64 と x86_64 の2種類を正本成果物とする。VPS デプロイ時は `uname -m` で `aarch64` または `x86_64` を確認し、対象アーキテクチャの Deno single binary を配置する。Docker を選択する場合は、その正本 binary を Docker image に同梱して配置する。
+安定版リリースの標準 Linux バイナリは、ARM64 と x86_64 の2種類を正本成果物とする。VPS デプロイ時は `uname -m` で `aarch64` または `x86_64` を確認し、対象アーキテクチャの Go single binary を配置する。Docker を選択する場合は、その正本 binary を Docker image に同梱して配置する。
 
 Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして完了済みである。Phase 8 はDB仕様完成としてlibSQL標準化を扱う。Phase 8.1 は本体整合性、Phase 8.5 はAdlaire Git Repository本体とデータ領域の分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備を扱う。Phase 10 では現行リリース配置を GitHub Releases として整合し、Adlaire Pipeline を将来のリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として整理する。

@@ -58,13 +58,15 @@ AdlaireGroup 共通雛形を利用するプロジェクトでは、採用技術�
 
 ## 4. 技術禁止原則
 
-Deno single binary 形式を正本成果物とする。
+各プロジェクトは、Deno + TypeScript または Go 単体のどちらかを開発言語として選定する。選定はプロジェクト特性、成果物形式、運用要件、依存関係、セキュリティ要件に基づき、ユーザー承認を得て行う。
 
-Docker は正本成果物ではなく、Deno single binary を Docker image に同梱して実行する運用選択肢の一つである。Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成にする。Deno single binary、Docker image / container、起動管理定義は差し替え可能な system 側として扱い、保護対象 data 側は host filesystem を正本として分離する。
+Go 採用プロジェクトでは Go single binary 形式を正本成果物とする。Deno + TypeScript 採用プロジェクトでは Deno single binary 形式を正本成果物候補として扱う。
+
+Docker は正本成果物ではなく、承認済み正本 binary を Docker image に同梱して実行する運用選択肢の一つである。Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成にする。正本 binary、Docker image / container、起動管理定義は差し替え可能な system 側として扱い、保護対象 data 側は host filesystem を正本として分離する。
 
 禁止対象と運用詳細は、2類の技術要件ポリシーを正本として定義する。
 
-標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。必要な外部ライブラリは、非 npm 依存であること、Node.js ランタイム環境が存在しない前提で Deno runtime だけで動作することを条件に、2類の技術要件ポリシーで例外採用として管理する。
+Go 採用プロジェクトでは Go 標準ライブラリを優先する。Deno + TypeScript 採用プロジェクトでは Deno 標準ライブラリ（`jsr:@std/*`）を優先する。必要な外部ライブラリは、2類の技術要件ポリシーで例外採用として管理し、ユーザー承認を得る。
 
 Node.js runtime、npm ecosystem、npm 互換 package、`npm:` specifier、`package.json`、`node_modules` を前提とする方式は例外なく採用禁止とする。詳細は、2類の技術要件ポリシーおよび依存関係ポリシーを正本として定義する。
 
