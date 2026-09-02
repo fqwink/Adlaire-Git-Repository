@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.24
+**文書バージョン**: v.2.25
 **ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Go + libSQL + Git
@@ -27,6 +27,9 @@
 - UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する
 - UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う
 - Adlaire 公式 SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする
+- Adlaire 公式 SDK は本体へ同梱せず、独立リリース対象とする
+- SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する
+- SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う
 - 外部依存は必要最小限とし、Go 標準ライブラリ、標準DBの libSQL、既存データ移行元確認用の SQLite を中心に扱う
 - ワンバイナリで起動
 
@@ -64,7 +67,7 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。
 - UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
 - HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。
-- Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK の実装、生成方式、配布方式、固定採用バージョンは、別途ユーザー承認を得るまで未確定とする。
+- Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
 - 標準開発言語は Go とする。
 - Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする。
 - 標準データベースは libSQL とし、DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは現行正本仕様の採用候補として扱わない。
@@ -90,7 +93,7 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - 現行正本仕様、フェーズ別履歴、保留候補、対象外範囲を分離している。
 - GitHub 機能互換方針と GitHub UI 非互換方針を同時に定義している。
 - ヘッドレスアーキテクチャ設計思想、UI 差し替え可能方針、静的フロントエンド、モバイルアプリ等のクライアント拡張、Adlaire 公式 SDK 経由の接続方針を定義している。
-- Adlaire 公式 SDK の TypeScript 実装方針と JavaScript 生成方針を定義している。
+- Adlaire 公式 SDK の TypeScript 実装、JavaScript 生成、`sdk/` 配置、本体非同梱、独立リリース方針を定義している。
 - Repository、User、Auth、Git Smart HTTP、Issue、Pull Request、Code Review、Wiki、Webhook、Release、Organizations、Teams、Projects、Adlaire 内製 Deno Module Registry、Audit、Operations、REST API、Web UI、Deployment、Database の主要境界を追跡できる。
 - libSQL 標準DB方針と SQLite 互換維持なし方針が矛盾していない。
 - Go single binary 正本成果物方針、Docker の Adlaire Pipeline 経由方針、host filesystem data 正本方針が矛盾していない。
@@ -120,7 +123,7 @@ UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換�
 
 Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
 
-Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK の実装、生成方式、配布方式、固定採用バージョンは、別途ユーザー承認を得るまで未確定とする。
+Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
 
 GitHub Actions、GitHub Pages、汎用 Package registry、Container registry、Copilot、Advanced Security 等は、個別に採用可否、実装時期、必要性、外部依存、セキュリティ、ライセンスを評価し、ユーザー承認を得るまで実装対象に含めない。
 
@@ -811,7 +814,7 @@ Phase 10 では、database schema 変更、database migration 実行、database 
 
 ### Phase 11 ヘッドレスアーキテクチャ / Go 移行準備仕様
 
-Phase 11 は、Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、SDK の TypeScript 実装 / JavaScript 生成方針、Docker の Adlaire Pipeline 経由方針を整理するフェーズである。
+Phase 11 は、Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理するフェーズである。
 
 Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。
 
@@ -823,7 +826,7 @@ Web UI 以外に、モバイルアプリ等のクライアント開発を可能�
 
 UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
 
-Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK の実装、生成方式、配布方式、固定採用バージョンは、別途ユーザー承認を得るまで未確定とする。
+Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
 
 Docker は、Adlaire Git Repository 本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。
 

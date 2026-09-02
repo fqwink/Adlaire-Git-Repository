@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター実装機能候補リスト
 **対象**: Auris / Adlaire Git Repository
-**文書バージョン**: v.0.33
+**文書バージョン**: v.0.34
 **ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
 
 ---
@@ -186,7 +186,7 @@ Phase 11 推奨候補は、Adlaire Git Repository 本体を Go へ移行する�
 | 5 | Go 検証導線整理 | 優先 | `go fmt`、`go test`、`go build`、Linux ARM64 / x86_64 build の確認範囲を定義するため |
 | 6 | ヘッドレスアーキテクチャ方針整理 | 優先 | UI を本体に固定せず、静的フロントエンドやモバイルアプリ等のクライアントを可能にし、Adlaire 公式 SDK 経由の接続方針を仕様へ反映するため |
 | 7 | Docker の Adlaire Pipeline 経由方針整理 | 優先 | Docker を本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で扱う方針へ整合するため |
-| 8 | Adlaire 公式 SDK 方針整理 | 優先 | SDK を TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針を、実装前に仕様へ固定するため |
+| 8 | Adlaire 公式 SDK 方針整理 | 優先 | SDK を TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成し、本体へ同梱せず `sdk/` で管理し、独立リリース対象にする方針を、実装前に仕様へ固定するため |
 
 ## 4. 保留候補
 
@@ -250,3 +250,4 @@ Phase 11 推奨候補は、Adlaire Git Repository 本体を Go へ移行する�
 | v.0.31 | Phase 11 推奨候補として Go 移行準備、Go 固定採用バージョン候補整理、外部依存例外候補整理、旧 Deno + TypeScript 資産整理、Go 検証導線整理を追加 |
 | v.0.32 | Phase 11 推奨候補に、ヘッドレスアーキテクチャ方針整理と Docker の Adlaire Pipeline 経由方針整理を追加 |
 | v.0.33 | Phase 11 推奨候補に、静的フロントエンド、モバイルアプリ等のクライアント拡張、Adlaire 公式 SDK の TypeScript 実装 / JavaScript 生成方針を追加 |
+| v.0.34 | Phase 11 推奨候補の Adlaire 公式 SDK 方針整理に、`sdk/` 配置、Deno runtime 生成、現行リポジトリ配布、リポジトリ分離未定、本体非同梱、独立リリース方針を追加 |

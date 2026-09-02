@@ -246,7 +246,7 @@ Go、SQLite、libSQL、Git、Go で利用する外部コマンド、例外採用
 
 Adlaire Git Repository 本体は、バイナリー形式リリースを軸にする本番環境基盤システムとして、Go を標準開発言語とする。Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする。
 
-Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK の実装、生成方式、配布方式、固定採用バージョンは、別途ユーザー承認を得るまで未確定とする。
+Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
 
 Adlaire Pipeline は、リリース基盤システムおよび自動実行基盤システムを担う内製付随システムとして、Go を採用方針とする。
 
@@ -460,7 +460,7 @@ Phase 9 は、ユーザー承認に基づく安定版判定フェーズとして
 - Web UI は GitHub 互換の対象外とし、本プロジェクト独自のUIとして設計する。
 - UI は差し替え可能なものとして扱い、Adlaire Git Repository 本体を特定 UI に依存させない。静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。
 - UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
-- Adlaire 公式 SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。ただし、SDK の実装、生成方式、配布方式、固定採用バージョンは、別途ユーザー承認を得るまで未確定とする。
+- Adlaire 公式 SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
 - フレームワークが必要な場合は内製のみとし、外部ライブラリが必要な場合は例外採用としてユーザー承認を得る。
 - Git リポジトリの実データ、libSQL メタデータ、移行元 SQLite データの整合性を壊す変更を行わない。
 

@@ -4,7 +4,7 @@
 **対象**: Auris / Adlaire Git Repository 全体
 **ライセンス**: クローズドライセンス
 **標準言語 / ランタイム**: Go
-**文書バージョン**: v.2.24
+**文書バージョン**: v.2.25
 **ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
 
 ---
@@ -94,7 +94,7 @@ Go 標準ライブラリを優先する。Go module、JSR レジストリの公�
 
 Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする。ただし、AdlaireGroup 関連プロジェクト、プロダクトでは、Deno + TypeScript と Go 単体の2系統を有効な開発言語選択肢として扱う。Deno + TypeScript を採用する別プロジェクトでは、Deno 標準ライブラリ（`jsr:@std/*`）を優先する。
 
-Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK の実装、生成方式、配布方式、固定採用バージョンは、別途ユーザー承認を得るまで未確定とする。
+Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
 
 JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認を得るまで採用してはならない。JSR レジストリの公開ライブラリを採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする。JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする。JSR へ公開する package は公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
 
@@ -204,6 +204,9 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。
 - UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
 - Adlaire 公式 SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。
+- Adlaire 公式 SDK は本体へ同梱せず、独立リリース対象とする。
+- SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。
+- SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。
 - 標準開発言語は Go とする。
 - 標準データベースは libSQL とする。
 - SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。
@@ -497,9 +500,9 @@ Phase 10 の完了条件は以下とする。
 
 基準バージョン: `v.2.10`
 
-Phase 11 は、Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、SDK の TypeScript 実装 / JavaScript 生成方針、Docker の Adlaire Pipeline 経由方針を整理するフェーズである。
+Phase 11 は、Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理するフェーズである。
 
-Phase 11 では、Adlaire Git Repository 本体を特定 UI に依存させず、HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は原則として Adlaire 公式 SDK 経由にする。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針を3類マスター仕様書へ反映する。
+Phase 11 では、Adlaire Git Repository 本体を特定 UI に依存させず、HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は原則として Adlaire 公式 SDK 経由にする。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。
 
 Phase 11 では、Docker を Adlaire Git Repository 本体の直接標準運用選択肢として扱わず、Adlaire Pipeline 経由で生成、管理、配布、利用する対象として整理する。
 
@@ -507,7 +510,7 @@ Phase 11 の完了条件は以下とする。
 
 - Go 採用方針、Go single binary 正本成果物方針、ヘッドレスアーキテクチャ設計思想が矛盾していない。
 - UI が Adlaire Git Repository 本体に固定されず、特定 UI 非依存、静的フロントエンド、モバイルアプリ等のクライアント拡張、Adlaire 公式 SDK 接続方針を説明できる。
-- Adlaire 公式 SDK を TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針を説明できる。
+- Adlaire 公式 SDK の TypeScript 実装、JavaScript 生成、`sdk/` 配置、本体非同梱、独立リリース方針を説明できる。
 - Docker が Adlaire Pipeline 経由で扱う対象として説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
