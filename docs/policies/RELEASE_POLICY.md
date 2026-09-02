@@ -2,7 +2,7 @@
 
 **位置づけ**: 2類責務別ポリシー
 **責務**: 安定版リリース、リリース対象、リリース禁止条件
-**ステータス**: 初期策定
+**ステータス**: GitHub Releases リリース配置一本化方針
 
 ---
 
@@ -65,7 +65,7 @@ Phase 9 は、ユーザー承認に基づく安定版判定フェーズとして
 
 ## 5. リリース配置
 
-リリース成果物の主配置は GitHub Releases とする。
+リリース成果物の配置は GitHub Releases へ一本化する。
 
 GitHub Releases には、リリースごとの成果物、release notes、必要な checksum、manifest を配置する方針とする。
 
@@ -73,7 +73,7 @@ Linux 向け Deno single binary を安定版リリース成果物とする場合
 
 リポジトリ内に、変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持してはならない。
 
-大きなバイナリ成果物をリポジトリへ継続的に直接配置してはならない。大きな成果物は GitHub Releases を優先する。
+大きなバイナリ成果物をリポジトリへ継続的に直接配置してはならない。大きな成果物は GitHub Releases へ配置する。
 
 リリース履歴の正本は GitHub Releases とする。リリースごとの release notes、成果物、checksum、manifest は GitHub Releases 側に配置し、リポジトリ内の `docs/releases/` または `releases/` へ履歴ファイルとして配置しない。
 

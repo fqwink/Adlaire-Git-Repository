@@ -2,8 +2,8 @@
 
 **位置づけ**: マスター実装機能候補リスト
 **対象**: Auris / Adlaire Git Repository
-**文書バージョン**: v.0.22
-**ステータス**: Phase 10 Adlaire Deploy 着手に伴う候補整理
+**文書バージョン**: v.0.26
+**ステータス**: Phase 10 GitHub Releases 一本化候補整理
 
 ---
 
@@ -161,15 +161,17 @@ Phase 8 は DB 仕様完成フェーズとする。Phase 8.1 は本体整合性�
 | 4 | 安定化 | 優先 | バグ修正、検証強化、ドキュメント整合性を行うため |
 | 5 | 安定版判定 | 優先 | Phase 9 で安定版リリース可否を判断するため |
 
-### 3.9 Phase 10 推奨候補: Adlaire Deploy
+### 3.9 Phase 10 推奨候補: リリース配置 GitHub Releases 一本化
 
-Phase 10 推奨候補は、Adlaire Git Repository の配布、取得、検証、配置を内製化する Adlaire Deploy を優先する。
+Phase 10 推奨候補は、リリース配置を GitHub Releases へ一本化し、標準デプロイ雛形との関係を整理することを優先する。
 
 | 優先順 | 機能 | 種別 | 理由 |
 |---:|---|---|---|
-| 1 | Adlaire Deploy 最小実装 | 優先 | Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を内製化するため |
-| 2 | dry-run / plan / verify | 優先 | 初回から本番サーバへ破壊的変更を行わず、配置計画と検証結果を先に説明できる状態にするため |
-| 3 | 標準デプロイ雛形との責務整理 | 優先 | `scripts/deploy/` 配下の shell script を移行元・暫定標準として維持しつつ、Adlaire Deploy へ段階移行するため |
+| 1 | GitHub Releases 一本化 | 優先 | Deno single binary、release notes、checksum、manifest の配置先を一本化し、リリース配置の正本を明確にするため |
+| 2 | リポジトリ内リリース履歴ファイル廃止維持 | 優先 | 変更履歴、release notes 元資料、リリース配置記録、リリース用 manifest、checksum をリポジトリへ保持しない方針を維持するため |
+| 3 | 標準デプロイ雛形との責務整理 | 優先 | `scripts/deploy/` 配下の shell script を、GitHub Releases 配置済み成果物を本番サーバへ反映する補助導線として説明するため |
+| 4 | 新規デプロイメントシステム対象外整理 | 優先 | Phase 10 で新しい内製デプロイメントシステム、外部デプロイフレームワーク、GitHub Actions、Container registry を扱わないことを明確にするため |
+| 5 | リポジトリ整合性確認 | 優先 | 1類、2類、3類、マスター開発計画、README、検証導線、PR説明から古いリリース配置方針を除去するため |
 
 ## 4. 保留候補
 
@@ -218,13 +220,11 @@ Phase 10 推奨候補は、Adlaire Git Repository の配布、取得、検証、
 | v.0.10 | Phase 6 の安定版リリース準備候補に基づき、既知バグ確認、ドキュメント整合性向上、移行・ロールバック前提整理、主要 workflow 検証を完了対象として整合 |
 | v.0.11 | libSQL を標準DB、SQLite を互換・移行元・最小ローカル検証用として保持する方針に合わせ、DB関連候補を整理 |
 | v.0.12 | Phase 8 のマスター仕様完成に合わせ、候補リストの責務を候補分類と理由に限定し、現行正本仕様との境界を明確化 |
-| v.0.13 | Adlaire Deploy を公式付随システムの優先候補として追加し、統合せず同居・連携する方針へ整理 |
-| v.0.14 | Adlaire Deploy を仕様未定の保留候補へ戻し、当面は Adlaire Git Repository 本体優先の候補整理へ修正 |
 | v.0.15 | Phase 8 をDBフェーズへ再定義し、libSQL標準化、SQLite互換維持なし、Phase 8.1本体整合性、Phase 8.5システム分割、Phase 8.7安定化、Phase 9安定版判定へ整理 |
 | v.0.16 | Phase 8 / Phase 9 仕様完成に合わせ、Phase 8 をDB仕様完成候補として整理し、正式仕様・実装対象・検証範囲・完了条件は3類マスター仕様書とマスター開発計画を正とする関係を維持 |
-| v.0.17 | Phase 8 libSQL driver 実装中に合わせ、`@libsql/client v0.17.4` を承認済み例外ライブラリとして扱う現行状態と整合 |
+| v.0.17 | Phase 8 libSQL driver 実装中の旧方針として、当時の npm 互換 libSQL client 採用状態を記録 |
 | v.0.18 | Phase 8.1 本体整合性完了に合わせ、DB仕様完成後の本体整合性候補と正式仕様・計画の責務分離を維持 |
 | v.0.19 | Phase 8.5 システム分割完了に合わせ、system / data 分離候補と正式仕様・計画の責務分離を維持 |
 | v.0.20 | Phase 8.7 安定化完了に合わせ、DB 標準化、Database Gateway 境界、system / data 分離、backup / rollback の安定化候補と正式仕様・計画の責務分離を維持 |
 | v.0.21 | Phase 9 安定版判定・リリース準備に合わせ、安定版判定候補と正式なリリース実行承認の責務分離を維持 |
-| v.0.22 | Phase 10 Adlaire Deploy 着手に合わせ、Adlaire Deploy を保留候補から外し、付随システムの優先候補として整理 |
+| v.0.26 | Phase 10 の推奨候補を GitHub Releases リリース配置一本化、標準デプロイ雛形との責務整理、新規デプロイメントシステム対象外整理へ改訂 |

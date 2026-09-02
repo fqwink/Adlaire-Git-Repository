@@ -2,7 +2,7 @@
 
 **位置づけ**: 2類責務別ポリシー
 **責務**: 採用技術、ランタイム、依存関係、固定採用バージョン、技術承認
-**ステータス**: 初期策定
+**ステータス**: JSR Deno runtime 前提方針整合
 
 ---
 
@@ -23,9 +23,10 @@
 - Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成にする。
 - libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として分離する。
 - フレームワークは、内製したもの以外の採用を禁止する。
-- Deno 標準ライブラリを最優先候補とする。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
-- JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用禁止とする。
-- JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。
+- 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
+- JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認を得るまで採用禁止とする。
+- JSR レジストリの公開ライブラリを採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする。
+- JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする。
 - JSR は公開可能なオープンソース package の公開候補に限る。クローズドライセンス、内部専用、非公開資産は JSR へ公開しない。
 - npm registry 互換レジストリは、Node.js / npm ecosystem リスクと衝突するため標準採用しない。
 - クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
@@ -40,43 +41,43 @@
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
-| `@libsql/client` | `v0.17.4` | Phase 8 DB driver 実装の承認済み例外ライブラリ |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
-### 3.1 承認済み例外ライブラリ
+### 3.1 承認済み例外外部依存
 
-Phase 8 DB driver 実装では、`@libsql/client v0.17.4` を承認済み例外ライブラリとして採用する。
+Adlaire Git Repository の標準DBは libSQL とし、libSQL は必要最小限の外部依存例外として扱う。
 
 | 項目 | 内容 |
 |---|---|
-| package | `@libsql/client` |
-| 固定バージョン | `v0.17.4` |
-| import | `npm:@libsql/client@0.17.4` |
-| 利用範囲 | `src/database/libsql_driver.ts` の内部 |
-| 採用理由 | libSQL 標準DB driver を実装し、Database Gateway 経由の接続、SQL 実行、将来の接続先差し替えを成立させるため |
-| 禁止事項 | Node.js runtime の採用、`package.json` の作成、`node_modules` の導入、npm ecosystem の一般採用、Repository 層より上位への外部API露出 |
+| 対象 | libSQL server / libSQL database |
+| 固定バージョン | `libsql-server v0.24.32` |
+| 利用範囲 | Database Gateway と内製 `libsql` driver 境界 |
+| 採用理由 | 標準DBを libSQL に統一し、DBアクセスを専用境界へ集約するため |
+| 禁止事項 | npm 互換 package、`npm:` specifier、Node.js runtime、`package.json`、`node_modules`、npm ecosystem、Repository 層より上位への外部API露出 |
 
-この例外は、libSQL driver 実装に必要な最小限の例外である。`npm:` specifier を使うが、Node.js runtime、npm registry 互換レジストリ、`package.json`、`node_modules`、npm ecosystem の一般採用を承認するものではない。
+この例外は、libSQL を標準DBとして扱うための最小限の外部依存例外である。npm 互換 package、`npm:` specifier、Node.js runtime、npm registry 互換レジストリ、`package.json`、`node_modules`、npm ecosystem の採用を承認するものではない。
 
-`@libsql/client` の API は内製 `LibsqlDriver` と Database Gateway の内部に閉じ込める。HTTP handler、Service 層、Repository 層、Git 操作処理、Web UI から `@libsql/client` を直接 import してはならない。
+libSQL に接続する実装は、内製 `LibsqlDriver` と Database Gateway の内部に閉じ込める。HTTP handler、Service 層、Repository 層、Git 操作処理、Web UI から外部 libSQL API を直接 import または利用してはならない。
 
-`deno.lock` は、承認済み例外ライブラリとその解決結果を固定するために管理する。`deno.lock` に記録された transitive dependency は、`@libsql/client v0.17.4` の承認済み例外範囲に従属するものとして扱い、未承認の直接依存追加、JSR 依存追加、npm ecosystem 一般採用を意味しない。
+`@libsql/client` 等の npm 互換 libSQL client は採用禁止とする。既存実装または設定に npm 由来の libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱い、別途承認を得て撤去または置換する。
 
-`@libsql/client` の native loader が Deno 実行時に FFI と system 情報の `cpus`、`networkInterfaces`、`hostname` 参照を要求するため、Deno task では `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname` を許可対象に加える。`--allow-ffi` は libSQL native loader のための承認済み権限であり、アプリケーションコードから `Deno.dlopen` 等の Deno FFI API を直接使うことは認めない。`--allow-sys` 全許可や、libSQL driver 以外の目的での system 情報参照を標準化してはならない。
+FFI または native loader を前提にする外部 libSQL client は標準採用しない。`--allow-ffi`、`--allow-sys`、native binary loader、platform-specific package を必要とする場合は、npm 依存を含まないこと、Deno single binary / Docker 運用と整合すること、最小権限であることを提示し、別途ユーザー承認を得る。
 
 ## 3.2 レジストリ方針
 
 Deno ランタイムにおける外部依存は、以下の優先順位で検討する。
 
-1. Deno 標準ライブラリ
+1. Deno 標準ライブラリ（`jsr:@std/*`）
 2. 内製実装
-3. 承認済みの JSR レジストリ package
+3. 承認済みの非 npm 依存 JSR レジストリ package
 4. その他の外部依存
 
-Deno 標準ライブラリは最優先候補である。ただし、個別モジュールの採用は自動承認ではない。採用する場合は、対象モジュール、固定バージョン、利用範囲、検証方法、ライセンス影響を整理し、ユーザー承認を得る。
+Deno 標準ライブラリ（`jsr:@std/*`）は標準採用の唯一の外部 module 群である。ただし、個別モジュールの採用は自動承認ではない。採用する場合は、対象モジュール、固定バージョン、利用範囲、検証方法、ライセンス影響を整理し、ユーザー承認を得る。
 
-JSR レジストリの公開 package は採用可能であり、Deno / TypeScript / ESM と相性がよい。ただし、ユーザー承認なしに採用してはならない。JSR package を採用する場合は、必要最小限の例外採用として扱い、3類マスター仕様書とマスター開発計画に利用範囲を反映する。
+JSR レジストリの公開 package は、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認なしに採用してはならない。必要な parser 等を採用する場合も、3類マスター仕様書とマスター開発計画に利用範囲を反映する。
+
+JSR レジストリの公開 package を採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする。Node.js runtime、`node` command、`node:` built-in、`package.json`、`node_modules`、npm scripts、native Node addon を要求する JSR package は採用してはならない。
 
 JSR レジストリの公開 package であっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。JSR で公開されていることは、npm 互換依存の採用許可を意味しない。
 
@@ -88,9 +89,7 @@ Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体の早期
 
 Adlaire 内製 Deno Module Registry は、npm registry 互換レジストリではない。`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提にしてはならない。
 
-npm registry 互換レジストリ、`npm:` specifier、`package.json` 前提運用、`node_modules` 前提運用は、Node.js / npm ecosystem リスクと衝突するため標準採用しない。採用検討が必要な場合は、例外採用ではなく方針変更候補として扱い、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
-
-ただし、Phase 8 DB driver 実装に限り、承認済み例外ライブラリとして `@libsql/client v0.17.4` の `npm:` import を認める。この例外は本ポリシーの「承認済み例外ライブラリ」に定義された範囲に限定する。
+npm registry 互換レジストリ、`npm:` specifier、`package.json` 前提運用、`node_modules` 前提運用は、Node.js / npm ecosystem リスクと衝突するため採用禁止とする。npm 依存は、標準採用、例外採用、開発補助、検証補助、ビルド補助のいずれとしても採用してはならない。
 
 ## 3.3 Binary / Docker 標準採用方針
 
@@ -100,7 +99,7 @@ Docker は正本成果物ではなく、Deno single binary を Docker image に�
 
 Docker を使用する場合も、Docker を使用せず Deno single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。
 
-Deno single binary 形式、Docker 形式のいずれでも、Node.js runtime、npm ecosystem、`package.json`、`node_modules` を導入してはならない。承認済み例外ライブラリとして明記された場合を除き、`npm:` specifier を導入してはならない。
+Deno single binary 形式、Docker 形式のいずれでも、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
 
 標準対象は、最低限以下とする。
 
@@ -161,8 +160,8 @@ Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用
 
 最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Docker 使用時も非 Docker の binary 直実行時も、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を host filesystem 基準で直接確認できることを、本体運用基盤の前提条件とする。
 
-Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、3類マスター仕様書とマスター開発計画へ採用理由、対象範囲、対象外、リスク、検証範囲を反映し、ユーザー承認を得る。
+Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
-Deno Deploy を採用候補にする場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提にしてはならない。
+Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、3類マスター仕様書とマスター開発計画へ採用理由、対象範囲、対象外、リスク、検証範囲を反映し、ユーザー承認を得る。
 
 Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、Database Gateway と内製 `libsql` driver の接続先差し替えとして扱い、アプリケーション上位層へサービス固有APIやサービス名を露出してはならない。

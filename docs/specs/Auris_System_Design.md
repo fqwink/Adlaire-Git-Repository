@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.2.11
-**ステータス**: Phase 10 Adlaire Deploy 着手
+**文書バージョン**: v.2.17
+**ステータス**: GitHub Releases リリース配置一本化方針整合
 
 ---
 
@@ -88,11 +88,11 @@ GitHub 互換は本書および個別3類マスター仕様書に定義された
 
 Node.js ランタイムは採用しない。
 
-外部フレームワークは採用しない。外部ライブラリが必要な場合は、例外採用としてユーザー承認を得る。
+外部フレームワークは採用しない。外部ライブラリが必要な場合は、例外採用としてユーザー承認を得る。ただし、npm 互換 package、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem を伴う外部ライブラリは例外なく採用しない。
 
-Deno 標準ライブラリを最優先候補とする。ただし、個別モジュールの採用は自動承認ではなく、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
+標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。ただし、個別モジュールの採用は自動承認ではなく、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
 
-JSR レジストリの公開ライブラリは採用可能とする。ただし、ユーザー承認を得るまで採用してはならない。JSR レジストリの公開ライブラリであっても、npm 互換、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは採用禁止とする。承認済み例外ライブラリとして明記された場合を除き、`npm:` specifier を導入してはならない。JSR へ公開する package は公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
+JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。採用する場合は、ユーザー承認を得るまで採用してはならない。JSR レジストリの公開ライブラリを採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする。JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする。JSR へ公開する package は公開可能なオープンソースコードであることを前提とし、クローズドライセンス、内部専用、非公開資産は JSR へ公開してはならない。
 
 クローズドな Adlaire 内製 Deno package の配布は、短期的には Private Git + Deno import、Deno workspace、vendor 管理を候補とし、中長期的には Adlaire 内製 Deno Module Registry を標準目標とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
 
@@ -112,13 +112,14 @@ Deno single binary 形式を正本成果物とする。Docker は正本成果物
 | TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
-| `@libsql/client` | `v0.17.4` | Phase 8 DB driver 実装の承認済み例外ライブラリ |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定とする。
 
 ### 4.1 データベース方針
 
 標準採用するデータベースエンジンは libSQL とする。
+
+libSQL は本プロジェクトの唯一の標準DBとして完全確定する。DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは、現行正本仕様における採用候補として扱わない。
 
 SQLite は既存データ移行元確認用としてのみ扱う。
 
@@ -128,9 +129,15 @@ SQLite 互換維持、SQLite 最小ローカル検証用運用、SQLite 標準DB
 
 libSQL は、移行容易性、将来の同期・分散構成への拡張余地という採用メリットが高いため、標準データベースとして扱う。
 
-libSQL driver は Phase 8 の承認済み実装対象とする。`@libsql/client v0.17.4` は承認済み例外ライブラリとして採用し、外部ライブラリAPIを直接利用せず、内製 `libsql` driver と Database Gateway の内部に閉じ込める。
+libSQL driver は Phase 8 の承認済み実装対象とする。libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、内製 `libsql` driver と Database Gateway の内部に閉じ込める。
 
-`@libsql/client` の native loader が Deno 実行時に FFI と system 情報の `cpus`、`networkInterfaces`、`hostname` 参照を要求するため、Deno task では `--allow-ffi` と `--allow-sys=cpus,networkInterfaces,hostname` を許可対象に加える。`--allow-ffi` は libSQL native loader のための承認済み権限であり、アプリケーションコードから Deno FFI API を直接使うことは認めない。`--allow-sys` 全許可や、libSQL driver 以外の system 情報参照は標準化しない。
+`@libsql/client` 等の npm 互換 libSQL client の問題は、DB 選定の問題ではなく、client / driver の依存経路と runtime 前提の問題として扱う。libSQL 採用は撤回せず、Node.js runtime が存在しない前提で Deno runtime だけで動作する driver 経路へ置換することを仕様上の是正方針とする。
+
+`@libsql/client` 等の npm 互換 libSQL client は採用禁止とする。既存実装または設定に npm 由来の libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱い、別途承認を得て撤去または置換する。
+
+libSQL client / driver 候補は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Deno runtime だけで動作することを必須条件とする。JSR 経由の公開ライブラリであっても、npm 互換 package、`npm:` specifier、Node.js runtime 前提、native loader 前提を含む場合は採用しない。
+
+Turso 公式の `@tursodatabase/serverless/compat` および `@tursodatabase/serverless` は、`fetch` のみで動作する libSQL over HTTP 系 client 候補として調査対象にできる。ただし、npm package としての取得経路、Deno runtime only 条件、固定バージョン、権限、self-host / VPS 上の libSQL server 接続可否を確認し、別途ユーザー承認を得るまで採用確定または実装反映してはならない。
 
 Turso Cloud 等の libSQL 系クラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングはデータベースエンジンの追加採用ではなく、libSQL の接続先または運用形態の候補として扱う。検討する場合は、標準運用方針、クローズドライセンス、データ管理責任、認証情報管理、運用コスト、障害時の復旧方針を3類マスター仕様書に追記してから判断する。
 
@@ -163,11 +170,11 @@ Git ホスティング本体は、Git bare repository の永続保存、`git` �
 
 本番サーバ環境へのデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Deno single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。Adlaire Deploy は Phase 10 の着手対象とし、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う付随システムとする。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
+標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Deno single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。リリース配置は GitHub Releases へ一本化する。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
 
-Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。採用を検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Deno 固定バージョン、Node.js / npm 非依存方針との整合を確認する。
+Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
-Deno Deploy を採用候補にする場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を前提にしてはならない。
+Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。採用を検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Node.js / npm 非依存方針との整合を確認する。
 
 Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、Database Gateway と内製 `libsql` driver の接続先差し替えとして扱う。アプリケーション上位層へサービス固有APIやサービス名を露出してはならない。
 
@@ -178,7 +185,6 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 | ドキュメント | 役割 |
 |---|---|
 | `docs/specs/Adlaire_Git_Repository_Specification.md` | Git ホスティング基盤本体の仕様 |
-| `docs/specs/Adlaire_Deploy_Specification.md` | Adlaire Deploy の仕様。付随システム、binary 取得、検証、配置、backup、rollback、manifest 記録の基準 |
 
 ---
 
@@ -187,7 +193,6 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 現行正本仕様は以下とする。
 
 - Adlaire Git Repository は、Adlaire Group 内部向けのセルフホスト型 Git ホスティング基盤である。
-- Adlaire Deploy は Phase 10 の着手対象であり、付随システムとして個別3類マスター仕様書を持つ。
 - 基本的な機能互換は GitHub 互換基準とする。
 - UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換対象外とする。
 - 標準ランタイムは Deno、標準言語は TypeScript とする。
@@ -199,16 +204,18 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - Docker 使用時も非 Docker の binary 直実行時も、system 側と data 側を分離する。
 - data 側は host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
 - 標準運用基盤は self-host、VPS、専用サーバーを前提とする。
-- Deno Deploy、Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく将来候補として保留する。
-- Node.js runtime、npm ecosystem、外部フレームワーク、無承認外部ライブラリは採用しない。
+- リリース配置は GitHub Releases へ一本化する。
+- Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。
+- Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく将来候補として保留する。
+- Node.js runtime、npm ecosystem、npm 依存、外部フレームワーク、無承認外部ライブラリは採用しない。
 
-## 6.1 Adlaire Deploy
+## 6.1 リリース配置
 
-Adlaire Deploy は、Adlaire Git Repository の付随システムである。
+リリース配置は GitHub Releases へ一本化する。
 
-Adlaire Deploy は Adlaire Git Repository 本体へ統合せず、同居・連携する。Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う。
+Deno single binary、release notes、checksum、manifest は GitHub Releases 側へ配置する。リポジトリ内に、変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持してはならない。
 
-Adlaire Deploy の詳細仕様は `docs/specs/Adlaire_Deploy_Specification.md` を正本とする。
+GitHub Releases の作成、成果物配置、release notes 公開、tag 作成は、リリース提案を提示し、ユーザー承認を得てから実行する。
 
 ## 7. 完成判定
 
@@ -348,7 +355,7 @@ Phase 8 の実施対象は以下とする。
 - libSQL 標準DB仕様の確定
 - `DB_DRIVER=libsql` を標準 driver とする接続仕様
 - `DB_URL` と `DB_AUTH_TOKEN` による接続先・認証情報の扱い
-- `@libsql/client v0.17.4` の承認済み例外ライブラリ採用
+- npm 依存を含まない libSQL 外部依存例外と内製 libSQL driver 境界
 - Database Gateway、Repository 層、driver 層の責務境界
 - libSQL 前提の schema、migration、seed 管理方針
 - 既存データ移行元確認用 SQLite の取扱境界
@@ -363,7 +370,8 @@ Phase 8 の対象外は以下とする。
 - SQLite 最小ローカル検証用運用
 - `DB_DRIVER=sqlite` の標準運用化
 - `DB_DRIVER=turso` 等のクラウドDBホスティング名を driver 名にすること
-- Turso Cloud、Deno Deploy、その他クラウドDBホスティングの標準採用
+- Deno Deploy 環境対応
+- Turso Cloud、その他クラウドDBホスティングの標準採用
 - Database Gateway を経由しない DB 直接アクセス
 - 承認なしの libSQL 外部ライブラリ導入、schema 変更、migration 実装
 
@@ -455,36 +463,19 @@ Phase 9 の完了条件は以下とする。
 
 ### 8.10 Phase 10
 
-基準バージョン: `v.2.11`
+基準バージョン: `v.2.10`
 
-Phase 10 は、Adlaire Deploy の着手フェーズである。
+Phase 10 は、リリース配置を GitHub Releases へ一本化するための整合フェーズである。
 
-Phase 10 では、Adlaire Deploy を Adlaire Git Repository の付随システムとして定義し、Deno single binary 正本成果物の取得、checksum 検証、配置、backup、rollback、manifest 記録を扱う内製デプロイメントシステムとして整備する。
+Phase 10 では、Deno single binary、release notes、checksum、manifest の配置先を GitHub Releases に統一し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない方針を明確にする。
 
-Adlaire Deploy は Adlaire Git Repository 本体へ統合しない。連携は release manifest、checksum、health check endpoint、標準デプロイ雛形、filesystem path、command execution の境界で行う。
-
-Phase 10 の対象外は以下とする。
-
-- Docker image 配布の正式化
-- Container registry
-- GitHub Actions
-- 外部デプロイフレームワーク
-- Node.js / npm 前提ツール
-- 初回から本番サーバへ破壊的変更を行う remote deploy 実行
-- 本番データ復元の自動実行
-- rollback の data 復元自動実行
-- 複数サーバー同時 rolling deploy
-- blue-green deployment
-- zero downtime 切替
-- GUI
-- SaaS 型クラウドデプロイ基盤
+Phase 10 では、新しい内製デプロイメントシステム、GitHub Actions、外部デプロイフレームワーク、Container registry、Docker image 配布の正式化、Node.js / npm 前提ツールは対象外とする。
 
 Phase 10 の完了条件は以下とする。
 
-- Adlaire Deploy が3類マスター仕様書として定義されている。
-- Adlaire Deploy が保留候補ではなく Phase 10 の正式着手対象として整理されている。
-- Adlaire Git Repository 本体と Adlaire Deploy の責務境界を説明できる。
-- Deno single binary 正本成果物、system / data 分離、標準デプロイ雛形との整合が取れている。
+- リリース配置が GitHub Releases へ一本化されている。
+- 3類マスター仕様書、2類リリースポリシー、2類デプロイポリシー、マスター開発計画、README の記述が矛盾していない。
+- 標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Deno single binary を本番サーバへ反映する補助導線として説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
 ---
