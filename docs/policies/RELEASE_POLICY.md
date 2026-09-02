@@ -2,7 +2,7 @@
 
 **位置づけ**: 2類責務別ポリシー
 **責務**: 安定版リリース、リリース対象、リリース禁止条件
-**ステータス**: GitHub Releases リリース配置一本化方針
+**ステータス**: GitHub Releases 現行配置 / Adlaire Pipeline 付随システム移行候補方針
 
 ---
 
@@ -65,9 +65,13 @@ Phase 9 は、ユーザー承認に基づく安定版判定フェーズとして
 
 ## 5. リリース配置
 
-リリース成果物の配置は GitHub Releases へ一本化する。
+リリース成果物の現行配置先は GitHub Releases とする。
 
 GitHub Releases には、リリースごとの成果物、release notes、必要な checksum、manifest を配置する方針とする。
+
+Adlaire Pipeline は、リリース基盤システムと自動実行基盤システムを担う付随システムとして検討する。将来的な機能群は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。Adlaire Pipeline が仕様確定、実装、検証、安定運用できるまで、GitHub Releases は現行の正式リリース配置元として維持する。
+
+将来的に Adlaire Pipeline をリリース成果物、release notes、checksum、manifest、release 履歴の正本にする場合は、リリース配置先の変更として扱い、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
 Linux 向け Deno single binary を安定版リリース成果物とする場合は、ARM64 と x86_64 の2種類を標準配置対象とする。
 
@@ -75,7 +79,7 @@ Linux 向け Deno single binary を安定版リリース成果物とする場合
 
 大きなバイナリ成果物をリポジトリへ継続的に直接配置してはならない。大きな成果物は GitHub Releases へ配置する。
 
-リリース履歴の正本は GitHub Releases とする。リリースごとの release notes、成果物、checksum、manifest は GitHub Releases 側に配置し、リポジトリ内の `docs/releases/` または `releases/` へ履歴ファイルとして配置しない。
+現行のリリース履歴の正本は GitHub Releases とする。リリースごとの release notes、成果物、checksum、manifest は GitHub Releases 側に配置し、リポジトリ内の `docs/releases/` または `releases/` へ履歴ファイルとして配置しない。
 
 デプロイ、バックアップ、検証で生成される operational な manifest、checksum、log は、変更履歴ファイルではなく運用記録として扱う。これらの保存先、保護対象、バックアップ方針は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
@@ -84,6 +88,8 @@ Linux 向け Deno single binary を安定版リリース成果物とする場合
 リリース作業は、承認工程を省略しない範囲で自動化を推奨する。
 
 本番サーバ環境へのデプロイ、デプロイ前後の検証、バックアップ、ロールバックは `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。リリース自動化とデプロイ自動化を同時に扱う場合も、承認対象、成果物、検証範囲、失敗時対応を分けて提示する。
+
+Adlaire Pipeline は、将来のリリース自動化とデプロイ自動化の正本候補である。`Adlaire Pipeline Release` は release notes、checksum、manifest、release 履歴を扱う候補とし、`Adlaire Pipeline Artifact` は成果物管理を扱う候補とする。`Adlaire Pipeline Runner` は検証、ビルド、定期実行、手動実行、実行制御を扱う候補とし、`Adlaire Pipeline Deploy` はデプロイ反映、切り替え、ロールバック準備を扱う候補とする。`Adlaire Pipeline Audit` は実行履歴・監査を扱う候補とする。ただし、初期方針では Adlaire Git Repository 本体へ統合せず、付随システムとして扱う。Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は未定とし、別途ユーザー承認を得るまで固定してはならない。
 
 ユーザー承認後に限り、以下を自動実行してよい。
 

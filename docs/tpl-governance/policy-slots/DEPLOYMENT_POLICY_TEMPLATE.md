@@ -12,6 +12,8 @@
 
 各プロジェクトは、共通方針を破らない範囲で配置先、接続方式、サーバ名、ドメイン、環境変数などの固有値を具体化する。
 
+Adlaire Pipeline を採用候補にする場合は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` の将来機能群に分けて定義する。初期方針で付随システムとして扱う場合は、プロジェクト本体への統合、開発言語、ランタイム、データベース、依存関係、実行基盤を自動的に固定してはならない。
+
 ## 2. 個別具体化必須項目
 
 - 標準運用基盤
@@ -25,6 +27,9 @@
 - deploy 後検証
 - 監視
 - 障害対応
+- Adlaire Pipeline の採用候補範囲
+- Adlaire Pipeline の本体統合判断
+- Adlaire Pipeline の未定技術項目
 
 ## 3. 共通デプロイ制約
 

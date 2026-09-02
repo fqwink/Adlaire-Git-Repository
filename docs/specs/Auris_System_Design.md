@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.2.18
-**ステータス**: GitHub Releases リリース配置一本化方針整合
+**文書バージョン**: v.2.21
+**ステータス**: GitHub Releases 現行配置 / Adlaire Pipeline 付随システム移行候補方針整合
 
 ---
 
@@ -170,7 +170,7 @@ Git ホスティング本体は、Git bare repository の永続保存、`git` �
 
 本番サーバ環境へのデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Deno single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。リリース配置は GitHub Releases へ一本化する。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
+標準運用方式は、Deno single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Deno single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。リリース配置は現行では GitHub Releases を正式配置元とする。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。
 
 Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
@@ -204,18 +204,23 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - Docker 使用時も非 Docker の binary 直実行時も、system 側と data 側を分離する。
 - data 側は host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
 - 標準運用基盤は self-host、VPS、専用サーバーを前提とする。
-- リリース配置は GitHub Releases へ一本化する。
+- リリース配置は現行では GitHub Releases を正式配置元とする。
+- Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ付随システム候補として扱う。
+- Adlaire Pipeline は初期方針では Adlaire Git Repository 本体へ統合せず、将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は仕様確定後に判断する。
+- Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は現時点では未定とし、ユーザー承認なしに固定しない。
 - Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。
 - Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく将来候補として保留する。
 - Node.js runtime、npm ecosystem、npm 依存、外部フレームワーク、無承認外部ライブラリは採用しない。
 
 ## 6.1 リリース配置
 
-リリース配置は GitHub Releases へ一本化する。
+リリース配置は現行では GitHub Releases を正式配置元とする。
 
 Deno single binary、release notes、checksum、manifest は GitHub Releases 側へ配置する。リポジトリ内に、変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持してはならない。
 
 GitHub Releases の作成、成果物配置、release notes 公開、tag 作成は、リリース提案を提示し、ユーザー承認を得てから実行する。
+
+Adlaire Pipeline は、将来的に GitHub Releases に代わる、または GitHub Releases を補助配置へ移す `Adlaire Pipeline Release`、検証・ビルド等を担う `Adlaire Pipeline Runner`、成果物管理を担う `Adlaire Pipeline Artifact`、デプロイ反映を担う `Adlaire Pipeline Deploy`、実行履歴・監査を担う `Adlaire Pipeline Audit` の候補として扱う。ただし、現時点では付随システム候補であり、Adlaire Git Repository 本体へ統合しない。Adlaire Pipeline の技術選定は未定であり、本書の Deno / TypeScript / libSQL 採用方針を Adlaire Pipeline へ自動適用してはならない。
 
 ## 7. 完成判定
 
@@ -465,17 +470,18 @@ Phase 9 の完了条件は以下とする。
 
 基準バージョン: `v.2.10`
 
-Phase 10 は、リリース配置を GitHub Releases へ一本化するための整合フェーズである。
+Phase 10 は、現行リリース配置を GitHub Releases に整合しつつ、将来の Adlaire Pipeline 付随システム化を検討可能にするための整合フェーズである。
 
-Phase 10 では、Deno single binary、release notes、checksum、manifest の配置先を GitHub Releases に統一し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない方針を明確にする。
+Phase 10 では、Deno single binary、release notes、checksum、manifest の現行配置先を GitHub Releases とし、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない方針を明確にする。
 
-Phase 10 では、新しい内製デプロイメントシステム、GitHub Actions、外部デプロイフレームワーク、Container registry、Docker image 配布の正式化、Node.js / npm 前提ツールは対象外とする。
+Phase 10 では、Adlaire Pipeline を付随システム候補として定義し、将来的な機能群を `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。ただし、Adlaire Pipeline の実装、技術選定、本体統合、GitHub Releases 廃止、GitHub Actions、外部デプロイフレームワーク、Container registry、Docker image 配布の正式化、Node.js / npm 前提ツールは対象外とする。
 
 Phase 10 の完了条件は以下とする。
 
-- リリース配置が GitHub Releases へ一本化されている。
+- 現行リリース配置が GitHub Releases として説明できる。
 - 3類マスター仕様書、2類リリースポリシー、2類デプロイポリシー、マスター開発計画、README の記述が矛盾していない。
 - 標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Deno single binary を本番サーバへ反映する補助導線として説明できる。
+- Adlaire Pipeline がリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う将来機能群の候補であり、開発言語と技術選定が未定であることを説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
 ---

@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.2.18
+**計画バージョン**: v.2.21
 **現行フェーズ基準バージョン**: v.2.10
-**ステータス**: GitHub Releases リリース配置一本化方針整合
+**ステータス**: GitHub Releases 現行配置 / Adlaire Pipeline 付随システム移行候補方針整合
 
 ---
 
@@ -16,7 +16,7 @@
 
 実装は、1類ルールブック、2類ポリシー、3類マスター仕様書に従い、本書で定義したフェーズ計画に基づいて進める。
 
-Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。`v.2.10` の公開配布は保留し、Phase 10 の現行フェーズ基準バージョンは `v.2.10` とする。Phase 10 はリリース配置を GitHub Releases へ一本化し、Deno single binary、release notes、checksum、manifest の配置先と標準デプロイ雛形の責務を整合する。Phase 10 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
+Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。Phase 10 の現行フェーズ基準バージョンは `v.2.10` とする。Phase 10 は現行リリース配置を GitHub Releases に整合しつつ、Adlaire Pipeline をリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として定義する。Phase 10 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
 
 本計画における「マスター仕様完成」は、実装承認ではない。仕様完成後にソースコード実装、DB driver 実装、schema 変更、テスト変更、デプロイ実行を行う場合は、対象範囲と検証方法を提示し、別途ユーザー承認を得る。
 
@@ -60,9 +60,10 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 - Phase 6、Phase 16、Phase 26 のような 6系フェーズは、大規模なバグ修正とドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズとする。必要に応じて移行準備と検証強化も行う。6系フェーズ自体は安定版リリースフェーズとして扱わない。
 - Phase 9 は安定版判定フェーズとする。Phase 19、Phase 29 のような後続9系フェーズは補助的なリリース判定フェーズとし、ケースバイケースで安定版リリースフェーズになる場合と、ならない場合がある。
 - 後続9系フェーズを安定版リリースフェーズとして扱う場合は、マスター開発計画と2類ポリシーに明記し、ユーザー承認を得る。
-- リリース提案、リリース配置、リリース成果物、リリース自動化は `docs/policies/RELEASE_POLICY.md` に従う。リリース履歴の正本は GitHub Releases とし、リポジトリ内に変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
+- リリース提案、リリース配置、リリース成果物、リリース自動化は `docs/policies/RELEASE_POLICY.md` に従う。現行のリリース履歴の正本は GitHub Releases とし、リポジトリ内に変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` に従う。
-- Deno single binary 形式を正本成果物とする。Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、1 VPS 上の差し替え可能な system 側と host filesystem data 側を分離する同じ構成にする。shell script + SSH は binary または image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer を補助採用とする。リリース配置は GitHub Releases へ一本化する。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
+- Deno single binary 形式を正本成果物とする。Docker は、正本成果物である Deno single binary を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、1 VPS 上の差し替え可能な system 側と host filesystem data 側を分離する同じ構成にする。shell script + SSH は binary または image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer を補助採用とする。リリース配置は現行では GitHub Releases を正式配置元とする。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
+- Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ内製付随システム候補とする。初期方針では Adlaire Git Repository 本体へ統合せず、将来の統合、一部統合、付随維持、AdlaireGroup 共通基盤化は仕様確定後に判断する。Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は未定とし、別途ユーザー承認を得るまで固定しない。
 - 標準データベースは libSQL とし、唯一の標準DBとして完全確定する。SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは採用候補として扱わない。
 - ローカルに Deno が存在しない場合、実行系検証は停止ではなく VPS または承認済み検証サーバで実施する方針とする。
 - ドキュメント参照導線は `docs/DOCUMENT_INDEX.md` を索引として確認する。AdlaireGroup 共通ガバナンス雛形の正本は `docs/tpl-governance/` 配下で管理し、現行プロジェクト固有の正本とは分離する。
@@ -110,7 +111,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 | Phase 8.5 | v.1.9 | 完了 | システム分割。Adlaire Git Repository 本体とデータ領域の分割 |
 | Phase 8.7 | v.1.9 | 完了 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
 | Phase 9 | v.2.10 | 完了 | バグ修正ゼロ化、安定版判定、リリース準備 |
-| Phase 10 | v.2.10 | 着手 | リリース配置 GitHub Releases 一本化。Deno single binary、release notes、checksum、manifest の配置先と標準デプロイ雛形の責務を整合 |
+| Phase 10 | v.2.10 | 着手 | GitHub Releases 現行配置整合と Adlaire Pipeline 付随システム候補整理。Release、Runner、Artifact、Deploy、Audit の将来機能責務を整合 |
 
 上記は各フェーズの基準バージョンである。表の `Major` は安定版リリース系列であり、累積フェーズ番号ではない。初回安定版リリース前は `v.0.x` 系を維持する。
 
@@ -797,7 +798,7 @@ Phase 7 へ進む前に確認すべき残課題は以下とする。
 
 - 安定版リリース判定を行うかどうかのユーザー承認
 - リリースノートの整理
-- GitHub Releases へ一本化するリリース配置案の確認
+- GitHub Releases を現行配置元とするリリース配置案の確認
 - リポジトリ内に変更履歴ファイルを保持しない方針との整合確認
 - 既知制約、対象外機能、保留候補の明示
 - backup / restore 手順の最終確認
@@ -855,7 +856,7 @@ Phase 7 はユーザー承認に基づき、初回安定版リリース `v.1.8` 
 
 - Phase 6 までの成果に対する安定版リリース可否判定
 - リリースノートの整理
-- GitHub Releases へ一本化するリリース配置案の確認
+- GitHub Releases を現行配置元とするリリース配置案の確認
 - リポジトリ内に変更履歴ファイルを保持しない方針との整合確認
 - 既知制約、対象外機能、保留候補の明示
 - backup / restore 手順の最終確認
@@ -910,7 +911,7 @@ Phase 7 は、ユーザー承認に基づき初回安定版リリース `v.1.8` 
 
 Phase 7 初回安定版リリースでは、`deno.json` の内部バージョンを `1.8.0` へ更新し、正式表記 `v.1.8` と対応させる。トップページの Phase 表記は `Phase 7 / v.1.8` とする。
 
-リリース成果物の配置は GitHub Releases へ一本化し、リリースノート、manifest、checksum、Deno single binary を配置対象とする。
+リリース成果物の現行配置先は GitHub Releases とし、リリースノート、manifest、checksum、Deno single binary を配置対象とする。
 
 ---
 
@@ -1163,7 +1164,7 @@ Phase 9 はリリース実行を自動承認しない。tag 作成、GitHub Rele
 
 ### 14.6 成果物と配置
 
-安定版リリースを行う場合、成果物の配置は GitHub Releases へ一本化する。
+安定版リリースを行う場合、成果物の現行配置先は GitHub Releases とする。
 
 標準 Linux binary は ARM64 と x86_64 の2種類を対象とする。Deno single binary を正本成果物とし、Docker image は正本 binary を同梱する運用選択肢として扱う。
 
@@ -1190,14 +1191,14 @@ Phase 9 では、ユーザー承認に基づき、追加のバグ精査と修正
 - `deno.json` 内部バージョン `2.10.0` と正式表記 `v.2.10` の整合
 - ARM64 と x86_64 の Linux binary 成果物名の `v2.10` 整合
 - deploy / rollback の既定リリースバージョンと説明の `v.2.10` 整合
-- GitHub Releases へ一本化するリリース準備
+- GitHub Releases を現行配置元とするリリース準備
 - リポジトリ全体の整合性確認と整合性向上
 
 Phase 9 PR が GitHub の `main` へ取り込まれるまで、tag 作成、GitHub Releases 作成、成果物配置、release notes 公開は実施しない。
 
 ---
 
-## 15. Phase 10: リリース配置 GitHub Releases 一本化
+## 15. Phase 10: GitHub Releases 現行配置整合 / Adlaire Pipeline 付随システム候補整理
 
 ### 15.1 基準バージョン
 
@@ -1205,24 +1206,33 @@ Phase 10 の基準バージョンは `v.2.10` とする。
 
 ### 15.2 目的
 
-Phase 10 では、リリース配置を GitHub Releases へ一本化する。
+Phase 10 では、現行リリース配置を GitHub Releases として整合する。
 
 Deno single binary、release notes、checksum、manifest の配置先を GitHub Releases に統一し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない方針を明確にする。
 
 標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Deno single binary を本番サーバへ反映する補助導線として維持する。
 
+Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ内製付随システム候補として整理する。初期方針では Adlaire Git Repository 本体へ統合しない。将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は、Adlaire Pipeline の仕様確定後に別途判断する。
+
+Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は未定とする。Adlaire Git Repository 本体の Deno / TypeScript / libSQL 方針を、Adlaire Pipeline へ自動的に固定してはならない。
+
 ### 15.3 実装対象
 
-- GitHub Releases をリリース配置の一本化先として定義
+- GitHub Releases を現行リリース配置先として定義
 - Deno single binary、release notes、checksum、manifest の GitHub Releases 配置方針整理
 - リポジトリ内リリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum の不保持方針整理
 - `scripts/deploy/` 配下の標準デプロイ雛形との責務整理
+- Adlaire Pipeline を Release、Runner、Artifact、Deploy、Audit の将来機能群を持つ付随システム候補として整理
+- Adlaire Pipeline の技術選定未定、本体統合未定、GitHub Releases からの移行未定を明記
 - 3類マスター仕様書、2類ポリシー、マスター開発計画、README の整合性向上
 - Pull Request 説明の整合
 
 ### 15.4 対象外
 
-- 新しい内製デプロイメントシステム
+- Adlaire Pipeline の実装
+- Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤の採用決定
+- Adlaire Pipeline の Adlaire Git Repository 本体統合
+- GitHub Releases の廃止
 - database schema 変更
 - database migration 実行
 - database restore 自動実行
@@ -1243,7 +1253,8 @@ Deno single binary、release notes、checksum、manifest の配置先を GitHub 
 
 ### 15.5 検証範囲
 
-- GitHub Releases 一本化方針とリリースポリシー、デプロイポリシー、マスター開発計画、README の整合
+- GitHub Releases 現行配置方針とリリースポリシー、デプロイポリシー、マスター開発計画、README の整合
+- Adlaire Pipeline 付随システム候補方針とリリースポリシー、デプロイポリシー、マスター仕様書、README の整合
 - Deno single binary 正本成果物方針との整合
 - Docker image 配布を正式化しない方針との整合
 - Node.js runtime、npm ecosystem、外部デプロイフレームワークを導入していないこと
@@ -1253,11 +1264,11 @@ Deno single binary、release notes、checksum、manifest の配置先を GitHub 
 
 ### 15.6 完了条件
 
-- リリース配置が GitHub Releases へ一本化されている。
+- 現行リリース配置が GitHub Releases として説明できる。
 - Phase 10 の実装対象、対象外、検証範囲、完了条件が本書に定義されている。
 - Deno single binary、release notes、checksum、manifest の配置先が GitHub Releases として説明できる。
 - 標準デプロイ雛形 `scripts/deploy/` が GitHub Releases 配置済み成果物を本番サーバへ反映する補助導線として説明できる。
-- `v.2.10` の公開配布保留と GitHub Releases 一本化方針が矛盾していない。
+- Adlaire Pipeline が Release、Runner、Artifact、Deploy、Audit の将来機能群を持つ付随システム候補であり、実装、技術選定、本体統合、GitHub Releases 廃止が未定であることを説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
 ---
@@ -1332,7 +1343,7 @@ Deno single binary、release notes、checksum、manifest の配置先を GitHub 
 | v.0.35 | 全フェーズ共通 | - | フェーズ単位でドキュメント等の整合性向上を必須化し、リポジトリ整合性が取れていない状態で次フェーズへ進むことを禁止する方針を反映 |
 | v.0.36 | Phase 5 | v.0.6 | Web UI の情報設計、画面レイアウト、視覚表現、操作導線、アクセシビリティ、可読性を改善し、Phase 5 完了へ更新 |
 | v.0.37 | Phase 6 | v.0.7 | 安定版リリース準備として、既知バグ確認、ドキュメント整合性向上、移行・ロールバック前提整理、検証導線強化を行い、Phase 6 完了へ更新 |
-| v.0.38 | 全フェーズ共通 | - | リリース提案、GitHub Releases へ一本化するリリース配置、承認後のリリース自動化方針への参照を反映 |
+| v.0.38 | 全フェーズ共通 | - | 当時の方針として、リリース提案、GitHub Releases を配置先とするリリース配置、承認後のリリース自動化方針への参照を反映 |
 | v.0.39 | Phase 6 | v.0.7 | Document Index と AdlaireGroup 共通 `tpl-governance` 雛形を Phase 6 のドキュメント整合性向上として整理 |
 | v.0.40 | Phase 6 | v.0.7 | 本来の Phase 6 作業として、既知バグ確認、主要 workflow 検証、標準検証結果を再確認 |
 | v.0.41 | Phase 6 | v.0.7 | Phase 6 バグ精査で確認した認証、権限、Git Smart HTTP、SQLite 外部キー、入力エラー応答、重複応答、Registry 一覧漏えいを修正し、再発防止テストと標準検証結果を反映 |
@@ -1361,5 +1372,8 @@ Deno single binary、release notes、checksum、manifest の配置先を GitHub 
 | v.2.14 | Phase 10 / Phase 8 | v.2.14 / v.1.9 | Deno Deploy 環境対応を白紙化し、オンプレミス、VPS、専用サーバー前提へ再固定。標準採用を Deno 標準ライブラリ（`jsr:@std/*`）に限定し、libSQL は npm 依存を含まない外部依存例外、npm 互換 package と全 npm 依存は禁止として整合 |
 | v.2.15 | Phase 10 / 全フェーズ共通 | v.2.10 | JSR レジストリ公開ライブラリの採用条件として、Node.js ランタイム環境が存在しない前提で Deno runtime だけで動作することを必須化 |
 | v.2.16 | Phase 8 / Phase 10 | v.2.10 | libSQL を唯一の標準DBとして完全確定し、`@libsql/client` 等の問題をDB選定ではなく Deno runtime only の client / driver 依存経路是正問題として整理 |
-| v.2.17 | Phase 10 | v.2.10 | Phase 10 を GitHub Releases リリース配置一本化、標準デプロイ雛形との責務整理、新規デプロイメントシステム対象外整理へ改訂 |
+| v.2.17 | Phase 10 | v.2.10 | 当時の方針として、Phase 10 を GitHub Releases リリース配置、標準デプロイ雛形との責務整理、内製デプロイメントシステム対象外整理へ改訂 |
 | v.2.18 | Phase 10 | v.2.10 | npm 互換 libSQL client と native loader 前提の権限を撤去し、Deno runtime only の内製 HTTP/Hrana driver、検証導線、リリース前整合性を反映 |
+| v.2.19 | Phase 10 | v.2.10 | Phase 10 を GitHub Releases 現行配置、Adlaire Pipeline 付随システム候補、技術選定未定、本体統合未定へ改訂 |
+| v.2.20 | Phase 10 | v.2.10 | 内製CI/CD付随システム候補の正式名称を Adlaire Pipeline とし、`Adlaire Pipeline Release` と `Adlaire Pipeline Runner` の責務名を明確化 |
+| v.2.21 | Phase 10 | v.2.10 | Adlaire Pipeline の将来機能群として `Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を追加 |
