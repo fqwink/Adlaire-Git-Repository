@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.29
+**文書バージョン**: v.2.30
 **ステータス**: 本体マスター仕様改善
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Go + libSQL + Git
@@ -163,6 +163,23 @@ Adlaire Git Repository 本体が外部へ公開する契約は、公開 API、�
 
 本体公開契約を変更する場合は、破壊的変更かどうかを判定し、SDK マスター仕様書、マスター開発計画、検証導線、README を同一変更範囲で整合する。
 
+## 本体境界の判定表
+
+本体仕様を読む場合は、以下の境界で判断する。
+
+| 境界 | 本体が提供するもの | 本体が直接提供しないもの |
+|---|---|---|
+| 公開 API | 外部システムと SDK が利用する HTTP 接続面 | SDK public API の具体関数名 |
+| Git 接続 | clone、push、pull、fetch、branch、tag、Git Smart HTTP、SSH / HTTP 認証境界 | 外部CIの job 実行、GitHub Actions 互換 |
+| DB | libSQL 標準DB、Database Gateway、Repository 層、driver 層、schema、migration | 上位層からの driver 直接利用、SQLite 互換維持 |
+| Storage | Git bare repositories、config、secrets、logs、backups、manifests の data 側保存 | Docker named volume への data 正本委譲 |
+| 運用 | health、operations status、audit log、backup / rollback 境界 | 本番データ復元の無承認自動実行 |
+| リリース | Go single binary、GitHub Releases 現行配置、checksum、manifest | Adlaire Pipeline の実装、GitHub Releases 廃止 |
+| UI | 最小 UI または参照 UI | GitHub UI 互換、外部フレームワークUI |
+| SDK | SDK が利用できる公開 API と互換範囲 | SDK 実装、SDK 配布、SDK リリース |
+
+上記の右列にあるものは、本体仕様の現行実装対象として扱わない。扱う場合は、対象外または未確定から現行正本仕様へ移すための仕様改訂、マスター開発計画改訂、ユーザー承認を必要とする。
+
 ## System / Data 境界
 
 本体は、差し替え可能な system 側と保護対象の data 側を分離する。
@@ -174,6 +191,16 @@ data 側は、host filesystem を正本とし、libSQL database、移行元 SQLi
 system 側は再配置、再生成、差し替え可能である必要がある。data 側は system 側の差し替え、Docker container lifecycle、release 更新によって失われてはならない。
 
 system 側と data 側の境界は、デプロイ方式に依存させない。Go single binary 直実行、Adlaire Pipeline 経由の Docker image、将来の承認済み配置方式のいずれであっても、data 側の正本は host filesystem とし、保護対象データを system 側へ混在させてはならない。
+
+system / data 境界の判断では、以下を確認する。
+
+| 判断項目 | 基準 |
+|---|---|
+| 差し替え可能性 | system 側は release 更新、再配置、再生成で置換できる |
+| 保護対象 | data 側は release 更新、container lifecycle、検証実行で失われない |
+| バックアップ | data 側と現行 system release 参照を分けて保全できる |
+| ロールバック | system rollback と data rollback を分離できる |
+| 秘密情報 | secrets は system 側や公開成果物へ混在させない |
 
 ## 完成済み仕様と未確定仕様
 
@@ -208,6 +235,8 @@ system 側と data 側の境界は、デプロイ方式に依存させない。G
 - 仕様書、マスター開発計画、マスター実装機能候補リスト、README の参照関係が整合している。
 - 本体公開契約と本体内部実装の境界が分離され、SDK や外部システムが内部構造へ依存しないことを説明できる。
 - 過去フェーズの履歴、現行正本仕様、未確定仕様を混同せずに読める。
+- 本体境界の判定表により、公開 API、Git 接続、DB、Storage、運用、リリース、UI、SDK の責務を分けて説明できる。
+- system / data 境界の判断基準により、差し替え可能な system 側と保護対象 data 側を分けて説明できる。
 
 ---
 

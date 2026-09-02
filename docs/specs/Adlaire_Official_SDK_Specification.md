@@ -3,7 +3,7 @@
 **位置づけ**: 3類マスター仕様書
 **対象**: Adlaire 公式 SDK
 **ライセンス**: クローズドライセンス
-**文書バージョン**: v.2.29
+**文書バージョン**: v.2.30
 **ステータス**: SDK マスター仕様改善
 
 ---
@@ -92,6 +92,19 @@ SDK は、本体公開 API の安定した利用面を提供する。SDK の pub
 
 SDK が安定して扱う境界は、本体公開 API の request / response、認証方式、HTTP status、error response、resource 名、リリース済み互換範囲に限る。SDK は本体内部の Service、Repository、Database Gateway、driver、Git 操作処理、host filesystem path を互換対象にしてはならない。
 
+SDK が依存してよい契約と、依存してはならない内部構造は以下とする。
+
+| 分類 | 対象 | 扱い |
+|---|---|---|
+| 依存可 | 本体公開 API の resource、method、path | SDK の接続対象として扱う |
+| 依存可 | request / response body の公開 field | SDK の入出力型候補として扱う |
+| 依存可 | HTTP status、error response、認証方式 | SDK の error / result 判定候補として扱う |
+| 依存可 | release 済み公開互換範囲 | SDK 互換性の基準として扱う |
+| 依存不可 | 本体内部 Service、Repository、Database Gateway、driver | SDK public API の根拠にしない |
+| 依存不可 | DB schema、migration、SQL、Git コマンド内部組み立て | SDK から参照しない |
+| 依存不可 | host filesystem path、secrets、環境固有値 | SDK の戻り値、error、log に含めない |
+| 依存不可 | UI 実装、DOM構造、CSS class | SDK の互換対象にしない |
+
 ## 4.2 SDK が提供しないもの
 
 SDK は以下を提供しない。
@@ -149,6 +162,19 @@ SDK 生成では、以下を標準方針とする。
 | 禁止 | Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` |
 
 SDK の生成物は、browser から利用できることを前提とする。生成物が server runtime 固有 API に依存する場合は、SDK の標準成果物として扱わない。
+
+SDK 生成成果物の検証条件は以下とする。
+
+| 項目 | 検証条件 |
+|---|---|
+| Node.js 非依存 | Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を要求しない |
+| Browser 利用 | Vanilla JavaScript から読み込める形式である |
+| 秘密情報 | build 時または生成物内に token、password、環境固有値を含めない |
+| 公開境界 | 本体内部構造ではなく公開 API だけを呼び出す |
+| 型と出力 | TypeScript source と JavaScript output の対応を説明できる |
+| 検証導線 | SDK 実装開始時に、生成、lint 相当、最低限の利用検証を提案し、承認後に確定する |
+
+上記は生成成果物の検証条件であり、SDK 実装開始、具体的な生成コマンド、配布対象ファイルの承認ではない。
 
 ## 6.1 Client lifecycle 方針
 
@@ -315,6 +341,8 @@ SDK の配布方式は、現時点では現行リポジトリ配布とする。n
 | error 形式 | SDK 実装開始時に確定する |
 | client lifecycle の具体API | SDK 実装開始時に確定する |
 | SDK 互換性の具体バージョン連携 | SDK リリース開始時に確定する |
+| 生成成果物の具体ファイル名 | SDK 実装開始時に確定する |
+| 生成成果物の具体検証コマンド | SDK 実装開始時に確定する |
 | release 成果物 | SDK リリース開始時に確定する |
 | リポジトリ分離 | 未定 |
 
@@ -333,6 +361,8 @@ SDK の配布方式は、現時点では現行リポジトリ配布とする。n
 - Node.js / npm 禁止方針を緩和しないことを説明できる。
 - SDK の公開境界、提供する resource 候補、認証方針、error 方針を説明できる。
 - SDK の client lifecycle と互換性方針を説明できる。
+- SDK が依存してよい本体公開契約と、依存してはならない本体内部構造を説明できる。
+- SDK 生成成果物の検証条件を説明できる。
 - SDK が UI framework、Git command wrapper、database driver、GitHub API 互換 client ではないことを説明できる。
 - SDK 実装、public API 詳細、実装開始フェーズ、リリース実行が未確定範囲として分離されている。
 - SDK 仕様、本体仕様、Auris システム設計、マスター開発計画、README の参照関係が矛盾していない。
