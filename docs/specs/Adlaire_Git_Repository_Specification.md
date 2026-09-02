@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.19
-**ステータス**: GitHub Releases 現行配置 / Adlaire CI/CD 付随システム移行候補方針整合
+**文書バージョン**: v.2.20
+**ステータス**: GitHub Releases 現行配置 / Adlaire Pipeline 付随システム移行候補方針整合
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -71,9 +71,9 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。
 - Node.js runtime、npm ecosystem、npm 依存、外部フレームワーク、無承認外部ライブラリは採用しない。
 - リリース配置は現行では GitHub Releases を正式配置元とする。
-- Adlaire 内製 CI/CD は、リリース基盤システムと自動実行基盤システムを担う付随システム候補として扱う。
-- Adlaire CI/CD は初期方針では本体へ統合せず、将来の統合、一部統合、付随維持、AdlaireGroup 共通基盤化を仕様確定後に判断する。
-- Adlaire CI/CD の開発言語、ランタイム、データベース、依存関係、実行基盤は現時点では未定とする。
+- Adlaire Pipeline は、リリース基盤システムである `Adlaire Pipeline Release` と自動実行基盤システムである `Adlaire Pipeline Runner` を担う付随システム候補として扱う。
+- Adlaire Pipeline は初期方針では本体へ統合せず、将来の統合、一部統合、付随維持、AdlaireGroup 共通基盤化を仕様確定後に判断する。
+- Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は現時点では未定とする。
 
 ## マスター仕様完成条件
 
@@ -588,7 +588,7 @@ Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用
 
 リリース配置は現行では GitHub Releases を正式配置元とする。Deno single binary、release notes、checksum、manifest は GitHub Releases 側へ配置し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない。
 
-Adlaire CI/CD は、将来的にリリース基盤システムと自動実行基盤システムを担う内製付随システム候補とする。Adlaire CI/CD は Adlaire Git Repository 本体とは分離して検討し、統合可否は仕様確定後に判断する。Adlaire CI/CD の開発言語、ランタイム、データベース、依存関係、実行基盤は未定であり、本体の採用技術を自動的に適用しない。
+Adlaire Pipeline は、将来的に `Adlaire Pipeline Release` と `Adlaire Pipeline Runner` を担う内製付随システム候補とする。Adlaire Pipeline は Adlaire Git Repository 本体とは分離して検討し、統合可否は仕様確定後に判断する。Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は未定であり、本体の採用技術を自動的に適用しない。
 
 Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
@@ -784,13 +784,13 @@ Phase 9 で安定版リリースを行う場合、リリース履歴の正本は
 
 ### Phase 10 リリース配置仕様
 
-Phase 10 は、現行リリース配置を GitHub Releases に整合しつつ、将来の Adlaire CI/CD 付随システム化を検討可能にするための整合フェーズである。
+Phase 10 は、現行リリース配置を GitHub Releases に整合しつつ、将来の Adlaire Pipeline 付随システム化を検討可能にするための整合フェーズである。
 
 Adlaire Git Repository 本体は、Deno single binary、release notes、checksum、manifest の現行配置先を GitHub Releases とする。リポジトリ内には、変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
 
 標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Deno single binary を本番サーバへ反映する補助導線として維持する。デプロイ先、SSH 接続方式、binary 直実行または Docker 運用の選択、バックアップ、ロールバック、本番サーバ反映は、2類デプロイポリシーに従い、別途ユーザー承認を得る。
 
-Adlaire CI/CD は、リリース基盤システムと自動実行基盤システムを担う内製付随システム候補として扱う。Phase 10 では Adlaire CI/CD の概念と責務を整理するが、実装、技術選定、本体統合、GitHub Releases 廃止は行わない。
+Adlaire Pipeline は、リリース基盤システムである `Adlaire Pipeline Release` と自動実行基盤システムである `Adlaire Pipeline Runner` を担う内製付随システム候補として扱う。Phase 10 では Adlaire Pipeline の概念と責務を整理するが、実装、技術選定、本体統合、GitHub Releases 廃止は行わない。
 
 Phase 10 では、database schema 変更、database migration 実行、database restore 自動実行、Docker image 配布の正式化、Container registry、GitHub Actions、外部デプロイフレームワーク、Node.js / npm 前提ツール、本番データ復元の自動実行は対象外とする。
 

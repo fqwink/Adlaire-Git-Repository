@@ -5,8 +5,8 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.2.19
-**ステータス**: GitHub Releases 現行配置 / Adlaire CI/CD 付随システム移行候補方針整合
+**文書バージョン**: v.2.20
+**ステータス**: GitHub Releases 現行配置 / Adlaire Pipeline 付随システム移行候補方針整合
 
 ---
 
@@ -205,9 +205,9 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - data 側は host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
 - 標準運用基盤は self-host、VPS、専用サーバーを前提とする。
 - リリース配置は現行では GitHub Releases を正式配置元とする。
-- Adlaire 内製 CI/CD は、リリース基盤システムと自動実行基盤システムを担う付随システム候補として扱う。
-- Adlaire CI/CD は初期方針では Adlaire Git Repository 本体へ統合せず、将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は仕様確定後に判断する。
-- Adlaire CI/CD の開発言語、ランタイム、データベース、依存関係、実行基盤は現時点では未定とし、ユーザー承認なしに固定しない。
+- Adlaire Pipeline は、リリース基盤システムである `Adlaire Pipeline Release` と自動実行基盤システムである `Adlaire Pipeline Runner` を担う付随システム候補として扱う。
+- Adlaire Pipeline は初期方針では Adlaire Git Repository 本体へ統合せず、将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は仕様確定後に判断する。
+- Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は現時点では未定とし、ユーザー承認なしに固定しない。
 - Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。
 - Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく将来候補として保留する。
 - Node.js runtime、npm ecosystem、npm 依存、外部フレームワーク、無承認外部ライブラリは採用しない。
@@ -220,7 +220,7 @@ Deno single binary、release notes、checksum、manifest は GitHub Releases 側
 
 GitHub Releases の作成、成果物配置、release notes 公開、tag 作成は、リリース提案を提示し、ユーザー承認を得てから実行する。
 
-Adlaire CI/CD は、将来的に GitHub Releases に代わる、または GitHub Releases を補助配置へ移すリリース基盤候補として扱う。ただし、現時点では付随システム候補であり、Adlaire Git Repository 本体へ統合しない。Adlaire CI/CD の技術選定は未定であり、本書の Deno / TypeScript / libSQL 採用方針を Adlaire CI/CD へ自動適用してはならない。
+Adlaire Pipeline は、将来的に GitHub Releases に代わる、または GitHub Releases を補助配置へ移す `Adlaire Pipeline Release` と、検証・ビルド・デプロイ等を担う `Adlaire Pipeline Runner` の候補として扱う。ただし、現時点では付随システム候補であり、Adlaire Git Repository 本体へ統合しない。Adlaire Pipeline の技術選定は未定であり、本書の Deno / TypeScript / libSQL 採用方針を Adlaire Pipeline へ自動適用してはならない。
 
 ## 7. 完成判定
 
@@ -470,18 +470,18 @@ Phase 9 の完了条件は以下とする。
 
 基準バージョン: `v.2.10`
 
-Phase 10 は、現行リリース配置を GitHub Releases に整合しつつ、将来の Adlaire CI/CD 付随システム化を検討可能にするための整合フェーズである。
+Phase 10 は、現行リリース配置を GitHub Releases に整合しつつ、将来の Adlaire Pipeline 付随システム化を検討可能にするための整合フェーズである。
 
 Phase 10 では、Deno single binary、release notes、checksum、manifest の現行配置先を GitHub Releases とし、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない方針を明確にする。
 
-Phase 10 では、Adlaire CI/CD を内製 CI/CD 付随システム候補として定義する。ただし、Adlaire CI/CD の実装、技術選定、本体統合、GitHub Releases 廃止、GitHub Actions、外部デプロイフレームワーク、Container registry、Docker image 配布の正式化、Node.js / npm 前提ツールは対象外とする。
+Phase 10 では、Adlaire Pipeline を付随システム候補として定義し、リリース基盤システムの責務名を `Adlaire Pipeline Release`、自動実行基盤システムの責務名を `Adlaire Pipeline Runner` とする。ただし、Adlaire Pipeline の実装、技術選定、本体統合、GitHub Releases 廃止、GitHub Actions、外部デプロイフレームワーク、Container registry、Docker image 配布の正式化、Node.js / npm 前提ツールは対象外とする。
 
 Phase 10 の完了条件は以下とする。
 
 - 現行リリース配置が GitHub Releases として説明できる。
 - 3類マスター仕様書、2類リリースポリシー、2類デプロイポリシー、マスター開発計画、README の記述が矛盾していない。
 - 標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Deno single binary を本番サーバへ反映する補助導線として説明できる。
-- Adlaire CI/CD がリリース基盤システムと自動実行基盤システムを担う付随システム候補であり、開発言語と技術選定が未定であることを説明できる。
+- Adlaire Pipeline が `Adlaire Pipeline Release` と `Adlaire Pipeline Runner` を担う付随システム候補であり、開発言語と技術選定が未定であることを説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
 ---

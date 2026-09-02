@@ -2,7 +2,7 @@
 
 **位置づけ**: 2類責務別ポリシー
 **責務**: 安定版リリース、リリース対象、リリース禁止条件
-**ステータス**: GitHub Releases 現行配置 / Adlaire CI/CD 付随システム移行候補方針
+**ステータス**: GitHub Releases 現行配置 / Adlaire Pipeline 付随システム移行候補方針
 
 ---
 
@@ -69,9 +69,9 @@ Phase 9 は、ユーザー承認に基づく安定版判定フェーズとして
 
 GitHub Releases には、リリースごとの成果物、release notes、必要な checksum、manifest を配置する方針とする。
 
-Adlaire 内製 CI/CD は、リリース基盤システムと自動実行基盤システムを担う付随システムとして検討する。Adlaire CI/CD が仕様確定、実装、検証、安定運用できるまで、GitHub Releases は現行の正式リリース配置元として維持する。
+Adlaire Pipeline は、リリース基盤システムと自動実行基盤システムを担う付随システムとして検討する。リリース基盤システムの責務名は `Adlaire Pipeline Release`、自動実行基盤システムの責務名は `Adlaire Pipeline Runner` とする。Adlaire Pipeline が仕様確定、実装、検証、安定運用できるまで、GitHub Releases は現行の正式リリース配置元として維持する。
 
-将来的に Adlaire CI/CD をリリース成果物、release notes、checksum、manifest、release 履歴の正本にする場合は、リリース配置先の変更として扱い、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
+将来的に Adlaire Pipeline をリリース成果物、release notes、checksum、manifest、release 履歴の正本にする場合は、リリース配置先の変更として扱い、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
 Linux 向け Deno single binary を安定版リリース成果物とする場合は、ARM64 と x86_64 の2種類を標準配置対象とする。
 
@@ -89,7 +89,7 @@ Linux 向け Deno single binary を安定版リリース成果物とする場合
 
 本番サーバ環境へのデプロイ、デプロイ前後の検証、バックアップ、ロールバックは `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。リリース自動化とデプロイ自動化を同時に扱う場合も、承認対象、成果物、検証範囲、失敗時対応を分けて提示する。
 
-Adlaire CI/CD は、将来のリリース自動化とデプロイ自動化の正本候補である。ただし、初期方針では Adlaire Git Repository 本体へ統合せず、付随システムとして扱う。Adlaire CI/CD の開発言語、ランタイム、データベース、依存関係、実行基盤は未定とし、別途ユーザー承認を得るまで固定してはならない。
+Adlaire Pipeline は、将来のリリース自動化とデプロイ自動化の正本候補である。`Adlaire Pipeline Release` は release notes、checksum、manifest、成果物、release 履歴を扱う候補とし、`Adlaire Pipeline Runner` は検証、ビルド、デプロイ、バックアップ、実行履歴を扱う候補とする。ただし、初期方針では Adlaire Git Repository 本体へ統合せず、付随システムとして扱う。Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は未定とし、別途ユーザー承認を得るまで固定してはならない。
 
 ユーザー承認後に限り、以下を自動実行してよい。
 

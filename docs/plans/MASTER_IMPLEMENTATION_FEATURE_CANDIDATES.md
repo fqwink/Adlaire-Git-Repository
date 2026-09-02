@@ -2,8 +2,8 @@
 
 **位置づけ**: マスター実装機能候補リスト
 **対象**: Auris / Adlaire Git Repository
-**文書バージョン**: v.0.27
-**ステータス**: Phase 10 GitHub Releases 現行配置 / Adlaire CI/CD 付随システム候補整理
+**文書バージョン**: v.0.28
+**ステータス**: Phase 10 GitHub Releases 現行配置 / Adlaire Pipeline 付随システム候補整理
 
 ---
 
@@ -161,16 +161,16 @@ Phase 8 は DB 仕様完成フェーズとする。Phase 8.1 は本体整合性�
 | 4 | 安定化 | 優先 | バグ修正、検証強化、ドキュメント整合性を行うため |
 | 5 | 安定版判定 | 優先 | Phase 9 で安定版リリース可否を判断するため |
 
-### 3.9 Phase 10 推奨候補: GitHub Releases 現行配置 / Adlaire CI/CD 付随システム候補整理
+### 3.9 Phase 10 推奨候補: GitHub Releases 現行配置 / Adlaire Pipeline 付随システム候補整理
 
-Phase 10 推奨候補は、現行リリース配置を GitHub Releases として整合し、Adlaire CI/CD をリリース基盤システムと自動実行基盤システムを担う内製付随システム候補として整理することを優先する。
+Phase 10 推奨候補は、現行リリース配置を GitHub Releases として整合し、Adlaire Pipeline をリリース基盤システム `Adlaire Pipeline Release` と自動実行基盤システム `Adlaire Pipeline Runner` を担う内製付随システム候補として整理することを優先する。
 
 | 優先順 | 機能 | 種別 | 理由 |
 |---:|---|---|---|
 | 1 | GitHub Releases 現行配置整理 | 優先 | Deno single binary、release notes、checksum、manifest の現行配置先を明確にするため |
 | 2 | リポジトリ内リリース履歴ファイル廃止維持 | 優先 | 変更履歴、release notes 元資料、リリース配置記録、リリース用 manifest、checksum をリポジトリへ保持しない方針を維持するため |
 | 3 | 標準デプロイ雛形との責務整理 | 優先 | `scripts/deploy/` 配下の shell script を、GitHub Releases 配置済み成果物を本番サーバへ反映する補助導線として説明するため |
-| 4 | Adlaire CI/CD 付随システム候補整理 | 優先 | リリース基盤システムと自動実行基盤システムを担う内製付随システム候補として扱い、実装、技術選定、本体統合は未定とするため |
+| 4 | Adlaire Pipeline 付随システム候補整理 | 優先 | `Adlaire Pipeline Release` と `Adlaire Pipeline Runner` を担う内製付随システム候補として扱い、実装、技術選定、本体統合は未定とするため |
 | 5 | リポジトリ整合性確認 | 優先 | 1類、2類、3類、マスター開発計画、README、検証導線、PR説明から古いリリース配置方針を除去するため |
 
 ## 4. 保留候補
@@ -228,4 +228,5 @@ Phase 10 推奨候補は、現行リリース配置を GitHub Releases として
 | v.0.20 | Phase 8.7 安定化完了に合わせ、DB 標準化、Database Gateway 境界、system / data 分離、backup / rollback の安定化候補と正式仕様・計画の責務分離を維持 |
 | v.0.21 | Phase 9 安定版判定・リリース準備に合わせ、安定版判定候補と正式なリリース実行承認の責務分離を維持 |
 | v.0.26 | 当時の方針として、Phase 10 の推奨候補を GitHub Releases リリース配置、標準デプロイ雛形との責務整理、内製デプロイメントシステム対象外整理へ改訂 |
-| v.0.27 | Phase 10 の推奨候補を GitHub Releases 現行配置、Adlaire CI/CD 付随システム候補、技術選定未定、本体統合未定へ改訂 |
+| v.0.27 | Phase 10 の推奨候補を GitHub Releases 現行配置、Adlaire Pipeline 付随システム候補、技術選定未定、本体統合未定へ改訂 |
+| v.0.28 | Phase 10 の推奨候補で、内製CI/CD付随システム候補の名称を Adlaire Pipeline へ統一し、`Adlaire Pipeline Release` と `Adlaire Pipeline Runner` の構成名を明確化 |
