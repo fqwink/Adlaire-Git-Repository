@@ -4,7 +4,7 @@
 **対象**: Auris / Adlaire Git Repository 全体
 **ライセンス**: クローズドライセンス
 **標準言語 / ランタイム**: Go
-**文書バージョン**: v.2.25
+**文書バージョン**: v.2.26
 **ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
 
 ---
@@ -190,6 +190,7 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 | ドキュメント | 役割 |
 |---|---|
 | `docs/specs/Adlaire_Git_Repository_Specification.md` | Git ホスティング基盤本体の仕様 |
+| `docs/specs/Adlaire_Official_SDK_Specification.md` | Adlaire 公式 SDK の仕様 |
 
 ---
 

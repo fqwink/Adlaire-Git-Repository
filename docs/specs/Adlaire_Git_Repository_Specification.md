@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.25
+**文書バージョン**: v.2.26
 **ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Go + libSQL + Git
@@ -48,9 +48,10 @@
 
 1. 本書の「現行正本仕様」
 2. `docs/specs/Auris_System_Design.md`
-3. 本書の各機能仕様
-4. `docs/plans/DEVELOPMENT_PLAN.md`
-5. フェーズ別の実装履歴と検証記録
+3. `docs/specs/Adlaire_Official_SDK_Specification.md`
+4. 本書の各機能仕様
+5. `docs/plans/DEVELOPMENT_PLAN.md`
+6. フェーズ別の実装履歴と検証記録
 
 Phase 1 から Phase 7 までの記述は、実装済みまたはリリース済みの履歴を含む。履歴は削除せず保持するが、現行方針と異なる古い表記がある場合は、本書の現行正本仕様、`docs/specs/Auris_System_Design.md`、2類ポリシー、マスター開発計画を正とする。
 
@@ -124,6 +125,8 @@ UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換�
 Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
 
 Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
+
+Adlaire 公式 SDK の詳細仕様は、`docs/specs/Adlaire_Official_SDK_Specification.md` を正本とする。本書は Adlaire Git Repository 本体との接続境界、責務分離、ヘッドレスアーキテクチャ上の位置づけを管理し、SDK API 詳細、生成、配布、対象外範囲は SDK マスター仕様書へ集約する。
 
 GitHub Actions、GitHub Pages、汎用 Package registry、Container registry、Copilot、Advanced Security 等は、個別に採用可否、実装時期、必要性、外部依存、セキュリティ、ライセンスを評価し、ユーザー承認を得るまで実装対象に含めない。
 

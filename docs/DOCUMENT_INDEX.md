@@ -65,6 +65,7 @@
 |---|---|
 | `docs/specs/Auris_System_Design.md` | システム全体のマスター仕様書。機能範囲、アーキテクチャ、非機能要件、セキュリティ方針の基準 |
 | `docs/specs/Adlaire_Git_Repository_Specification.md` | Adlaire Git Repository 本体のマスター仕様書 |
+| `docs/specs/Adlaire_Official_SDK_Specification.md` | Adlaire 公式 SDK のマスター仕様書 |
 
 3類マスター仕様書は、現行正本仕様、フェーズ別履歴、保留候補、対象外範囲を分離して読む。Phase 7 初回安定版リリース `v.1.8` は履歴として保持し、Phase 8 / Phase 9 以降の仕様判断では、各マスター仕様書の現行正本仕様、2類ポリシー、マスター開発計画を基準にする。
 
