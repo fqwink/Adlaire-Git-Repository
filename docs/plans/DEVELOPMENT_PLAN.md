@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.2.22
+**計画バージョン**: v.2.27
 **現行フェーズ基準バージョン**: v.2.10
-**ステータス**: Go 採用方針 / Deno + TypeScript 終了方針整合
+**ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
 
 ---
 
@@ -16,7 +16,7 @@
 
 実装は、1類ルールブック、2類ポリシー、3類マスター仕様書に従い、本書で定義したフェーズ計画に基づいて進める。
 
-Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。Phase 10 の現行フェーズ基準バージョンは `v.2.10` とする。Phase 10 は現行リリース配置を GitHub Releases に整合しつつ、Adlaire Pipeline をリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として定義する。Phase 10 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
+Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。Phase 10 は現行リリース配置を GitHub Releases に整合しつつ、Adlaire Pipeline をリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として定義した履歴である。Phase 11 の現行フェーズ基準バージョンは `v.2.10` とする。Phase 11 は Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、SDK マスター仕様書、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理する。Phase 11 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
 
 本計画における「マスター仕様完成」は、実装承認ではない。仕様完成後にソースコード実装、DB driver 実装、schema 変更、テスト変更、デプロイ実行を行う場合は、対象範囲と検証方法を提示し、別途ユーザー承認を得る。
 
@@ -56,13 +56,15 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 - フェーズ途中で実装範囲を変更する場合は、本書、2類ポリシー、必要な3類マスター仕様書を更新し、ユーザー承認を得る。
 - 正式リリース対象は安定版のみとする。
 - 安定版リリースフェーズは、Phase 7、Phase 17、Phase 27 のような 7系フェーズをデフォルト方針とする。
-- Phase 5、Phase 15、Phase 25 のような 5系フェーズは、補助的なリリース判定、設計・デザイン改良、仕様整理のためのフェーズとし、安定版リリースフェーズとして扱わない。
+- Phase 5、Phase 15、Phase 25 のような 5系フェーズは、設計・デザイン改良、仕様整理のためのフェーズとし、安定版リリースフェーズまたは補助的なリリース判定フェーズとして扱わない。
 - Phase 6、Phase 16、Phase 26 のような 6系フェーズは、大規模なバグ修正とドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズとする。必要に応じて移行準備と検証強化も行う。6系フェーズ自体は安定版リリースフェーズとして扱わない。
-- Phase 9 は安定版判定フェーズとする。Phase 19、Phase 29 のような後続9系フェーズは補助的なリリース判定フェーズとし、ケースバイケースで安定版リリースフェーズになる場合と、ならない場合がある。
+- Phase 9 は安定版判定フェーズとする。Phase 19、Phase 29 のような後続9系フェーズは、自動的な安定版判定フェーズまたは補助的なリリース判定フェーズとして扱わない。後続9系フェーズで安定版判定を行う場合は、マスター開発計画と2類ポリシーに明記し、ユーザー承認を得る。
 - 後続9系フェーズを安定版リリースフェーズとして扱う場合は、マスター開発計画と2類ポリシーに明記し、ユーザー承認を得る。
 - リリース提案、リリース配置、リリース成果物、リリース自動化は `docs/policies/RELEASE_POLICY.md` に従う。現行のリリース履歴の正本は GitHub Releases とし、リポジトリ内に変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` に従う。
-- Adlaire Git Repository 本体は Go を標準開発言語とし、Go single binary 形式を正本成果物とする。Deno + TypeScript は本体開発言語として終了方針とする。Docker は、正本成果物である Go single binary を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、1 VPS 上の差し替え可能な system 側と host filesystem data 側を分離する同じ構成にする。shell script + SSH は binary または image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer を補助採用とする。リリース配置は現行では GitHub Releases を正式配置元とする。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
+- Adlaire Git Repository 本体は Go を標準開発言語とし、Go single binary 形式を正本成果物とする。Deno + TypeScript は本体開発言語として終了方針とする。Docker は、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。1 VPS 上の差し替え可能な system 側と host filesystem data 側を分離する構成にする。shell script + SSH は binary 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer を補助採用とする。リリース配置は現行では GitHub Releases を正式配置元とする。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
+- Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+- Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
 - Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ内製付随システム候補とする。初期方針では Adlaire Git Repository 本体へ統合せず、将来の統合、一部統合、付随維持、AdlaireGroup 共通基盤化は仕様確定後に判断する。Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は未定とし、別途ユーザー承認を得るまで固定しない。
 - 標準データベースは libSQL とし、唯一の標準DBとして完全確定する。SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは採用候補として扱わない。
 - ローカルに Deno が存在しない場合、実行系検証は停止ではなく VPS または承認済み検証サーバで実施する方針とする。
@@ -78,7 +80,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 - リポジトリ整合性確認では、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、マスター実装機能候補リスト、README、実装、テスト、検証導線、バージョン表記、Pull Request 説明の矛盾や古い表記を確認する。
 - リポジトリ整合性確認で矛盾が見つかった場合、補正が完了するまでフェーズを完了扱いにしてはならない。
 - リポジトリ整合性が取れていない状態で、次のフェーズに進んではならない。
-- Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用サーバーを前提とする。Docker 使用時も非 Docker の binary 直実行時も、保護対象 data 側は host filesystem を正本として system 側から分離する。
+- Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用サーバーを前提とする。保護対象 data 側は host filesystem を正本として system 側から分離する。Docker は Adlaire Pipeline 経由で扱う。
 - Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Node.js / npm 非依存方針との整合を確認する。
 - Turso Cloud 等のクラウドDBサービスを検討する場合も、Database Gateway と内製 `libsql` driver の接続先差し替えとして扱い、アプリケーション上位層へサービス固有APIやサービス名を露出してはならない。
 
@@ -94,7 +96,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 
 初回安定版リリース前は、Phase が進んでも `Major` を `0` のまま維持する。初回安定版リリースとして承認されたフェーズで、`Major` を `1` へ進める。
 
-安定版リリースを表す `Major` 更新は、7系フェーズをデフォルトとする。ただし、Phase 9 はユーザー承認に基づく安定版判定フェーズとして扱う。Phase 19、Phase 29 のような後続9系フェーズは補助的にケースバイケースで扱う。5系フェーズと6系フェーズでは `Major` を更新しない。
+安定版リリースを表す `Major` 更新は、7系フェーズをデフォルトとする。ただし、Phase 9 はユーザー承認に基づく安定版判定フェーズとして扱う。後続9系フェーズは自動的な安定版判定フェーズまたは補助的なリリース判定フェーズとして扱わず、安定版判定を行う場合はマスター開発計画と2類ポリシーに明記し、ユーザー承認を得る。5系フェーズと6系フェーズでは `Major` を更新しない。
 
 | フェーズ | 基準バージョン | ステータス | 扱い |
 |---|---:|---|---|
@@ -111,8 +113,8 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 | Phase 8.5 | v.1.9 | 完了 | システム分割。Adlaire Git Repository 本体とデータ領域の分割 |
 | Phase 8.7 | v.1.9 | 完了 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
 | Phase 9 | v.2.10 | 完了 | バグ修正ゼロ化、安定版判定、リリース準備 |
-| Phase 10 | v.2.10 | 着手 | GitHub Releases 現行配置整合、Adlaire Pipeline 付随システム候補整理、Go 採用方針整合 |
-| Phase 11 | v.2.10 | 未着手 | Go 移行準備。固定採用バージョン、実装構成、検証導線、旧 Deno + TypeScript 資産の扱いを整理 |
+| Phase 10 | v.2.10 | 完了 | GitHub Releases 現行配置整合、Adlaire Pipeline 付随システム候補整理、Go 採用方針整合 |
+| Phase 11 | v.2.10 | 着手 | Go 移行準備。固定採用バージョン、実装構成、検証導線、旧 Deno + TypeScript 資産、ヘッドレスアーキテクチャ方針、SDK マスター仕様書、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理 |
 
 上記は各フェーズの基準バージョンである。表の `Major` は安定版リリース系列であり、累積フェーズ番号ではない。初回安定版リリース前は `v.0.x` 系を維持する。
 
@@ -138,9 +140,9 @@ v.0.8 -> v.1.8
 
 採用バージョンの基本方針は、各技術の **最新の安定版** とする。
 
-Deno、SQLite、libSQL、Git、Deno 標準ライブラリ、Deno で利用する外部コマンド、例外採用する外部ライブラリ、その他ユーザー承認を得て採用する技術は、採用または更新の時点で公式情報を確認し、最新の安定版を採用候補とする。
+Go、SQLite、libSQL、Git、Go で利用する外部コマンド、Deno + TypeScript 旧資産確認に必要な Deno 標準ライブラリ、例外採用する外部ライブラリ、その他ユーザー承認を得て採用する技術は、採用または更新の時点で公式情報を確認し、最新の安定版を採用候補とする。
 
-Go single binary 形式を正本成果物とする。Docker は、正本成果物である Go single binary を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として分離する。
+Go single binary 形式を正本成果物とする。Docker は、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として分離する。
 
 Go 標準ライブラリを優先する。Go module、JSR レジストリの公開ライブラリ、その他外部ライブラリは、必要最小限の外部ライブラリ例外採用として扱い、採用する場合はユーザー承認を得る。
 
@@ -158,14 +160,15 @@ Adlaire Git Repository 本体では、Deno + TypeScript は開発言語として
 
 | 技術 | 固定採用バージョン | 扱い |
 |---|---:|---|
-| Deno | `v2.9.5` | 標準ランタイム |
-| TypeScript | `v6.0.3` | 6系の最新安定版として採用 |
+| Go | 未確定 | 標準開発言語。固定採用バージョンは別途承認を得る |
+| Deno | `v2.9.5` | 旧標準ランタイム。本体開発言語として終了方針。既存資産確認用 |
+| TypeScript | `v6.0.3` | 旧標準言語。本体開発言語として終了方針。既存資産確認用 |
 | SQLite | `v3.53.4` | 既存データ移行元確認用。互換維持・最小検証用として扱わない |
 | libSQL | `libsql-server v0.24.32` | 標準データベース |
 | Git | `v2.55.0` 系 | Git 操作用外部コマンド |
 エージェントは、候補提示、比較、調査、リスク整理、推奨案の提示を行ってよい。ただし、ユーザーの明示承認なしに採用決定、バージョン固定、方針確定、実装反映を行ってはならない。
 
-上記にない技術、Deno 標準ライブラリの個別モジュール、Deno で利用する外部コマンド、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定として扱う。
+上記にない技術、Go で利用する外部コマンド、Deno + TypeScript 旧資産確認に必要な Deno 標準ライブラリの個別モジュール、例外採用する外部ライブラリの固定バージョンは、個別にユーザー承認を得るまで未確定として扱う。
 
 採用または更新の時点で公式情報から最新の安定版を確認し、候補、理由、影響範囲、検証方法を提示し、ユーザー承認を得てから本書、2類ポリシー、3類マスター仕様書、実装設定へ反映する。
 
@@ -675,11 +678,11 @@ Phase 5 の基準バージョンは `v.0.6` とする。Phase 5 は安定版リ�
 
 ### 10.2 目的
 
-Phase 1 から Phase 4 までの成果を対象に、補助的なリリース判定を行う。あわせて、Web UI、画面デザイン、画面レイアウト、視覚表現、操作導線、アクセシビリティの改良・改修方針を整理する。
+Phase 1 から Phase 4 までの成果を対象に、Web UI、画面デザイン、画面レイアウト、視覚表現、操作導線、アクセシビリティの改良・改修方針を整理する。
 
 ### 10.3 リリース方針
 
-Phase 5 は補助的なリリース判定フェーズである。ただし、Phase 5 は安定版リリースフェーズではない。Phase 5 では例外なく安定版リリース方針を持たない。
+Phase 5 は設計・デザイン改良、仕様整理のためのフェーズである。Phase 5 は安定版リリースフェーズまたは補助的なリリース判定フェーズではない。Phase 5 では例外なく安定版リリース方針を持たない。
 
 ### 10.4 デザイン関連改良・改修方針
 
@@ -937,8 +940,8 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 - libSQL 標準DB仕様の確定
 - `DB_DRIVER=libsql` を標準 driver とする接続仕様
 - `DB_URL` と `DB_AUTH_TOKEN` による接続先・認証情報の扱い
-- Node.js runtime が存在しない前提で Deno runtime だけで動作する libSQL 外部依存例外と内製 libSQL driver 境界
-- `@libsql/client` 等の npm 互換 client を撤去し、Deno runtime only の内製 HTTP/Hrana driver へ置換する方針
+- Node.js runtime と npm ecosystem が存在しない前提で、Go runtime と Go 標準ライブラリを中心に動作する libSQL 外部依存例外と内製 libSQL driver 境界
+- `@libsql/client` 等の npm 互換 client を撤去し、Go runtime 前提の内製 HTTP/Hrana driver へ置換する方針
 - Database Gateway、Repository 層、driver 層の責務境界
 - libSQL 前提の schema、migration、seed 管理方針
 - 既存データ移行元確認用 SQLite の取扱境界
@@ -963,7 +966,7 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 ### 13.4.2 必須検証
 
 - 標準 driver が `DB_DRIVER=libsql` として定義されていること
-- Node.js runtime が存在しない前提で Deno runtime だけで動作する libSQL driver 境界が内製 `LibsqlDriver` の内部に閉じていること
+- Node.js runtime と npm ecosystem が存在しない前提で、Go runtime と Go 標準ライブラリを中心に動作する libSQL driver 境界が内製 `LibsqlDriver` の内部に閉じていること
 - SQLite が既存データ移行元確認用に限定されていること
 - Database Gateway、Repository 層、driver 層の責務境界が仕様書と矛盾していないこと
 - DB driver 固有 API が上位層へ漏れない構成になっていること
@@ -1018,7 +1021,7 @@ Adlaire Git Repository 本体とデータ領域を分割する。本体は差し
 #### 13.6.1 実施対象
 
 - system 側と data 側の責務整理
-- Docker 運用と binary 直実行で共通する data 側構成の整理
+- Docker を Adlaire Pipeline 経由で扱う場合の data 側保護方針の整理
 - host filesystem を data 正本とする運用方針の確認
 - Docker named volume を data 正本にしない禁止事項の確認
 - deploy、backup、verify、rollback の対象整理
@@ -1026,8 +1029,8 @@ Adlaire Git Repository 本体とデータ領域を分割する。本体は差し
 #### 13.6.2 system 側
 
 - Go single binary
-- Docker image
-- Docker container
+- Adlaire Pipeline 経由で扱う Docker image
+- Adlaire Pipeline 経由で扱う Docker container
 - docker compose
 - systemd service または同等の起動管理定義
 - deploy script
@@ -1046,7 +1049,7 @@ Adlaire Git Repository 本体とデータ領域を分割する。本体は差し
 #### 13.6.4 完了条件
 
 - system 側と data 側の保存対象、責務、バックアップ対象を説明できる。
-- Docker 運用と binary 直実行で同じ data 側構成を維持できる。
+- Docker を扱う場合も data 側を Docker named volume へ丸投げしないことを説明できる。
 - data 側が container lifecycle に依存していない。
 - デプロイポリシー、技術要件ポリシー、3類マスター仕様書と矛盾していない。
 
@@ -1169,7 +1172,7 @@ Phase 9 はリリース実行を自動承認しない。tag 作成、GitHub Rele
 
 安定版リリースを行う場合、成果物の現行配置先は GitHub Releases とする。
 
-標準 Linux binary は ARM64 と x86_64 の2種類を対象とする。Go single binary を正本成果物とし、Docker image は正本 binary を同梱する運用選択肢として扱う。
+標準 Linux binary は ARM64 と x86_64 の2種類を対象とする。Go single binary を正本成果物とし、Docker image は Adlaire Pipeline 経由で扱う対象とする。
 
 リリース履歴の正本は GitHub Releases とする。リポジトリ内に変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
 
@@ -1179,7 +1182,7 @@ Phase 9 はリリース実行を自動承認しない。tag 作成、GitHub Rele
 - リリース禁止条件に該当しないことを説明できる。
 - 安定版リリースを行う場合は、別途ユーザー承認を得ている。
 - GitHub Releases をリリース履歴の正本とする方針に従っている。
-- Go single binary、必要な checksum、manifest、release notes、Docker image の扱いを説明できる。
+- Go single binary、必要な checksum、manifest、release notes、Docker image の Adlaire Pipeline 経由方針を説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
 ### 14.8 Phase 9 実施範囲
@@ -1259,7 +1262,7 @@ Adlaire Pipeline の開発言語は Go 採用方針とする。データベー�
 - GitHub Releases 現行配置方針とリリースポリシー、デプロイポリシー、マスター開発計画、README の整合
 - Adlaire Pipeline 付随システム候補方針とリリースポリシー、デプロイポリシー、マスター仕様書、README の整合
 - Go single binary 正本成果物方針との整合
-- Docker image 配布を正式化しない方針との整合
+- Docker image は Adlaire Pipeline 経由で扱う方針との整合
 - Node.js runtime、npm ecosystem、外部デプロイフレームワークを導入していないこと
 - system 側と data 側の分離を破らないこと
 - `scripts/deploy/` 配下の標準デプロイ雛形との関係が説明できること
@@ -1293,17 +1296,29 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 - Go 実装基盤のディレクトリ構成案
 - Go 固定採用バージョン候補の提示
 - Go single binary の Linux ARM64 / x86_64 build 方針
+- ヘッドレスアーキテクチャ設計思想と Adlaire 公式 SDK 接続方針
+- Adlaire 公式 SDK マスター仕様書の新設
+- SDK の TypeScript 実装 / JavaScript 生成方針
+- SDK の `sdk/` 配置、Deno runtime 生成、現行リポジトリ配布、独立リリース方針
+- Docker image を Adlaire Pipeline 経由で扱う方針
 - Go 標準ライブラリ優先、外部ライブラリ必要最小限、例外採用承認必須方針の確認
 - libSQL 接続境界を Database Gateway と driver 層に閉じ込める方針の維持
 - Deno + TypeScript 旧資産の扱い、撤去順序、履歴保持範囲の整理
 - 標準検証導線を Go 方針へ移行する計画
-- 1類ルールブック、2類ポリシー、3類マスター仕様書、README、共通雛形の整合性確認
+- ヘッドレスアーキテクチャ設計思想、UI 差し替え可能方針、静的フロントエンド、モバイルアプリ等のクライアント拡張方針、Adlaire 公式 SDK 接続方針
+- Adlaire 公式 SDK の TypeScript 実装 / JavaScript 生成方針
+- Docker を Adlaire Pipeline 経由で生成、管理、配布、利用する方針
+- 1類ルールブック、2類ポリシー、3類マスター仕様書、README の整合性確認
 
 ### 16.4 対象外
 
 - Go 実装着手
 - Go 固定採用バージョンの確定
 - Go module または外部ライブラリの採用
+- Adlaire 公式 SDK の実装
+- SDK API 詳細仕様の確定
+- SDK 実装開始フェーズの確定
+- Docker image の本体直接標準運用化
 - 既存 Deno + TypeScript 実装の削除
 - `deno.json`、`deno.lock`、既存検証スクリプトの撤去
 - database schema 変更
@@ -1315,7 +1330,10 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 - Go 移行の実装対象、対象外、検証範囲を説明できる。
 - Go 固定採用バージョンと外部依存の承認が別工程で必要であることを説明できる。
 - Deno + TypeScript 本体終了方針と、AdlaireGroup 共通の Deno + TypeScript / Go 単体2系統選択方針が矛盾していない。
-- Go single binary 正本成果物方針、GitHub Releases 現行配置、system / data 分離、libSQL 標準DB方針が矛盾していない。
+- Go single binary 正本成果物方針、GitHub Releases 現行配置、system / data 分離、libSQL 標準DB方針、ヘッドレスアーキテクチャ設計思想、Docker の Adlaire Pipeline 経由方針が矛盾していない。
+- UI が Adlaire Git Repository 本体に固定されず、特定 UI 非依存、静的フロントエンド、モバイルアプリ等のクライアント拡張、Adlaire 公式 SDK 接続方針を説明できる。
+- Adlaire 公式 SDK マスター仕様書を3類マスター仕様書として参照できる。
+- Adlaire 公式 SDK の TypeScript 実装、JavaScript 生成、`sdk/` 配置、本体非同梱、独立リリース方針を説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
 ---
@@ -1425,3 +1443,8 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 | v.2.20 | Phase 10 | v.2.10 | 内製CI/CD付随システム候補の正式名称を Adlaire Pipeline とし、`Adlaire Pipeline Release` と `Adlaire Pipeline Runner` の責務名を明確化 |
 | v.2.21 | Phase 10 | v.2.10 | Adlaire Pipeline の将来機能群として `Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を追加 |
 | v.2.22 | 全フェーズ共通 / Phase 10 | v.2.10 | Adlaire Git Repository 本体と Adlaire Pipeline の Go 採用方針、Deno + TypeScript 本体終了方針、AdlaireGroup 共通の Deno + TypeScript / Go 単体2系統選択方針、外部依存最小・例外承認継続方針を反映 |
+| v.2.23 | 全フェーズ共通 / Phase 11 | v.2.10 | Adlaire Git Repository 固有のヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、Docker を Adlaire Pipeline 経由で扱う方針を反映 |
+| v.2.24 | 全フェーズ共通 / Phase 11 | v.2.10 | ヘッドレスアーキテクチャの目的を静的フロントエンド、モバイルアプリ等のクライアント拡張として明確化し、Adlaire 公式 SDK の TypeScript 実装 / JavaScript 生成方針を反映 |
+| v.2.25 | 全フェーズ共通 / Phase 11 | v.2.10 | Adlaire 公式 SDK の `sdk/` 配置、Deno runtime 生成、現行リポジトリ配布、リポジトリ分離未定、本体非同梱、独立リリース方針を反映 |
+| v.2.26 | 全フェーズ共通 / Phase 11 | v.2.10 | Adlaire 公式 SDK マスター仕様書を3類マスター仕様書として新設し、SDK 詳細仕様の正本を分離 |
+| v.2.27 | 全フェーズ共通 / Phase 11 | v.2.10 | 本体 libSQL driver 方針を Go runtime 前提へ整合し、5系フェーズと後続9系フェーズの補助的リリース判定表記を現行方針へ修正 |

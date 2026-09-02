@@ -2,7 +2,7 @@
 
 **位置づけ**: 2類責務別ポリシー
 **責務**: 採用技術、ランタイム、依存関係、固定採用バージョン、技術承認
-**ステータス**: Go 採用方針 / Deno + TypeScript 終了方針整合
+**ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
 
 ---
 
@@ -21,9 +21,10 @@
 - AdlaireGroup 関連プロジェクト、プロダクトでは、Deno + TypeScript と Go 単体の2系統を有効な開発言語選択肢として扱う。各プロジェクトは、成果物形式、運用要件、保守性、依存関係、セキュリティ要件に基づいて個別に選定する。
 - Node.js ランタイムは採用禁止とする。
 - Go single binary 形式を正本成果物とする。
-- Docker は、正本成果物である Go single binary を Docker image に同梱して実行する運用選択肢の一つとする。
-- Docker 使用時も非 Docker の binary 直実行時も、同じ system / data 分離構成にする。
+- Docker は、Adlaire Git Repository 本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。
 - libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として分離する。
+- Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+- Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とする。SDK 配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは、2類ポリシーとマスター開発計画に従う。SDK は Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` の禁止方針を緩和しない。
 - フレームワークは、内製したもの以外の採用を禁止する。
 - Go 標準ライブラリを優先する。
 - Deno + TypeScript を採用する別プロジェクトでは、Deno 標準ライブラリ（`jsr:@std/*`）を優先する。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
@@ -66,7 +67,7 @@ libSQL に接続する実装は、内製 `LibsqlDriver` と Database Gateway の
 
 `@libsql/client` 等の npm 互換 libSQL client は採用禁止とする。既存実装または設定に npm 由来の libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱い、別途承認を得て撤去または置換する。
 
-標準 libSQL driver は、Deno runtime の `fetch` だけで libSQL server の HTTP/Hrana endpoint に接続する内製 driver とする。FFI、native loader、platform-specific package、`--allow-ffi`、`--allow-sys` を前提にする外部 libSQL client は標準採用しない。
+標準 libSQL driver は、Go runtime と Go 標準ライブラリを前提に libSQL server の HTTP/Hrana endpoint へ接続する内製 driver とする。Node.js runtime、npm ecosystem、FFI、native loader、platform-specific package を前提にする外部 libSQL client は標準採用しない。
 
 ## 3.2 レジストリ方針
 
@@ -108,9 +109,7 @@ Go single binary 形式を、本プロジェクトにおける正本成果物と
 
 AdlaireGroup 共通方針では、プロジェクトごとに Go single binary または Deno single binary を選定できる。ただし、Adlaire Git Repository 本体と Adlaire Pipeline は Go single binary 方針とする。
 
-Docker は正本成果物ではなく、Go single binary を Docker image に同梱して実行する運用選択肢の一つである。
-
-Docker を使用する場合も、Docker を使用せず Go single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Go single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。
+Docker は、Adlaire Git Repository 本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。Go single binary、起動管理定義は差し替え可能な system 側として扱う。
 
 Go single binary 形式、Docker 形式のいずれでも、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
 
@@ -118,19 +117,13 @@ Go single binary 形式、Docker 形式のいずれでも、Node.js runtime、np
 
 - Go single binary
 - host OS 上での Go single binary 直実行
-- `docker run`
-- `docker compose`
-- Dockerfile
-- Docker image
-- Docker container
-- Go single binary を含む Docker image
 - 1 VPS 上での system 側と host filesystem data 側の同居構成
 - Go fmt / test / build
 - Go single binary の Linux ARM64 build
 - Go single binary の Linux x86_64 build
 - Go single binary の release build
 
-検証・ビルド用の標準 Docker image は、Go 固定採用バージョン承認後に別途定義する。本番用 Docker image は、承認済み Go single binary を同梱する最小 image とし、実行時に Node.js / npm ecosystem を含めてはならない。
+Docker image、Dockerfile、`docker run`、`docker compose`、Docker container は、Adlaire Pipeline 経由で扱う対象とし、Adlaire Pipeline の仕様確定、実装、検証、ユーザー承認が完了するまで本体の直接標準運用対象にしない。
 
 禁止対象には、最低限以下を含む。
 
@@ -140,15 +133,15 @@ Go single binary 形式、Docker 形式のいずれでも、Node.js runtime、np
 - Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を含む Docker image
 - 外部 Docker デプロイフレームワーク
 
-Docker Desktop は本番サーバ標準構成として採用しない。Docker 運用を選択する場合、本番サーバでは Docker Engine と Docker Compose または同等の Docker 実行基盤を用いる。
+Docker Desktop は本番サーバ標準構成として採用しない。Docker image、Dockerfile、Docker Engine、Docker Compose、Docker 実行基盤を扱う場合は、Adlaire Pipeline 経由の対象として別途仕様化し、ユーザー承認を得る。
 
-検証、テスト、ビルド、Go single binary 生成は、ホストOS上の固定採用バージョン Go、または承認済み固定 Go Docker image のいずれかで実行できる。
+検証、テスト、ビルド、Go single binary 生成は、ホストOS上の固定採用バージョン Go で実行する。Docker を用いる検証、テスト、ビルド、image 生成は、Adlaire Pipeline 経由の対象として扱う。
 
-本番とデプロイは、Go single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、事前バックアップ、health check、rollback 手順を基本構成とする。デプロイ、検証、バックアップ、ロールバックの詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
+本番とデプロイは、Go single binary 正本成果物、host filesystem data 領域、事前バックアップ、health check、rollback 手順を基本構成とする。Docker image を扱う場合は Adlaire Pipeline 経由とする。デプロイ、検証、バックアップ、ロールバックの詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-system 側と data 側を分離する。Go single binary、Docker image、container、起動管理定義は差し替え可能な system 側とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として扱う。Docker 運用を選択する場合、data 側は原則として host bind mount で container へ接続し、Docker named volume へ丸投げしてはならない。
+system 側と data 側を分離する。Go single binary、起動管理定義は差し替え可能な system 側とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として扱う。Docker を扱う場合も、data 側を Docker named volume へ丸投げしてはならない。
 
-標準アプリケーション設定では、`ADLAIRE_APP_ROOT` から `ADLAIRE_SHARED_DIR` と `ADLAIRE_DATA_DIR` を導き、アプリケーションの標準 `DB_URL` は `http://127.0.0.1:8081` の libSQL server endpoint とする。libSQL database の保護対象ファイルは `shared/data/database/adlaire.libsql`、Git bare repositories は `shared/data/repositories` に配置する。Docker 使用時も binary 直実行時も、この data 側パスを共通化する。
+標準アプリケーション設定では、`ADLAIRE_APP_ROOT` から `ADLAIRE_SHARED_DIR` と `ADLAIRE_DATA_DIR` を導き、アプリケーションの標準 `DB_URL` は `http://127.0.0.1:8081` の libSQL server endpoint とする。libSQL database の保護対象ファイルは `shared/data/database/adlaire.libsql`、Git bare repositories は `shared/data/repositories` に配置する。
 
 ## 4. データベース方針
 
@@ -168,7 +161,7 @@ SQLite または libSQL を直接触る設計は禁止する。アプリケー�
 
 Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用サーバーを前提とする。
 
-最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Docker 使用時も非 Docker の binary 直実行時も、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を host filesystem 基準で直接確認できることを、本体運用基盤の前提条件とする。
+最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を host filesystem 基準で直接確認できることを、本体運用基盤の前提条件とする。
 
 Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
