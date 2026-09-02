@@ -129,7 +129,8 @@
 - 開発言語、ランタイム、データベース、Git、外部コマンド、外部ライブラリ、フレームワーク、採用バージョン、固定バージョン、更新方針は、ユーザーが決定する。
 - エージェントは候補提示、比較、調査、リスク整理、推奨案の提示にとどめ、ユーザー承認なしに採用決定、バージョン固定、方針確定、実装反映をしてはならない。
 - Adlaire Git Repository 本体は、Go を標準開発言語とし、Go single binary を正本成果物とする。Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする。Adlaire Pipeline は Go 採用方針とする。AdlaireGroup 関連プロジェクト、プロダクトでは、Deno + TypeScript と Go 単体の2系統を有効な開発言語選択肢として扱い、プロジェクトごとにユーザー承認を得て選定する。
-- Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+- Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+- Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK の実装、生成方式、配布方式、固定採用バージョンは、別途ユーザー承認を得るまで未確定とする。
 - 本番サーバ運用、デプロイ、運用基盤では、Go single binary 形式を標準化対象とする。Go single binary を正本成果物とし、Docker は Adlaire Git Repository 本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。保護対象 data 側は host filesystem を正本として system 側から分離する。詳細は `docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` と `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 - Go 採用プロジェクトでは Go 標準ライブラリを優先し、Deno + TypeScript 採用プロジェクトでは Deno 標準ライブラリ（`jsr:@std/*`）を優先する。ただし、個別モジュールまたは Go module の採用はユーザー承認なしに行ってはならない。

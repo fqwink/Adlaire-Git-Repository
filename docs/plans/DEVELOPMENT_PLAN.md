@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.2.23
+**計画バージョン**: v.2.24
 **現行フェーズ基準バージョン**: v.2.10
-**ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ方針整合
+**ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
 
 ---
 
@@ -16,7 +16,7 @@
 
 実装は、1類ルールブック、2類ポリシー、3類マスター仕様書に従い、本書で定義したフェーズ計画に基づいて進める。
 
-Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。Phase 10 は現行リリース配置を GitHub Releases に整合しつつ、Adlaire Pipeline をリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として定義した履歴である。Phase 11 の現行フェーズ基準バージョンは `v.2.10` とする。Phase 11 は Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、Docker の Adlaire Pipeline 経由方針を整理する。Phase 11 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
+Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。Phase 10 は現行リリース配置を GitHub Releases に整合しつつ、Adlaire Pipeline をリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として定義した履歴である。Phase 11 の現行フェーズ基準バージョンは `v.2.10` とする。Phase 11 は Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、SDK の TypeScript 実装 / JavaScript 生成方針、Docker の Adlaire Pipeline 経由方針を整理する。Phase 11 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
 
 本計画における「マスター仕様完成」は、実装承認ではない。仕様完成後にソースコード実装、DB driver 実装、schema 変更、テスト変更、デプロイ実行を行う場合は、対象範囲と検証方法を提示し、別途ユーザー承認を得る。
 
@@ -63,7 +63,8 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 - リリース提案、リリース配置、リリース成果物、リリース自動化は `docs/policies/RELEASE_POLICY.md` に従う。現行のリリース履歴の正本は GitHub Releases とし、リポジトリ内に変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` に従う。
 - Adlaire Git Repository 本体は Go を標準開発言語とし、Go single binary 形式を正本成果物とする。Deno + TypeScript は本体開発言語として終了方針とする。Docker は、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。1 VPS 上の差し替え可能な system 側と host filesystem data 側を分離する構成にする。shell script + SSH は binary 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer を補助採用とする。リリース配置は現行では GitHub Releases を正式配置元とする。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
-- Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+- Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+- Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK の実装、生成方式、配布方式、固定採用バージョンは、別途ユーザー承認を得るまで未確定とする。
 - Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ内製付随システム候補とする。初期方針では Adlaire Git Repository 本体へ統合せず、将来の統合、一部統合、付随維持、AdlaireGroup 共通基盤化は仕様確定後に判断する。Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は未定とし、別途ユーザー承認を得るまで固定しない。
 - 標準データベースは libSQL とし、唯一の標準DBとして完全確定する。SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは採用候補として扱わない。
 - ローカルに Deno が存在しない場合、実行系検証は停止ではなく VPS または承認済み検証サーバで実施する方針とする。
@@ -113,7 +114,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 | Phase 8.7 | v.1.9 | 完了 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
 | Phase 9 | v.2.10 | 完了 | バグ修正ゼロ化、安定版判定、リリース準備 |
 | Phase 10 | v.2.10 | 完了 | GitHub Releases 現行配置整合、Adlaire Pipeline 付随システム候補整理、Go 採用方針整合 |
-| Phase 11 | v.2.10 | 着手 | Go 移行準備。固定採用バージョン、実装構成、検証導線、旧 Deno + TypeScript 資産、ヘッドレスアーキテクチャ方針、Docker の Adlaire Pipeline 経由方針を整理 |
+| Phase 11 | v.2.10 | 着手 | Go 移行準備。固定採用バージョン、実装構成、検証導線、旧 Deno + TypeScript 資産、ヘッドレスアーキテクチャ方針、SDK の TypeScript 実装 / JavaScript 生成方針、Docker の Adlaire Pipeline 経由方針を整理 |
 
 上記は各フェーズの基準バージョンである。表の `Major` は安定版リリース系列であり、累積フェーズ番号ではない。初回安定版リリース前は `v.0.x` 系を維持する。
 
@@ -1296,12 +1297,14 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 - Go 固定採用バージョン候補の提示
 - Go single binary の Linux ARM64 / x86_64 build 方針
 - ヘッドレスアーキテクチャ設計思想と Adlaire 公式 SDK 接続方針
+- SDK の TypeScript 実装 / JavaScript 生成方針
 - Docker image を Adlaire Pipeline 経由で扱う方針
 - Go 標準ライブラリ優先、外部ライブラリ必要最小限、例外採用承認必須方針の確認
 - libSQL 接続境界を Database Gateway と driver 層に閉じ込める方針の維持
 - Deno + TypeScript 旧資産の扱い、撤去順序、履歴保持範囲の整理
 - 標準検証導線を Go 方針へ移行する計画
-- ヘッドレスアーキテクチャ設計思想、UI 差し替え可能方針、Adlaire 公式 SDK 接続方針
+- ヘッドレスアーキテクチャ設計思想、UI 差し替え可能方針、静的フロントエンド、モバイルアプリ等のクライアント拡張方針、Adlaire 公式 SDK 接続方針
+- Adlaire 公式 SDK の TypeScript 実装 / JavaScript 生成方針
 - Docker を Adlaire Pipeline 経由で生成、管理、配布、利用する方針
 - 1類ルールブック、2類ポリシー、3類マスター仕様書、README の整合性確認
 
@@ -1312,6 +1315,7 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 - Go module または外部ライブラリの採用
 - Adlaire 公式 SDK の実装
 - SDK 仕様の確定
+- SDK 生成方式、配布方式、固定採用バージョンの確定
 - Docker image の本体直接標準運用化
 - 既存 Deno + TypeScript 実装の削除
 - `deno.json`、`deno.lock`、既存検証スクリプトの撤去
@@ -1325,7 +1329,8 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 - Go 固定採用バージョンと外部依存の承認が別工程で必要であることを説明できる。
 - Deno + TypeScript 本体終了方針と、AdlaireGroup 共通の Deno + TypeScript / Go 単体2系統選択方針が矛盾していない。
 - Go single binary 正本成果物方針、GitHub Releases 現行配置、system / data 分離、libSQL 標準DB方針、ヘッドレスアーキテクチャ設計思想、Docker の Adlaire Pipeline 経由方針が矛盾していない。
-- UI が Adlaire Git Repository 本体に固定されず、特定 UI 非依存と Adlaire 公式 SDK 接続方針を説明できる。
+- UI が Adlaire Git Repository 本体に固定されず、特定 UI 非依存、静的フロントエンド、モバイルアプリ等のクライアント拡張、Adlaire 公式 SDK 接続方針を説明できる。
+- Adlaire 公式 SDK を TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針を説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
 ---
@@ -1436,3 +1441,4 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 | v.2.21 | Phase 10 | v.2.10 | Adlaire Pipeline の将来機能群として `Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を追加 |
 | v.2.22 | 全フェーズ共通 / Phase 10 | v.2.10 | Adlaire Git Repository 本体と Adlaire Pipeline の Go 採用方針、Deno + TypeScript 本体終了方針、AdlaireGroup 共通の Deno + TypeScript / Go 単体2系統選択方針、外部依存最小・例外承認継続方針を反映 |
 | v.2.23 | 全フェーズ共通 / Phase 11 | v.2.10 | Adlaire Git Repository 固有のヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、Docker を Adlaire Pipeline 経由で扱う方針を反映 |
+| v.2.24 | 全フェーズ共通 / Phase 11 | v.2.10 | ヘッドレスアーキテクチャの目的を静的フロントエンド、モバイルアプリ等のクライアント拡張として明確化し、Adlaire 公式 SDK の TypeScript 実装 / JavaScript 生成方針を反映 |

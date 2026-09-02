@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**現行フェーズ**: Phase 11 Go 採用方針 / ヘッドレスアーキテクチャ方針 / Docker の Adlaire Pipeline 経由方針 / v.2.10 baseline
+**現行フェーズ**: Phase 11 Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針 / Docker の Adlaire Pipeline 経由方針 / v.2.10 baseline
 **直近安定版リリース**: Phase 7 / v.1.8
 
 ## ドキュメント
@@ -66,7 +66,9 @@
 
 Go single binary を正本成果物とする。Docker は Adlaire Git Repository 本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。
 
-Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+
+Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK の実装、生成方式、配布方式、固定採用バージョンは、別途ユーザー承認を得るまで未確定とする。
 
 最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として `shared/` 配下に分離し、host filesystem を正本とする。Go single binary、起動管理定義は差し替え可能な system 側として扱う。Docker image は Adlaire Pipeline 経由で扱う。
 
@@ -90,4 +92,4 @@ Phase 8.5 では、標準アプリケーション設定と標準デプロイ雛�
 
 安定版リリースの標準 Linux バイナリは、ARM64 と x86_64 の2種類を正本成果物とする。VPS デプロイ時は `uname -m` で `aarch64` または `x86_64` を確認し、対象アーキテクチャの Go single binary を配置する。Docker image を扱う場合は、Adlaire Pipeline 経由で扱う。
 
-Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして完了済みである。Phase 8 はDB仕様完成としてlibSQL標準化を扱う。Phase 8.1 は本体整合性、Phase 8.5 はAdlaire Git Repository本体とデータ領域の分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備を扱う。Phase 10 では現行リリース配置を GitHub Releases として整合し、Adlaire Pipeline を将来のリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として整理した。Phase 11 では Go 移行準備、ヘッドレスアーキテクチャ方針、Adlaire 公式 SDK 接続方針、Docker の Adlaire Pipeline 経由方針を整理する。
+Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして完了済みである。Phase 8 はDB仕様完成としてlibSQL標準化を扱う。Phase 8.1 は本体整合性、Phase 8.5 はAdlaire Git Repository本体とデータ領域の分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備を扱う。Phase 10 では現行リリース配置を GitHub Releases として整合し、Adlaire Pipeline を将来のリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として整理した。Phase 11 では Go 移行準備、ヘッドレスアーキテクチャ方針、Adlaire 公式 SDK 接続方針、SDK の TypeScript 実装 / JavaScript 生成方針、Docker の Adlaire Pipeline 経由方針を整理する。
