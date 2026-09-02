@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.17
+**文書バージョン**: v.2.18
 **ステータス**: GitHub Releases リリース配置一本化方針整合
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
@@ -563,11 +563,11 @@ libSQL は必要最小限の外部依存に該当するが、DB抽象化設計�
 
 libSQL driver は Phase 8 の承認済み実装対象とする。libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、内製 `libsql` driver と Database Gateway の内部に閉じ込め、サービス層やRepository層へ直接露出させない。
 
-`@libsql/client` 等の npm 互換 libSQL client の問題は、DB 選定の問題ではなく、client / driver の依存経路と runtime 前提の問題として扱う。libSQL 採用は撤回せず、Node.js runtime が存在しない前提で Deno runtime だけで動作する driver 経路へ置換することを仕様上の是正方針とする。
+`@libsql/client` 等の npm 互換 libSQL client は撤去済みとし、再導入してはならない。libSQL 採用は撤回せず、Node.js runtime が存在しない前提で Deno runtime だけで動作する内製 HTTP/Hrana driver 経路へ集約する。
 
-`@libsql/client` 等の npm 互換 libSQL client は採用禁止とする。既存実装または設定に npm 由来の libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱い、別途承認を得て撤去または置換する。
+`@libsql/client` 等の npm 互換 libSQL client は採用禁止とする。既存実装または設定に npm 由来の libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱い、撤去または置換する。
 
-libSQL client / driver 候補は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Deno runtime だけで動作することを必須条件とする。JSR 経由の公開ライブラリであっても、npm 互換 package、`npm:` specifier、Node.js runtime 前提、native loader 前提を含む場合は採用しない。
+libSQL client / driver は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Deno runtime だけで動作することを必須条件とする。標準 driver は、Deno `fetch` による内製 HTTP/Hrana driver とする。
 
 Turso 公式の `@tursodatabase/serverless/compat` および `@tursodatabase/serverless` は、`fetch` のみで動作する libSQL over HTTP 系 client 候補として調査対象にできる。ただし、npm package としての取得経路、Deno runtime only 条件、固定バージョン、権限、self-host / VPS 上の libSQL server 接続可否を確認し、別途ユーザー承認を得るまで採用確定または実装反映してはならない。
 
@@ -664,9 +664,9 @@ Phase 8 の DB 接続仕様は以下とする。
 
 Phase 8 では、DB driver の外部ライブラリ API を Database Gateway より上位へ露出させない。Repository 層は永続化要求を表現し、接続、SQL 実行、トランザクション、migration、driver 差し替えは Database Gateway と driver 層の責務とする。
 
-`@libsql/client` 等の npm 互換 libSQL client の問題は、標準DBとしての libSQL 採用可否ではなく、client / driver の依存経路と runtime 前提の問題として扱う。libSQL 採用は撤回せず、Node.js runtime が存在しない前提で Deno runtime だけで動作する driver 経路へ置換する。
+`@libsql/client` 等の npm 互換 libSQL client は撤去済みとし、再導入してはならない。標準DBとしての libSQL 採用は撤回せず、Node.js runtime が存在しない前提で Deno runtime だけで動作する内製 HTTP/Hrana driver 経路へ集約する。
 
-libSQL client / driver 候補は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Deno runtime だけで動作することを必須条件とする。JSR 経由の公開ライブラリであっても、npm 互換 package、`npm:` specifier、Node.js runtime 前提、native loader 前提を含む場合は採用しない。
+libSQL client / driver は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Deno runtime だけで動作することを必須条件とする。標準 driver は、Deno `fetch` による内製 HTTP/Hrana driver とする。
 
 Turso 公式の `@tursodatabase/serverless/compat` および `@tursodatabase/serverless` は、`fetch` のみで動作する libSQL over HTTP 系 client 候補として調査対象にできる。ただし、npm package としての取得経路、Deno runtime only 条件、固定バージョン、権限、self-host / VPS 上の libSQL server 接続可否を確認し、別途ユーザー承認を得るまで採用確定または実装反映してはならない。
 
@@ -743,7 +743,7 @@ ADLAIRE_APP_ROOT=/opt/adlaire-git-repository
 ADLAIRE_SHARED_DIR=/opt/adlaire-git-repository/shared
 ADLAIRE_DATA_DIR=/opt/adlaire-git-repository/shared/data
 ADLAIRE_REPOSITORY_ROOT=/opt/adlaire-git-repository/shared/data/repositories
-DB_URL=file:/opt/adlaire-git-repository/shared/data/database/adlaire.libsql
+DB_URL=http://127.0.0.1:8081
 ```
 
 標準デプロイ雛形では、`system/releases` と `system/current` を稼働版差し替え単位とし、`shared/logs/deploy.log` と `shared/manifests` を運用記録の保存先とする。

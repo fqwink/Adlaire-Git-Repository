@@ -9,7 +9,7 @@ Deno.test("loadConfig defaults to shared data paths for system/data split", () =
   assertEquals(config.repositoryRoot, "./shared/data/repositories");
   assertEquals(
     config.database.url,
-    "file:./shared/data/database/adlaire.libsql",
+    "http://127.0.0.1:8081",
   );
 });
 
@@ -25,7 +25,7 @@ Deno.test("loadConfig derives shared data paths from the app root", () => {
   );
   assertEquals(
     config.database.url,
-    "file:/opt/adlaire-git-repository/shared/data/database/adlaire.libsql",
+    "http://127.0.0.1:8081",
   );
 });
 
@@ -40,7 +40,7 @@ Deno.test("loadConfig allows overriding shared and data roots explicitly", () =>
   );
   assertEquals(
     sharedConfig.database.url,
-    "file:/srv/adlaire/shared/data/database/adlaire.libsql",
+    "http://127.0.0.1:8081",
   );
 
   const dataConfig = loadConfig(
@@ -53,7 +53,7 @@ Deno.test("loadConfig allows overriding shared and data roots explicitly", () =>
   assertEquals(dataConfig.repositoryRoot, "/srv/git/repositories");
   assertEquals(
     dataConfig.database.url,
-    "file:/srv/adlaire/data/database/adlaire.libsql",
+    "http://127.0.0.1:8081",
   );
 });
 

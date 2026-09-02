@@ -76,5 +76,5 @@ function defaultDatabaseUrl(
   if (driver === "sqlite") {
     return `${databaseDir}/adlaire.sqlite3`;
   }
-  return `file:${databaseDir}/adlaire.libsql`;
+  return "http://127.0.0.1:8081";
 }

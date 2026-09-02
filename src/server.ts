@@ -53,6 +53,7 @@ export interface App {
 export async function createApp(config: AppConfig): Promise<App> {
   await Deno.mkdir(config.dataDir, { recursive: true });
   await Deno.mkdir(config.repositoryRoot, { recursive: true });
+  await Deno.mkdir(`${config.dataDir}/database`, { recursive: true });
   await ensureLocalDatabaseDirectory(config.database.url);
 
   const database = new DatabaseGateway(createDatabaseDriver(config.database));

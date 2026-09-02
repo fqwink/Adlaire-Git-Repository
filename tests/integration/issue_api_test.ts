@@ -10,8 +10,8 @@ Deno.test("issue API creates, lists, reads, and closes repository issues", async
       dataDir: root,
       repositoryRoot: `${root}/repositories`,
       database: {
-        driver: "libsql",
-        url: `file://${root}/adlaire.libsql`,
+        driver: "sqlite",
+        url: `${root}/adlaire.sqlite3`,
       },
     });
 
@@ -86,8 +86,8 @@ Deno.test("issue API protects private repository issue lists", async () => {
       dataDir: root,
       repositoryRoot: `${root}/repositories`,
       database: {
-        driver: "libsql",
-        url: `file://${root}/adlaire.libsql`,
+        driver: "sqlite",
+        url: `${root}/adlaire.sqlite3`,
       },
     });
 

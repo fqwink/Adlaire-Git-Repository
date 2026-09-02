@@ -62,7 +62,7 @@ libSQL に接続する実装は、内製 `LibsqlDriver` と Database Gateway の
 
 `@libsql/client` 等の npm 互換 libSQL client は採用禁止とする。既存実装または設定に npm 由来の libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱い、別途承認を得て撤去または置換する。
 
-FFI または native loader を前提にする外部 libSQL client は標準採用しない。`--allow-ffi`、`--allow-sys`、native binary loader、platform-specific package を必要とする場合は、npm 依存を含まないこと、Deno single binary / Docker 運用と整合すること、最小権限であることを提示し、別途ユーザー承認を得る。
+標準 libSQL driver は、Deno runtime の `fetch` だけで libSQL server の HTTP/Hrana endpoint に接続する内製 driver とする。FFI、native loader、platform-specific package、`--allow-ffi`、`--allow-sys` を前提にする外部 libSQL client は標準採用しない。
 
 ## 3.2 レジストリ方針
 
@@ -138,7 +138,7 @@ Docker Desktop は本番サーバ標準構成として採用しない。Docker �
 
 system 側と data 側を分離する。Deno single binary、Docker image、container、起動管理定義は差し替え可能な system 側とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として扱う。Docker 運用を選択する場合、data 側は原則として host bind mount で container へ接続し、Docker named volume へ丸投げしてはならない。
 
-標準アプリケーション設定では、`ADLAIRE_APP_ROOT` から `ADLAIRE_SHARED_DIR` と `ADLAIRE_DATA_DIR` を導き、libSQL database は `shared/data/database/adlaire.libsql`、Git bare repositories は `shared/data/repositories` に配置する。Docker 使用時も binary 直実行時も、この data 側パスを共通化する。
+標準アプリケーション設定では、`ADLAIRE_APP_ROOT` から `ADLAIRE_SHARED_DIR` と `ADLAIRE_DATA_DIR` を導き、アプリケーションの標準 `DB_URL` は `http://127.0.0.1:8081` の libSQL server endpoint とする。libSQL database の保護対象ファイルは `shared/data/database/adlaire.libsql`、Git bare repositories は `shared/data/repositories` に配置する。Docker 使用時も binary 直実行時も、この data 側パスを共通化する。
 
 ## 4. データベース方針
 
