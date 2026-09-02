@@ -3,7 +3,7 @@
 **位置づけ**: 3類マスター仕様書
 **対象**: Adlaire 公式 SDK
 **ライセンス**: クローズドライセンス
-**文書バージョン**: v.2.30
+**文書バージョン**: v.2.31
 **ステータス**: SDK マスター仕様改善
 
 ---
@@ -175,6 +175,22 @@ SDK 生成成果物の検証条件は以下とする。
 | 検証導線 | SDK 実装開始時に、生成、lint 相当、最低限の利用検証を提案し、承認後に確定する |
 
 上記は生成成果物の検証条件であり、SDK 実装開始、具体的な生成コマンド、配布対象ファイルの承認ではない。
+
+### 6.0.1 SDK 実装前チェック
+
+SDK 仕様を根拠に実装または生成導線へ進む場合は、最低限以下を確認する。
+
+| 確認項目 | 判定基準 |
+|---|---|
+| 接続境界 | SDK が本体公開 API だけを利用し、本体内部構造へ依存していない |
+| 生成 runtime | Deno runtime による生成であり、Adlaire Git Repository 本体の開発言語を Deno + TypeScript へ戻すものではない |
+| Node.js / npm 非依存 | Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を要求しない |
+| Browser 利用 | Vanilla JavaScript から利用できる JavaScript output を説明できる |
+| API 未確定 | client 名、関数名、戻り値形式、error 形式を未承認のまま固定していない |
+| 配布 | 本体非同梱、独立リリース、現行リポジトリ配布、リポジトリ分離未定の扱いが維持されている |
+| 承認 | SDK 実装、生成コマンド、配布対象、リリース開始フェーズの別承認要否を説明できる |
+
+上記を満たさない場合、その変更は SDK 実装対象として扱わない。
 
 ## 6.1 Client lifecycle 方針
 
@@ -363,6 +379,7 @@ SDK の配布方式は、現時点では現行リポジトリ配布とする。n
 - SDK の client lifecycle と互換性方針を説明できる。
 - SDK が依存してよい本体公開契約と、依存してはならない本体内部構造を説明できる。
 - SDK 生成成果物の検証条件を説明できる。
+- SDK 実装前チェックにより、接続境界、生成 runtime、Node.js / npm 非依存、未確定API、配布条件、承認要否を確認できる。
 - SDK が UI framework、Git command wrapper、database driver、GitHub API 互換 client ではないことを説明できる。
 - SDK 実装、public API 詳細、実装開始フェーズ、リリース実行が未確定範囲として分離されている。
 - SDK 仕様、本体仕様、Auris システム設計、マスター開発計画、README の参照関係が矛盾していない。

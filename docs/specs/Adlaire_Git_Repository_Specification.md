@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.30
+**文書バージョン**: v.2.31
 **ステータス**: 本体マスター仕様改善
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Go + libSQL + Git
@@ -162,6 +162,22 @@ Adlaire Git Repository 本体が外部へ公開する契約は、公開 API、�
 - Adlaire Pipeline の内部仕様
 
 本体公開契約を変更する場合は、破壊的変更かどうかを判定し、SDK マスター仕様書、マスター開発計画、検証導線、README を同一変更範囲で整合する。
+
+### 本体実装前契約チェック
+
+本体仕様を根拠に実装へ進む場合は、最低限以下を確認する。
+
+| 確認項目 | 判定基準 |
+|---|---|
+| 公開契約 | 変更対象が公開 API、認証境界、Git 接続境界、health / operations status、リリース成果物のどれに影響するか説明できる |
+| 内部境界 | Service、Repository、Database Gateway、driver、Git 操作処理、host filesystem path を外部契約へ露出しない |
+| DB 境界 | libSQL は Database Gateway と driver 層に閉じ、上位層から直接触らない |
+| SDK 影響 | SDK が依存してよい契約だけが変わるか、SDK 仕様の同時更新が必要か説明できる |
+| system / data | system 側の差し替えと data 側の保全を分離できる |
+| 履歴混同 | 旧 Deno + TypeScript、旧 SQLite、旧 Docker 方針を現行標準仕様として扱っていない |
+| 承認 | 実装、schema、migration、依存、固定バージョン、リリース、デプロイの別承認要否を説明できる |
+
+上記を満たさない場合、その変更は本体仕様に基づく実装対象として扱わない。
 
 ## 本体境界の判定表
 
@@ -1322,8 +1338,9 @@ NAS は自動複製機能 or スナップショット機能を活用
 標準アップグレードは、`scripts/deploy/deploy.sh` を用いた Go single binary 配置、process 再起動、配置後検証を基本とする。Docker image を扱う場合は Adlaire Pipeline 経由とする。
 
 ```bash
-# 1. 新バイナリの compile
-$ deno task compile
+# 1. 新バイナリの build
+# 現行 Go 方針では go build 系の導線を採用する。
+# 具体的な build command は Go 固定採用バージョンと Go 実装構成の承認後に確定する。
 
 # 2. デプロイ環境設定を確認
 $ cp scripts/deploy/deploy.env.example scripts/deploy/deploy.env
