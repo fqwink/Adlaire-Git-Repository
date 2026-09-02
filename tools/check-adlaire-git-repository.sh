@@ -73,6 +73,7 @@ check_required_paths() {
     tests/unit/config_test.ts \
     tests/unit/git_http_backend_test.ts \
     tests/unit/issue_service_test.ts \
+    tests/unit/libsql_driver_test.ts \
     tests/unit/repository_name_test.ts \
     tests/unit/repository_path_test.ts \
     tests/integration/issue_api_test.ts \
@@ -144,27 +145,25 @@ check_forbidden_node_files() {
 }
 
 check_forbidden_unapproved_registries() {
-  if grep -R -n -E '["'\''](jsr|npm):' "$ROOT_DIR/src" "$ROOT_DIR/tests" "$ROOT_DIR/deno.json" \
-    | grep -v 'npm:@libsql/client@0.17.4' >/dev/null 2>&1; then
+  if grep -R -n -E '["'\''](jsr|npm):' "$ROOT_DIR/src" "$ROOT_DIR/tests" "$ROOT_DIR/deno.json" "$ROOT_DIR/deno.lock" >/dev/null 2>&1; then
     echo "JSR/npm registry dependencies are not allowed without explicit approval and policy updates." >&2
     exit 1
   fi
 
-  if ! grep -F '"@libsql/client": "npm:@libsql/client@0.17.4"' deno.json >/dev/null 2>&1; then
-    echo "deno.json must pin the approved libSQL exception library." >&2
+  if grep -R -n '@libsql/client' "$ROOT_DIR/src" "$ROOT_DIR/tests" "$ROOT_DIR/deno.json" "$ROOT_DIR/deno.lock" >/dev/null 2>&1; then
+    echo "@libsql/client must not be used; libSQL access must stay in the Deno-only internal driver." >&2
     exit 1
   fi
 
-  if grep -R -n 'from "@libsql/client"' "$ROOT_DIR/src" "$ROOT_DIR/tests" \
-    | grep -v 'src/database/libsql_driver.ts' >/dev/null 2>&1; then
-    echo "approved libSQL client imports must stay inside src/database/libsql_driver.ts." >&2
+  if grep -R -n -E 'node:|package.json|node_modules|npm ecosystem' "$ROOT_DIR/src" "$ROOT_DIR/tests" "$ROOT_DIR/deno.json" "$ROOT_DIR/deno.lock" >/dev/null 2>&1; then
+    echo "runtime and test code must not depend on Node.js/npm ecosystem." >&2
     exit 1
   fi
 }
 
 check_forbidden_direct_ffi_usage() {
   if grep -R -n -E 'Deno\.(dlopen|UnsafePointer|UnsafeFnPointer|UnsafeCallback|UnsafePointerView)' "$ROOT_DIR/src" "$ROOT_DIR/tests" >/dev/null 2>&1; then
-    echo "direct Deno FFI API usage is not approved; --allow-ffi is only for the libSQL native loader." >&2
+    echo "direct Deno FFI API usage is not approved." >&2
     exit 1
   fi
 }
@@ -180,8 +179,8 @@ check_system_data_split_policy() {
     exit 1
   fi
 
-  if ! grep -F 'file:${databaseDir}/adlaire.libsql' src/config.ts >/dev/null 2>&1; then
-    echo "default libSQL database must live under data/database." >&2
+  if ! grep -F 'return "http://127.0.0.1:8081";' src/config.ts >/dev/null 2>&1; then
+    echo "default libSQL connection must target the local libSQL server endpoint." >&2
     exit 1
   fi
 
@@ -219,7 +218,7 @@ check_deno_tasks() {
   formal_version="v.$major_version.$minor_version"
   artifact_version="v$major_version.$minor_version"
 
-  if ! grep -F '"dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname src/main.ts"' deno.json >/dev/null 2>&1; then
+  if ! grep -F '"dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-run src/main.ts"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the dev task." >&2
     exit 1
   fi
@@ -234,22 +233,22 @@ check_deno_tasks() {
     exit 1
   fi
 
-  if ! grep -F '"test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname tests/"' deno.json >/dev/null 2>&1; then
+  if ! grep -F '"test": "deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the test task." >&2
     exit 1
   fi
 
-  if ! grep -F '"compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo src/main.ts"' deno.json >/dev/null 2>&1; then
+  if ! grep -F '"compile": "deno compile --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo src/main.ts"' deno.json >/dev/null 2>&1; then
     echo "deno.json must define the compile task." >&2
     exit 1
   fi
 
-  if ! grep -F "\"compile:linux-arm64\": \"deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-$artifact_version-aarch64-unknown-linux-gnu src/main.ts\"" deno.json >/dev/null 2>&1; then
+  if ! grep -F "\"compile:linux-arm64\": \"deno compile --target aarch64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-$artifact_version-aarch64-unknown-linux-gnu src/main.ts\"" deno.json >/dev/null 2>&1; then
     echo "deno.json must define the Linux ARM64 release compile task." >&2
     exit 1
   fi
 
-  if ! grep -F "\"compile:linux-x86_64\": \"deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname --output=dist/adlaire-git-repo-$artifact_version-x86_64-unknown-linux-gnu src/main.ts\"" deno.json >/dev/null 2>&1; then
+  if ! grep -F "\"compile:linux-x86_64\": \"deno compile --target x86_64-unknown-linux-gnu --allow-net --allow-read --allow-write --allow-env --allow-run --output=dist/adlaire-git-repo-$artifact_version-x86_64-unknown-linux-gnu src/main.ts\"" deno.json >/dev/null 2>&1; then
     echo "deno.json must define the Linux x86_64 release compile task." >&2
     exit 1
   fi
@@ -298,6 +297,7 @@ run_step "docker verify build script syntax check" \
 
 require_command deno
 require_command git
+require_command sqlite3
 
 mkdir -p "$TMP_DIR"
 
@@ -308,7 +308,7 @@ run_step "deno lint" \
   deno lint
 
 run_step "deno test" \
-  deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run --allow-ffi --allow-sys=cpus,networkInterfaces,hostname tests/
+  deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/
 
 run_step "deno compile" \
   deno compile \
@@ -317,8 +317,6 @@ run_step "deno compile" \
     --allow-write \
     --allow-env \
     --allow-run \
-    --allow-ffi \
-    --allow-sys=cpus,networkInterfaces,hostname \
     --output="$BIN_PATH" \
     src/main.ts
 

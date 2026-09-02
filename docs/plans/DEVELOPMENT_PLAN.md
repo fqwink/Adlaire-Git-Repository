@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.2.17
+**計画バージョン**: v.2.18
 **現行フェーズ基準バージョン**: v.2.10
 **ステータス**: GitHub Releases リリース配置一本化方針整合
 
@@ -934,7 +934,7 @@ Phase 8 は安定版リリースフェーズではない。Phase 8 では例外�
 - `DB_DRIVER=libsql` を標準 driver とする接続仕様
 - `DB_URL` と `DB_AUTH_TOKEN` による接続先・認証情報の扱い
 - Node.js runtime が存在しない前提で Deno runtime だけで動作する libSQL 外部依存例外と内製 libSQL driver 境界
-- `@libsql/client` 等の問題を DB 選定ではなく client / driver 依存経路の是正問題として扱う方針
+- `@libsql/client` 等の npm 互換 client を撤去し、Deno runtime only の内製 HTTP/Hrana driver へ置換する方針
 - Database Gateway、Repository 層、driver 層の責務境界
 - libSQL 前提の schema、migration、seed 管理方針
 - 既存データ移行元確認用 SQLite の取扱境界
@@ -1001,7 +1001,7 @@ Phase 8.1 では、Phase 8 の libSQL driver 実装後に残る本体整合性�
 
 - 現行フェーズ表記を `Phase 8.1 / v.1.9` へ整合する。
 - `DB_DRIVER=sqlite` を通常運用で拒否し、承認済みの移行元確認時のみ `ADLAIRE_ALLOW_SQLITE_MIGRATION_SOURCE=1` で許可する。
-- `@libsql/client` 等の npm 互換 libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱う。
+- `@libsql/client` 等の npm 互換 libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限を撤去し、再導入を禁止する。
 - libSQL driver の利用範囲が、npm 依存を含まない内製 `LibsqlDriver` と Database Gateway の内部に閉じる計画であることを確認する。
 - 実装または設定の撤去・置換へ進む場合は、別途ソースコード実装承認を得る。
 - Database Gateway、Repository 層、driver 層の境界を確認する。
@@ -1362,3 +1362,4 @@ Deno single binary、release notes、checksum、manifest の配置先を GitHub 
 | v.2.15 | Phase 10 / 全フェーズ共通 | v.2.10 | JSR レジストリ公開ライブラリの採用条件として、Node.js ランタイム環境が存在しない前提で Deno runtime だけで動作することを必須化 |
 | v.2.16 | Phase 8 / Phase 10 | v.2.10 | libSQL を唯一の標準DBとして完全確定し、`@libsql/client` 等の問題をDB選定ではなく Deno runtime only の client / driver 依存経路是正問題として整理 |
 | v.2.17 | Phase 10 | v.2.10 | Phase 10 を GitHub Releases リリース配置一本化、標準デプロイ雛形との責務整理、新規デプロイメントシステム対象外整理へ改訂 |
+| v.2.18 | Phase 10 | v.2.10 | npm 互換 libSQL client と native loader 前提の権限を撤去し、Deno runtime only の内製 HTTP/Hrana driver、検証導線、リリース前整合性を反映 |

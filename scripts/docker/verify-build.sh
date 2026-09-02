@@ -29,7 +29,7 @@ PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH" exec "$DOCKER_BIN" 
   "$IMAGE" -eu -c '
     if ! command -v git >/dev/null 2>&1; then
       apt-get update
-      apt-get install -y --no-install-recommends git ca-certificates
+      apt-get install -y --no-install-recommends git sqlite3 ca-certificates
       rm -rf /var/lib/apt/lists/*
     fi
 

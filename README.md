@@ -72,7 +72,7 @@ Deno single binary を正本成果物とする。Docker は正本成果物であ
 
 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。必要な parser 等の外部ライブラリは、非 npm 依存であること、Node.js ランタイム環境が存在しない前提で Deno runtime だけで動作することを条件に、明示的な例外採用として管理する。npm 互換 package、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem を伴う依存は例外なく採用しない。
 
-libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、Database Gateway と内製 `libsql` driver 境界に閉じ込める。`@libsql/client` 等の問題は DB 選定ではなく client / driver の依存経路と runtime 前提の問題として扱い、Node.js runtime が存在しない前提で Deno runtime だけで動作する driver 経路へ置換する。既存実装または設定に npm 由来の libSQL client、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱う。
+libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、Database Gateway と内製 `libsql` driver 境界に閉じ込める。`@libsql/client` 等の npm 互換 client は撤去済みであり、再導入しない。libSQL 接続は、Node.js runtime が存在しない前提で、Deno runtime だけで動作する内製 HTTP/Hrana driver 経路へ集約する。
 
 ローカルに Deno が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Deno Docker image で行う。Docker で検証、テスト、ビルド、binary 生成をまとめて実行する場合は、`scripts/docker/verify-build.sh` を使う。
 

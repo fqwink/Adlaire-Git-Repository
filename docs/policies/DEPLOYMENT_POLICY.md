@@ -93,7 +93,7 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 
 `system/releases` と `system/current` は差し替え可能な system 側として扱う。`shared/data/database`、`shared/data/repositories`、`shared/config`、`shared/secrets`、`shared/logs`、`shared/backups`、`shared/manifests` は保護対象 data 側として扱う。
 
-標準アプリケーション設定では、`ADLAIRE_APP_ROOT=/opt/adlaire-git-repository` から `ADLAIRE_SHARED_DIR=/opt/adlaire-git-repository/shared`、`ADLAIRE_DATA_DIR=/opt/adlaire-git-repository/shared/data`、`ADLAIRE_REPOSITORY_ROOT=/opt/adlaire-git-repository/shared/data/repositories` を導く。標準 libSQL database は `file:/opt/adlaire-git-repository/shared/data/database/adlaire.libsql` とする。
+標準アプリケーション設定では、`ADLAIRE_APP_ROOT=/opt/adlaire-git-repository` から `ADLAIRE_SHARED_DIR=/opt/adlaire-git-repository/shared`、`ADLAIRE_DATA_DIR=/opt/adlaire-git-repository/shared/data`、`ADLAIRE_REPOSITORY_ROOT=/opt/adlaire-git-repository/shared/data/repositories` を導く。標準 `DB_URL` は `http://127.0.0.1:8081` の libSQL server endpoint とし、保護対象の libSQL database file は `/opt/adlaire-git-repository/shared/data/database/adlaire.libsql` とする。
 
 Docker 運用を選択する場合の container 内配置は以下を基準とする。
 

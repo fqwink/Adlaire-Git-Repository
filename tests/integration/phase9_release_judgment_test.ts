@@ -10,8 +10,8 @@ Deno.test("home UI exposes current Phase 9 release judgment baseline", async () 
     dataDir,
     repositoryRoot: `${dataDir}/repositories`,
     database: {
-      driver: "libsql",
-      url: `file:${dataDir}/database/adlaire.libsql`,
+      driver: "sqlite",
+      url: `${dataDir}/database/adlaire.sqlite3`,
     },
   });
 
@@ -51,8 +51,8 @@ Deno.test("application initializes host filesystem data directories", async () =
       dataDir,
       repositoryRoot,
       database: {
-        driver: "libsql",
-        url: `file:${databaseDir}/adlaire.libsql`,
+        driver: "sqlite",
+        url: `${databaseDir}/adlaire.sqlite3`,
       },
     });
 
