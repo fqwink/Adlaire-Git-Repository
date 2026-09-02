@@ -6,7 +6,6 @@ cd "$ROOT_DIR"
 
 TMP_REL=".check-work/adlaire-git-repository-check-$$"
 TMP_DIR="${CHECK_TMP_DIR:-$ROOT_DIR/$TMP_REL}"
-BIN_PATH="$TMP_DIR/adlaire-git-repo"
 
 cleanup() {
   rm -rf "$TMP_DIR"
@@ -210,7 +209,7 @@ check_system_data_split_policy() {
   fi
 }
 
-check_deno_tasks() {
+check_legacy_deno_assets() {
   version=$(sed -n 's/.*"version": "\([^"]*\)".*/\1/p' deno.json | sed -n '1p')
   major_version=${version%%.*}
   remainder=${version#*.}
@@ -269,6 +268,19 @@ check_deno_tasks() {
   fi
 }
 
+check_go_execution_if_present() {
+  if [ ! -f go.mod ]; then
+    echo "Go implementation is not present yet; execution checks are deferred to the approved Go implementation phase."
+    return 0
+  fi
+
+  require_command go
+
+  run_step "go fmt" go fmt ./...
+  run_step "go test" go test ./...
+  run_step "go build" go build ./...
+}
+
 trap cleanup EXIT INT HUP TERM
 
 run_step "required path check" check_required_paths
@@ -278,7 +290,7 @@ run_step "forbidden Node.js project file check" check_forbidden_node_files
 run_step "forbidden unapproved registry dependency check" check_forbidden_unapproved_registries
 run_step "direct FFI usage check" check_forbidden_direct_ffi_usage
 run_step "system/data split policy check" check_system_data_split_policy
-run_step "deno task definition check" check_deno_tasks
+run_step "legacy Deno asset definition check" check_legacy_deno_assets
 
 run_step "deploy script syntax check" \
   sh -n scripts/deploy/deploy.sh
@@ -290,34 +302,14 @@ run_step "server verification script syntax check" \
   sh -n scripts/deploy/verify-server.sh
 run_step "release verification script syntax check" \
   sh -n scripts/deploy/verify-release.sh
-run_step "docker Deno wrapper syntax check" \
+run_step "legacy docker Deno wrapper syntax check" \
   sh -n scripts/docker/deno.sh
-run_step "docker verify build script syntax check" \
+run_step "legacy docker verify build script syntax check" \
   sh -n scripts/docker/verify-build.sh
 
-require_command deno
 require_command git
-require_command sqlite3
 
 mkdir -p "$TMP_DIR"
-
-run_step "deno fmt --check" \
-  deno fmt --check deno.json src/ tests/
-
-run_step "deno lint" \
-  deno lint
-
-run_step "deno test" \
-  deno test --allow-net=127.0.0.1,localhost --allow-read --allow-write --allow-env --allow-run tests/
-
-run_step "deno compile" \
-  deno compile \
-    --allow-net \
-    --allow-read \
-    --allow-write \
-    --allow-env \
-    --allow-run \
-    --output="$BIN_PATH" \
-    src/main.ts
+run_step "Go execution check" check_go_execution_if_present
 
 echo "adlaire-git-repository-check-ok"

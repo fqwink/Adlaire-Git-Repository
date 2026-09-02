@@ -4,8 +4,8 @@
 **対象**: Auris / Adlaire Git Repository 全体
 **ライセンス**: クローズドライセンス
 **標準言語 / ランタイム**: Go
-**文書バージョン**: v.2.22
-**ステータス**: Go 採用方針 / Deno + TypeScript 終了方針整合
+**文書バージョン**: v.2.23
+**ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ方針整合
 
 ---
 
@@ -53,6 +53,8 @@ Adlaire Git Repository は、Adlaire Group 内部向けのセルフホスト型 
 GitHub 互換とは、Repository、Issue、Pull Request、Code Review、Wiki、Release、Webhook、REST API、Personal Access Token、Organization / Team、Projects、Discussions 等の機能体系、用語、主要ワークフローについて、GitHub 利用経験を前提に理解・移行しやすい振る舞いを目指すことを指す。
 
 ただし、UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換の対象外とする。UI は本プロジェクト独自の設計とし、GitHub の画面、デザイン、ブランド表現、商標表現を模倣しない。
+
+Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
 
 GitHub 互換は本書および個別3類マスター仕様書に定義された範囲に限る。GitHub の全機能、外部サービス依存、商標・ブランド表現、GitHub 固有サービスへの直接依存を無条件に採用してはならない。現時点で不要な機能は、GitHub に存在する機能であっても実装対象から除外する。
 
@@ -102,7 +104,7 @@ npm registry 互換レジストリは、Node.js / npm ecosystem リスクと衝�
 
 採用バージョンは、各技術の最新の安定版を基本方針とする。Go、libSQL、既存データ移行元確認用 SQLite、Git、Go で利用する外部コマンド、例外採用する外部ライブラリは、採用または更新の時点で公式情報を確認し、最新の安定版を採用候補とする。Go の固定採用バージョンは、別途ユーザー承認を得るまで未確定とする。
 
-Go single binary 形式を正本成果物とする。Docker は正本成果物である Go single binary を Docker image に同梱して実行する運用選択肢の一つである。Docker 使用時も非 Docker の binary 直実行時も、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として system 側から分離する。
+Go single binary 形式を正本成果物とする。Docker は Adlaire Git Repository 本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として system 側から分離する。
 
 承認済み固定採用バージョンは以下とする。
 
@@ -169,9 +171,9 @@ Adlaire Git Repository 本体の標準運用方針は、self-host、VPS、専用
 
 Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、標準実行基盤は、これらを直接管理しやすい self-host / VPS / 専用サーバーを基準にする。
 
-本番サーバ環境へのデプロイは、Go single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
+本番サーバ環境へのデプロイは、Go single binary 正本成果物、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。Docker image を扱う場合は Adlaire Pipeline 経由とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-標準運用方式は、Go single binary 直実行と Docker 実行の双方を標準化対象とする。ただし、正本成果物は Go single binary であり、Docker は運用選択肢の一つである。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem data 側を同居させる構成とする。shell script + SSH は binary または Docker image 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。リリース配置は現行では GitHub Releases を正式配置元とする。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Go が存在しない場合、実行系検証は VPS、承認済み検証サーバ、または承認済み固定 Go Docker image で行う。
+標準運用方式は、Go single binary 直実行を標準化対象とする。Docker は Adlaire Pipeline 経由で扱う。最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem data 側を同居させる構成とする。shell script + SSH は binary 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer は補助採用とする。リリース配置は現行では GitHub Releases を正式配置元とする。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。ローカルに Go が存在しない場合、実行系検証は VPS または承認済み検証サーバで行う。
 
 Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
@@ -196,13 +198,15 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - Adlaire Git Repository は、Adlaire Group 内部向けのセルフホスト型 Git ホスティング基盤である。
 - 基本的な機能互換は GitHub 互換基準とする。
 - UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換対象外とする。
+- ヘッドレスアーキテクチャ設計思想を採用し、UI は Adlaire Git Repository 本体に固定しない。
+- UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
 - 標準開発言語は Go とする。
 - 標準データベースは libSQL とする。
 - SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。
 - SQLite または libSQL を直接触る設計は禁止し、Database Gateway と driver 境界を経由する。
 - Go single binary を正本成果物とする。
-- Docker は、正本成果物である Go single binary を Docker image に同梱して実行する運用選択肢の一つとする。
-- Docker 使用時も非 Docker の binary 直実行時も、system 側と data 側を分離する。
+- Docker は、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。
+- system 側と data 側を分離する。
 - data 側は host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
 - 標準運用基盤は self-host、VPS、専用サーバーを前提とする。
 - リリース配置は現行では GitHub Releases を正式配置元とする。
@@ -230,7 +234,7 @@ Adlaire Pipeline は、将来的に GitHub Releases に代わる、または Git
 - 1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画、マスター実装機能候補リストの役割が分離されている。
 - 現行仕様、過去フェーズ履歴、保留候補、対象外範囲が混在せず、判断基準を追跡できる。
 - libSQL 標準DB方針、SQLite 互換維持なし方針、Database Gateway 境界が矛盾していない。
-- Go single binary 正本成果物方針、Docker 運用選択肢、system / data 分離方針が矛盾していない。
+- Go single binary 正本成果物方針、Docker の Adlaire Pipeline 経由方針、system / data 分離方針が矛盾していない。
 - GitHub 機能互換方針と UI 非互換方針が同時に明記されている。
 - 保留機能は、ユーザー承認なしに実装対象へ戻らないように定義されている。
 - マスター仕様完成はソースコード実装承認を意味しない。
@@ -405,9 +409,9 @@ Phase 8.1 の完了条件は以下とする。
 
 Phase 8.5 はシステム分割フェーズである。
 
-Phase 8.5 では、Adlaire Git Repository 本体とデータ領域を分割する。Go single binary、Docker image、container、compose、service、起動管理定義は差し替え可能な system 側として扱う。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として扱う。
+Phase 8.5 では、Adlaire Git Repository 本体とデータ領域を分割する。Go single binary、service、起動管理定義は差し替え可能な system 側として扱う。Docker image、container、compose は Adlaire Pipeline 経由で扱う対象とする。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として扱う。
 
-Phase 8.5 の標準構成は、1 VPS 上に system 側と host filesystem data 側を同居させる最小構成とする。Docker 使用時も非 Docker の binary 直実行時も、data 側の正本は host filesystem とし、Docker named volume を data 正本として扱わない。
+Phase 8.5 の標準構成は、1 VPS 上に system 側と host filesystem data 側を同居させる最小構成とする。data 側の正本は host filesystem とし、Docker named volume を data 正本として扱わない。
 
 標準アプリケーション設定では、`ADLAIRE_APP_ROOT` から `ADLAIRE_SHARED_DIR` と `ADLAIRE_DATA_DIR` を導き、libSQL database は `shared/data/database/adlaire.libsql`、Git bare repositories は `shared/data/repositories` に配置する。
 
@@ -416,7 +420,7 @@ Phase 8.5 の標準構成は、1 VPS 上に system 側と host filesystem data �
 Phase 8.5 の完了条件は以下とする。
 
 - system 側と data 側の保存対象、責務、バックアップ対象を説明できる。
-- Docker 運用と binary 直実行で同じ data 側構成を維持できる。
+- Docker を扱う場合も data 側を Docker named volume へ丸投げしないことを説明できる。
 - data 側が container lifecycle に依存しない。
 - deploy、backup、verify、rollback の対象と保護対象がデプロイポリシーと矛盾していない。
 
@@ -483,6 +487,23 @@ Phase 10 の完了条件は以下とする。
 - 3類マスター仕様書、2類リリースポリシー、2類デプロイポリシー、マスター開発計画、README の記述が矛盾していない。
 - 標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Go single binary を本番サーバへ反映する補助導線として説明できる。
 - Adlaire Pipeline がリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う将来機能群の候補であり、開発言語は Go 採用方針、データベース、依存関係、実行基盤、本体統合は未定であることを説明できる。
+- リポジトリ整合性確認と整合性向上を完了している。
+
+### 8.11 Phase 11
+
+基準バージョン: `v.2.10`
+
+Phase 11 は、Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、Docker の Adlaire Pipeline 経由方針を整理するフェーズである。
+
+Phase 11 では、Adlaire Git Repository 本体を特定 UI に依存させず、UI および外部システムとの接続を原則として Adlaire 公式 SDK 経由にする方針を3類マスター仕様書へ反映する。
+
+Phase 11 では、Docker を Adlaire Git Repository 本体の直接標準運用選択肢として扱わず、Adlaire Pipeline 経由で生成、管理、配布、利用する対象として整理する。
+
+Phase 11 の完了条件は以下とする。
+
+- Go 採用方針、Go single binary 正本成果物方針、ヘッドレスアーキテクチャ設計思想が矛盾していない。
+- UI が Adlaire Git Repository 本体に固定されず、特定 UI 非依存と Adlaire 公式 SDK 接続方針を説明できる。
+- Docker が Adlaire Pipeline 経由で扱う対象として説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
 ---

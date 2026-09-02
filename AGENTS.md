@@ -213,6 +213,8 @@
 
 ただし、UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換の対象外とする。UI は本プロジェクト独自の設計とし、GitHub の画面、デザイン、ブランド表現、商標表現を模倣しない。
 
+Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+
 GitHub 互換はマスター仕様書に定義された範囲に限る。GitHub の全機能、外部サービス依存、商標・ブランド表現、GitHub 固有サービスへの直接依存を無条件に採用してはならない。現時点で不要な機能は、GitHub に存在する機能であっても実装対象から除外する。
 
 オープンソースの Git プロバイダーやセルフホスト型 Git ホスティング製品は、サブの機能互換インスパイア対象として扱ってよい。ただし、これらは主たる互換基準ではない。Gitea、Forgejo、GitLab、GitPrep 等の機能、画面、API、運用モデルをそのまま互換対象として扱ってはならず、採用する場合は本プロジェクトのマスター仕様書に再定義し、必要性を確認し、ユーザー承認を得る。
@@ -264,13 +266,11 @@ AdlaireGroup 関連プロジェクト、プロダクトの共通方針では、D
 
 Node.js ランタイムは、セキュリティ上のリスクによるプロジェクト方針として採用を禁止する。
 
-本番サーバ運用、デプロイ、運用基盤では、Go single binary 形式と Docker 形式の双方を標準化対象とする。
+本番サーバ運用、デプロイ、運用基盤では、Go single binary 形式を標準化対象とする。
 
-Go single binary を正本成果物とする。Docker は正本成果物ではなく、Go single binary を Docker image に同梱して実行する運用選択肢の一つである。
+Go single binary を正本成果物とする。Docker は Adlaire Git Repository 本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。
 
-Docker を使用する場合も、Docker を使用せず Go single binary を host OS 上で直接実行する場合も、同じ system / data 分離構成にする。Go single binary、Docker image、container、起動管理定義は差し替え可能な system 側として扱う。libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は保護対象 data 側として扱い、host filesystem を正本として system 側から分離する。
-
-Docker を利用する場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
+Docker を扱う場合も、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
 
 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
@@ -278,7 +278,7 @@ Docker を利用する場合も、Node.js runtime、npm ecosystem、`npm:` speci
 
 Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用サーバーを前提とする。
 
-最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Docker を使用する場合も、Docker を使用しない binary 直実行の場合も、この構成を変えてはならない。Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、data 側は container lifecycle に依存させず、host filesystem 上で直接保全できる構成を基準にする。
+最小本番構成は、1 VPS 上に差し替え可能な system 側と host filesystem による data 側を同居させる構成とする。Git ホスティング本体は、Git bare repository の永続保存、`git` コマンド実行、ファイルシステム、容量管理、バックアップ、復旧、権限管理を中核とする。そのため、data 側は container lifecycle に依存させず、host filesystem 上で直接保全できる構成を基準にする。
 
 Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
@@ -456,6 +456,8 @@ Phase 9 は、ユーザー承認に基づく安定版判定フェーズとして
 - ユーザー入力は必ず検証・エスケープする。
 - Web UI は外部フレームワークを使わず、HTML / CSS / Vanilla JavaScript を基本とする。
 - Web UI は GitHub 互換の対象外とし、本プロジェクト独自のUIとして設計する。
+- UI は差し替え可能なものとして扱い、Adlaire Git Repository 本体を特定 UI に依存させない。
+- UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
 - フレームワークが必要な場合は内製のみとし、外部ライブラリが必要な場合は例外採用としてユーザー承認を得る。
 - Git リポジトリの実データ、libSQL メタデータ、移行元 SQLite データの整合性を壊す変更を行わない。
 

@@ -2,8 +2,8 @@
 
 **位置づけ**: マスター実装機能候補リスト
 **対象**: Auris / Adlaire Git Repository
-**文書バージョン**: v.0.31
-**ステータス**: Go 採用方針 / Deno + TypeScript 終了方針整合
+**文書バージョン**: v.0.32
+**ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ方針整合
 
 ---
 
@@ -184,6 +184,8 @@ Phase 11 推奨候補は、Adlaire Git Repository 本体を Go へ移行する�
 | 3 | 外部依存例外候補整理 | 優先 | Go module を含む外部ライブラリを必要最小限に抑え、採用前承認を徹底するため |
 | 4 | 旧 Deno + TypeScript 資産整理 | 優先 | 本体終了方針に基づき、撤去対象、履歴保持対象、移行対象を混同しないため |
 | 5 | Go 検証導線整理 | 優先 | `go fmt`、`go test`、`go build`、Linux ARM64 / x86_64 build の確認範囲を定義するため |
+| 6 | ヘッドレスアーキテクチャ方針整理 | 優先 | UI を本体に固定せず、Adlaire 公式 SDK 経由の接続方針を仕様へ反映するため |
+| 7 | Docker の Adlaire Pipeline 経由方針整理 | 優先 | Docker を本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で扱う方針へ整合するため |
 
 ## 4. 保留候補
 
@@ -245,3 +247,4 @@ Phase 11 推奨候補は、Adlaire Git Repository 本体を Go へ移行する�
 | v.0.29 | Adlaire Pipeline の将来機能群として `Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を追加 |
 | v.0.30 | Phase 10 の推奨候補を Go single binary 方針と Adlaire Pipeline Go 採用方針へ整合 |
 | v.0.31 | Phase 11 推奨候補として Go 移行準備、Go 固定採用バージョン候補整理、外部依存例外候補整理、旧 Deno + TypeScript 資産整理、Go 検証導線整理を追加 |
+| v.0.32 | Phase 11 推奨候補に、ヘッドレスアーキテクチャ方針整理と Docker の Adlaire Pipeline 経由方針整理を追加 |
