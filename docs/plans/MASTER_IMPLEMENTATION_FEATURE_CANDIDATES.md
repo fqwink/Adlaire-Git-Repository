@@ -2,8 +2,8 @@
 
 **位置づけ**: マスター実装機能候補リスト
 **対象**: Auris / Adlaire Git Repository
-**文書バージョン**: v.0.36
-**ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
+**文書バージョン**: v.0.37
+**ステータス**: 3類マスター仕様完成
 
 ---
 
@@ -186,7 +186,7 @@ Phase 11 推奨候補は、Adlaire Git Repository 本体を Go へ移行する�
 | 5 | Go 検証導線整理 | 優先 | `go fmt`、`go test`、`go build`、Linux ARM64 / x86_64 build の確認範囲を定義するため |
 | 6 | ヘッドレスアーキテクチャ方針整理 | 優先 | UI を本体に固定せず、静的フロントエンドやモバイルアプリ等のクライアントを可能にし、Adlaire 公式 SDK 経由の接続方針を仕様へ反映するため |
 | 7 | Docker の Adlaire Pipeline 経由方針整理 | 優先 | Docker を本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で扱う方針へ整合するため |
-| 8 | Adlaire 公式 SDK 方針整理 | 優先 | SDK 専用の3類マスター仕様書を新設し、SDK を TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成し、本体へ同梱せず `sdk/` で管理し、独立リリース対象にする方針を、実装前に仕様へ固定するため |
+| 8 | Adlaire 公式 SDK 仕様完成 | 優先 | SDK 専用の3類マスター仕様書を完成させ、SDK の公開境界、非責務、TypeScript 実装、Vanilla JavaScript 向け JavaScript 生成、本体非同梱、`sdk/` 管理、独立リリース、対象外、未確定範囲を、実装前に仕様へ固定するため |
 
 ## 4. 保留候補
 
@@ -253,3 +253,4 @@ Phase 11 推奨候補は、Adlaire Git Repository 本体を Go へ移行する�
 | v.0.34 | Phase 11 推奨候補の Adlaire 公式 SDK 方針整理に、`sdk/` 配置、Deno runtime 生成、現行リポジトリ配布、リポジトリ分離未定、本体非同梱、独立リリース方針を追加 |
 | v.0.35 | Phase 11 推奨候補の Adlaire 公式 SDK 方針整理に、SDK 専用3類マスター仕様書の新設を追加 |
 | v.0.36 | Phase 11 の整合性向上として、本体 libSQL driver 方針を Go runtime 前提へ整合し、5系フェーズと後続9系フェーズの補助的リリース判定表記を現行方針へ修正 |
+| v.0.37 | Phase 11 の3類マスター仕様完成に合わせ、SDK 仕様完成、本体仕様境界、全体仕様の確定範囲、対象外、未確定範囲との整合を反映 |

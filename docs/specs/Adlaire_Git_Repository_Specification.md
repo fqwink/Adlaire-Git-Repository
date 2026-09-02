@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.27
-**ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
+**文書バージョン**: v.2.28
+**ステータス**: 本体マスター仕様完成
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Go + libSQL + Git
 
@@ -86,6 +86,76 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ付随システム候補として扱う。
 - Adlaire Pipeline は初期方針では本体へ統合せず、将来の統合、一部統合、付随維持、AdlaireGroup 共通基盤化を仕様確定後に判断する。
 - Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は現時点では未定とする。
+
+## 本体仕様の責務境界
+
+Adlaire Git Repository 本体は、Git ホスティング基盤として以下を責務に持つ。
+
+| 領域 | 本体の責務 |
+|---|---|
+| Repository | Repository 作成、参照、更新、削除、visibility、settings、README 表示 |
+| Git | clone、push、pull、fetch、branch、tag、Git Smart HTTP、SSH / HTTP 認証境界 |
+| 開発支援 | Issue、Pull Request、Code Review、Wiki、Webhook、Release の本体側 API と永続化 |
+| 組織管理 | Organization、Team、Project の最小運用と権限境界 |
+| 認証・認可 | User、session、HTTP Basic、Personal Access Token、SSH key、admin 権限、repository 権限 |
+| API | Adlaire 公式 SDK と外部システムが利用する公開 API |
+| DB | libSQL 標準DB、Database Gateway、Repository 層、driver 層、schema、migration、seed |
+| Storage | Git bare repositories、data 領域、config、secrets、logs、backups、manifests |
+| 運用 | health check、backup、restore、rollback、audit log、operations status |
+| リリース | Go single binary 成果物、GitHub Releases 現行配置、tag / release notes / checksum / manifest の扱い |
+
+本体は、SDK 実装、クライアント UI 実装、Adlaire Pipeline 実装、GitHub Actions 互換実装、外部フレームワーク、npm ecosystem、Node.js runtime を責務に持たない。
+
+## ヘッドレス境界
+
+Adlaire Git Repository は、ヘッドレスアーキテクチャ設計思想に基づき、特定 UI に依存しない本体として設計する。
+
+本体は、UI が必要とする操作を公開 API と認証境界として提供する。UI、モバイルアプリ、外部システムは、本体内部の Service、Repository、Database Gateway、driver、Git 操作処理へ直接依存してはならない。
+
+接続境界は原則として Adlaire 公式 SDK とする。SDK が未実装または対象外の範囲では、公開 API 仕様に基づく直接 HTTP 利用を一時的な接続手段として扱える。ただし、その場合も本体内部構造への依存を仕様化してはならない。
+
+本体に含まれる HTML / CSS / Vanilla JavaScript は、運用上必要な最小 UI または参照 UI として扱う。本体の仕様判断では、UI の見た目、画面配置、ブランド表現を GitHub UI 互換として扱わない。
+
+## API 境界
+
+本体の公開 API は、Adlaire 公式 SDK、管理用スクリプト、外部システムが利用する標準接続面である。
+
+公開 API は、以下を満たす必要がある。
+
+- 認証と認可を分離する。
+- private repository へのアクセスでは必ず repository 権限境界を通す。
+- 入力値の検証結果を一貫した error response として返す。
+- secret、token、password hash、内部 file path、driver 固有情報をレスポンスへ露出しない。
+- driver、Database Gateway、内部 Service の型や関数名を API 契約にしない。
+- GitHub 互換基準の用語と主要 workflow に寄せるが、GitHub API の完全再現を前提にしない。
+
+API 詳細を追加または変更する場合は、本書、`docs/specs/Adlaire_Official_SDK_Specification.md`、マスター開発計画、検証範囲を整合し、ユーザー承認を得る。
+
+## System / Data 境界
+
+本体は、差し替え可能な system 側と保護対象の data 側を分離する。
+
+system 側は、Go single binary、起動管理定義、Adlaire Pipeline 経由で扱う Docker image / container / compose、承認済み deploy script を含む。
+
+data 側は、host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を含む。
+
+system 側は再配置、再生成、差し替え可能である必要がある。data 側は system 側の差し替え、Docker container lifecycle、release 更新によって失われてはならない。
+
+## 完成済み仕様と未確定仕様
+
+本書における完成済み仕様は、現行正本仕様、責務境界、Phase 1 から Phase 11 までの完了済みまたは着手済み範囲、対象外範囲、保留候補、検証方針を追跡できる状態を指す。
+
+未確定仕様は以下とする。
+
+| 領域 | 未確定内容 |
+|---|---|
+| Go 固定採用バージョン | 最新安定版方針に従い、別途承認で固定する |
+| Adlaire Pipeline | 付随システム候補。実装、DB、依存関係、実行基盤、本体統合は未確定 |
+| SDK 詳細 API | SDK マスター仕様書と対応する公開 API 詳細を別途確定する |
+| SDK リポジトリ分離 | 未定 |
+| Turso Cloud 等 | libSQL 接続先候補として保留 |
+
+未確定仕様は、ユーザー承認なしに実装対象へ移してはならない。
 
 ## マスター仕様完成条件
 
@@ -1826,10 +1896,10 @@ Docker は、Adlaire Pipeline 経由で生成、管理、配布、利用する�
 ```
 □ Adlaire Git Repository と同一サーバー上で CI/CD 実行
 □ ビルド・テスト・デプロイを自動化
-□ GitHub Actions 互換ワークフロー対応
+□ Adlaire Pipeline との将来連携
 □ スケーラビリティ（複数インスタンス対応）
 
-実装タイミング: Phase 3以降検討
+実装タイミング: Adlaire Pipeline 仕様確定後に再検討
 ```
 
 ---
@@ -1844,8 +1914,8 @@ Go single binary 形式を正本成果物とする。標準デプロイは、Go 
 
 標準構成は以下を基本とする。
 
-- `deno compile` による single binary 生成
-- 安定版リリースでは ARM64 Linux と x86_64 Linux の2種類の single binary 生成
+- Go による single binary 生成
+- 安定版リリースでは ARM64 Linux と x86_64 Linux の2種類の Go single binary 生成
 - Adlaire Pipeline 経由で扱う Docker image 生成
 - binary 直実行による起動
 - libSQL database、移行元 SQLite database、Git repository、config、secrets、log、backups、manifests の host filesystem 上での永続保存
@@ -1861,11 +1931,12 @@ Docker named volume を標準の data 正本として扱ってはならない。
 
 ### 準備
 
-- [ ] Deno `v2.9.5` を基準にした実行環境確認
+- [ ] Go 固定採用バージョン確定後の実行環境確認
+- [ ] Deno `v2.9.5` を基準にした旧資産確認
 - [ ] Git `v2.55.0` 系を基準にした実行環境確認
 - [ ] Repository 作成
 - [ ] Team onboarding
-- [ ] CI/CD パイプライン
+- [ ] Adlaire Pipeline 連携方針の再確認
 
 ### 開発
 

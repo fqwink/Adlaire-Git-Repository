@@ -2,9 +2,9 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.2.27
+**計画バージョン**: v.2.28
 **現行フェーズ基準バージョン**: v.2.10
-**ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
+**ステータス**: 3類マスター仕様完成
 
 ---
 
@@ -16,7 +16,7 @@
 
 実装は、1類ルールブック、2類ポリシー、3類マスター仕様書に従い、本書で定義したフェーズ計画に基づいて進める。
 
-Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。Phase 10 は現行リリース配置を GitHub Releases に整合しつつ、Adlaire Pipeline をリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として定義した履歴である。Phase 11 の現行フェーズ基準バージョンは `v.2.10` とする。Phase 11 は Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、SDK マスター仕様書、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理する。Phase 11 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
+Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。Phase 10 は現行リリース配置を GitHub Releases に整合しつつ、Adlaire Pipeline をリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として定義した履歴である。Phase 11 の現行フェーズ基準バージョンは `v.2.10` とする。Phase 11 は Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、SDK マスター仕様書、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理し、3類マスター仕様書を完成版として整合する。Phase 11 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
 
 本計画における「マスター仕様完成」は、実装承認ではない。仕様完成後にソースコード実装、DB driver 実装、schema 変更、テスト変更、デプロイ実行を行う場合は、対象範囲と検証方法を提示し、別途ユーザー承認を得る。
 
@@ -114,7 +114,7 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 | Phase 8.7 | v.1.9 | 完了 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
 | Phase 9 | v.2.10 | 完了 | バグ修正ゼロ化、安定版判定、リリース準備 |
 | Phase 10 | v.2.10 | 完了 | GitHub Releases 現行配置整合、Adlaire Pipeline 付随システム候補整理、Go 採用方針整合 |
-| Phase 11 | v.2.10 | 着手 | Go 移行準備。固定採用バージョン、実装構成、検証導線、旧 Deno + TypeScript 資産、ヘッドレスアーキテクチャ方針、SDK マスター仕様書、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理 |
+| Phase 11 | v.2.10 | 着手 | Go 移行準備。固定採用バージョン、実装構成、検証導線、旧 Deno + TypeScript 資産、ヘッドレスアーキテクチャ方針、3類マスター仕様完成、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理 |
 
 上記は各フェーズの基準バージョンである。表の `Major` は安定版リリース系列であり、累積フェーズ番号ではない。初回安定版リリース前は `v.0.x` 系を維持する。
 
@@ -1297,7 +1297,8 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 - Go 固定採用バージョン候補の提示
 - Go single binary の Linux ARM64 / x86_64 build 方針
 - ヘッドレスアーキテクチャ設計思想と Adlaire 公式 SDK 接続方針
-- Adlaire 公式 SDK マスター仕様書の新設
+- 3類マスター仕様書の完成
+- Adlaire 公式 SDK マスター仕様書の完成
 - SDK の TypeScript 実装 / JavaScript 生成方針
 - SDK の `sdk/` 配置、Deno runtime 生成、現行リポジトリ配布、独立リリース方針
 - Docker image を Adlaire Pipeline 経由で扱う方針
@@ -1316,7 +1317,7 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 - Go 固定採用バージョンの確定
 - Go module または外部ライブラリの採用
 - Adlaire 公式 SDK の実装
-- SDK API 詳細仕様の確定
+- SDK public API の具体的な関数名、戻り値形式、error 形式の確定
 - SDK 実装開始フェーズの確定
 - Docker image の本体直接標準運用化
 - 既存 Deno + TypeScript 実装の削除
@@ -1332,7 +1333,7 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 - Deno + TypeScript 本体終了方針と、AdlaireGroup 共通の Deno + TypeScript / Go 単体2系統選択方針が矛盾していない。
 - Go single binary 正本成果物方針、GitHub Releases 現行配置、system / data 分離、libSQL 標準DB方針、ヘッドレスアーキテクチャ設計思想、Docker の Adlaire Pipeline 経由方針が矛盾していない。
 - UI が Adlaire Git Repository 本体に固定されず、特定 UI 非依存、静的フロントエンド、モバイルアプリ等のクライアント拡張、Adlaire 公式 SDK 接続方針を説明できる。
-- Adlaire 公式 SDK マスター仕様書を3類マスター仕様書として参照できる。
+- Adlaire 公式 SDK マスター仕様書を3類マスター仕様書として参照でき、SDK の公開境界、非責務、対象外、未確定範囲を説明できる。
 - Adlaire 公式 SDK の TypeScript 実装、JavaScript 生成、`sdk/` 配置、本体非同梱、独立リリース方針を説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
@@ -1448,3 +1449,4 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 | v.2.25 | 全フェーズ共通 / Phase 11 | v.2.10 | Adlaire 公式 SDK の `sdk/` 配置、Deno runtime 生成、現行リポジトリ配布、リポジトリ分離未定、本体非同梱、独立リリース方針を反映 |
 | v.2.26 | 全フェーズ共通 / Phase 11 | v.2.10 | Adlaire 公式 SDK マスター仕様書を3類マスター仕様書として新設し、SDK 詳細仕様の正本を分離 |
 | v.2.27 | 全フェーズ共通 / Phase 11 | v.2.10 | 本体 libSQL driver 方針を Go runtime 前提へ整合し、5系フェーズと後続9系フェーズの補助的リリース判定表記を現行方針へ修正 |
+| v.2.28 | 全フェーズ共通 / Phase 11 | v.2.10 | 3類マスター仕様書を完成版として整合し、Auris 全体仕様、本体仕様、SDK 仕様の責務境界、確定範囲、対象外、未確定範囲を明確化 |
