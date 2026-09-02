@@ -67,7 +67,7 @@ libSQL に接続する実装は、内製 `LibsqlDriver` と Database Gateway の
 
 `@libsql/client` 等の npm 互換 libSQL client は採用禁止とする。既存実装または設定に npm 由来の libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱い、別途承認を得て撤去または置換する。
 
-標準 libSQL driver は、Deno runtime の `fetch` だけで libSQL server の HTTP/Hrana endpoint に接続する内製 driver とする。FFI、native loader、platform-specific package、`--allow-ffi`、`--allow-sys` を前提にする外部 libSQL client は標準採用しない。
+標準 libSQL driver は、Go runtime と Go 標準ライブラリを前提に libSQL server の HTTP/Hrana endpoint へ接続する内製 driver とする。Node.js runtime、npm ecosystem、FFI、native loader、platform-specific package を前提にする外部 libSQL client は標準採用しない。
 
 ## 3.2 レジストリ方針
 

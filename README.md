@@ -82,7 +82,7 @@ Adlaire Git Repository 本体は Go を標準開発言語とし、Deno + TypeScr
 
 Go 標準ライブラリを優先する。Go module、JSR レジストリの公開ライブラリ、その他外部ライブラリは必要最小限とし、明示的な例外採用としてユーザー承認を得る。npm 互換 package、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem を伴う依存は例外なく採用しない。
 
-libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、Database Gateway と内製 `libsql` driver 境界に閉じ込める。`@libsql/client` 等の npm 互換 client は撤去済みであり、再導入しない。libSQL 接続は、Node.js runtime が存在しない前提で、Deno runtime だけで動作する内製 HTTP/Hrana driver 経路へ集約する。
+libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、Database Gateway と内製 `libsql` driver 境界に閉じ込める。`@libsql/client` 等の npm 互換 client は撤去済みであり、再導入しない。libSQL 接続は、Node.js runtime と npm ecosystem が存在しない前提で、Go runtime と Go 標準ライブラリを中心に動作する内製 HTTP/Hrana driver 経路へ集約する。
 
 ローカルに Go が存在しない場合、実行系検証は VPS または承認済み検証サーバで行う。Docker で検証、テスト、ビルド、binary 生成をまとめて実行する場合は、Adlaire Pipeline 経由で扱う。
 

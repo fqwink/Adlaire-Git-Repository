@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.26
+**文書バージョン**: v.2.27
 **ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Go + libSQL + Git
@@ -585,13 +585,13 @@ libSQL は必要最小限の外部依存に該当するが、DB抽象化設計�
 
 libSQL driver は Phase 8 の承認済み実装対象とする。libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、内製 `libsql` driver と Database Gateway の内部に閉じ込め、サービス層やRepository層へ直接露出させない。
 
-`@libsql/client` 等の npm 互換 libSQL client は撤去済みとし、再導入してはならない。libSQL 採用は撤回せず、Node.js runtime が存在しない前提で Deno runtime だけで動作する内製 HTTP/Hrana driver 経路へ集約する。
+`@libsql/client` 等の npm 互換 libSQL client は撤去済みとし、再導入してはならない。libSQL 採用は撤回せず、Adlaire Git Repository 本体の Go 方針に合わせて、Go runtime と Go 標準ライブラリを前提に動作する内製 HTTP/Hrana driver 経路へ集約する。
 
 `@libsql/client` 等の npm 互換 libSQL client は採用禁止とする。既存実装または設定に npm 由来の libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱い、撤去または置換する。
 
-libSQL client / driver は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Deno runtime だけで動作することを必須条件とする。標準 driver は、Deno `fetch` による内製 HTTP/Hrana driver とする。
+libSQL client / driver は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Adlaire Git Repository 本体の Go runtime だけで動作することを必須条件とする。標準 driver は、Go 標準ライブラリによる内製 HTTP/Hrana driver とする。
 
-Turso 公式の `@tursodatabase/serverless/compat` および `@tursodatabase/serverless` は、`fetch` のみで動作する libSQL over HTTP 系 client 候補として調査対象にできる。ただし、npm package としての取得経路、Deno runtime only 条件、固定バージョン、権限、self-host / VPS 上の libSQL server 接続可否を確認し、別途ユーザー承認を得るまで採用確定または実装反映してはならない。
+Turso 公式の `@tursodatabase/serverless/compat` および `@tursodatabase/serverless` は、Go 採用方針への転換後は Adlaire Git Repository 本体の標準 client 候補として扱わない。libSQL 外部依存例外を検討する場合は、Go runtime、Node.js / npm 非依存、固定バージョン、権限、self-host / VPS 上の libSQL server 接続可否を確認し、別途ユーザー承認を得るまで採用確定または実装反映してはならない。
 
 Turso Cloud 等のクラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングは新しいデータベースエンジンではなく、libSQL の接続先または運用形態の候補として扱う。採用する場合は、外部サービス依存、データ所在、認証トークン管理、バックアップ、障害時の復旧、運用費用を評価し、例外採用としてユーザー承認を得る。
 
@@ -680,7 +680,7 @@ Phase 8 の DB 接続仕様は以下とする。
 | 標準 driver | `DB_DRIVER=libsql` |
 | 接続先 | `DB_URL` |
 | 認証情報 | `DB_AUTH_TOKEN` |
-| driver ライブラリ | Node.js runtime が存在しない前提で Deno runtime だけで動作する内製 libSQL driver / libSQL 外部依存例外を使用 |
+| driver ライブラリ | Node.js runtime と npm ecosystem が存在しない前提で、Go runtime と Go 標準ライブラリを中心に動作する内製 libSQL driver / 承認済み libSQL 外部依存例外を使用 |
 | migration 適用 | Database Gateway 経由 |
 | schema / seed | 専用ディレクトリへ集約 |
 | SQLite | 既存データ移行元確認用。利用時は別途承認 |
@@ -688,11 +688,11 @@ Phase 8 の DB 接続仕様は以下とする。
 
 Phase 8 では、DB driver の外部ライブラリ API を Database Gateway より上位へ露出させない。Repository 層は永続化要求を表現し、接続、SQL 実行、トランザクション、migration、driver 差し替えは Database Gateway と driver 層の責務とする。
 
-`@libsql/client` 等の npm 互換 libSQL client は撤去済みとし、再導入してはならない。標準DBとしての libSQL 採用は撤回せず、Node.js runtime が存在しない前提で Deno runtime だけで動作する内製 HTTP/Hrana driver 経路へ集約する。
+`@libsql/client` 等の npm 互換 libSQL client は撤去済みとし、再導入してはならない。標準DBとしての libSQL 採用は撤回せず、Adlaire Git Repository 本体の Go 方針に合わせて、Go runtime と Go 標準ライブラリを前提に動作する内製 HTTP/Hrana driver 経路へ集約する。
 
-libSQL client / driver は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Deno runtime だけで動作することを必須条件とする。標準 driver は、Deno `fetch` による内製 HTTP/Hrana driver とする。
+libSQL client / driver は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Adlaire Git Repository 本体の Go runtime だけで動作することを必須条件とする。標準 driver は、Go 標準ライブラリによる内製 HTTP/Hrana driver とする。
 
-Turso 公式の `@tursodatabase/serverless/compat` および `@tursodatabase/serverless` は、`fetch` のみで動作する libSQL over HTTP 系 client 候補として調査対象にできる。ただし、npm package としての取得経路、Deno runtime only 条件、固定バージョン、権限、self-host / VPS 上の libSQL server 接続可否を確認し、別途ユーザー承認を得るまで採用確定または実装反映してはならない。
+Turso 公式の `@tursodatabase/serverless/compat` および `@tursodatabase/serverless` は、Go 採用方針への転換後は Adlaire Git Repository 本体の標準 client 候補として扱わない。libSQL 外部依存例外を検討する場合は、Go runtime、Node.js / npm 非依存、固定バージョン、権限、self-host / VPS 上の libSQL server 接続可否を確認し、別途ユーザー承認を得るまで採用確定または実装反映してはならない。
 
 Phase 8 の対象外は以下とする。
 

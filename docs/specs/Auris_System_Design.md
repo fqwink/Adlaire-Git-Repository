@@ -4,7 +4,7 @@
 **対象**: Auris / Adlaire Git Repository 全体
 **ライセンス**: クローズドライセンス
 **標準言語 / ランタイム**: Go
-**文書バージョン**: v.2.26
+**文書バージョン**: v.2.27
 **ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
 
 ---
@@ -136,13 +136,13 @@ libSQL は、移行容易性、将来の同期・分散構成への拡張余地�
 
 libSQL driver は Phase 8 の承認済み実装対象とする。libSQL は必要最小限の外部依存例外として扱うが、npm 互換 package を使わず、内製 `libsql` driver と Database Gateway の内部に閉じ込める。
 
-`@libsql/client` 等の npm 互換 libSQL client は撤去済みとし、再導入してはならない。libSQL 採用は維持し、Node.js runtime が存在しない前提で Deno runtime だけで動作する内製 HTTP/Hrana driver 経路へ集約する。
+`@libsql/client` 等の npm 互換 libSQL client は撤去済みとし、再導入してはならない。libSQL 採用は維持し、Adlaire Git Repository 本体の Go 方針に合わせて、Go runtime と Go 標準ライブラリを前提に動作する内製 HTTP/Hrana driver 経路へ集約する。
 
 `@libsql/client` 等の npm 互換 libSQL client は採用禁止とする。既存実装または設定に npm 由来の libSQL client、`npm:` import、npm 由来の `deno.lock` 解決結果、FFI / native loader 前提の権限が残る場合は、現行方針へ反する是正対象として扱い、撤去または置換する。
 
-libSQL client / driver は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Deno runtime だけで動作することを必須条件とする。標準 driver は、Deno `fetch` による内製 HTTP/Hrana driver とする。
+libSQL client / driver は、Node.js runtime、npm ecosystem、`package.json`、`node_modules` が存在しない前提で、Adlaire Git Repository 本体の Go runtime だけで動作することを必須条件とする。標準 driver は、Go 標準ライブラリによる内製 HTTP/Hrana driver とする。
 
-Turso 公式の `@tursodatabase/serverless/compat` および `@tursodatabase/serverless` は、`fetch` のみで動作する libSQL over HTTP 系 client 候補として調査対象にできる。ただし、npm package としての取得経路、Deno runtime only 条件、固定バージョン、権限、self-host / VPS 上の libSQL server 接続可否を確認し、別途ユーザー承認を得るまで採用確定または実装反映してはならない。
+Turso 公式の `@tursodatabase/serverless/compat` および `@tursodatabase/serverless` は、Go 採用方針への転換後は Adlaire Git Repository 本体の標準 client 候補として扱わない。libSQL 外部依存例外を検討する場合は、Go runtime、Node.js / npm 非依存、固定バージョン、権限、self-host / VPS 上の libSQL server 接続可否を確認し、別途ユーザー承認を得るまで採用確定または実装反映してはならない。
 
 Turso Cloud 等の libSQL 系クラウドDBホスティングを採用するかどうかは未定とする。クラウドDBホスティングはデータベースエンジンの追加採用ではなく、libSQL の接続先または運用形態の候補として扱う。検討する場合は、標準運用方針、クローズドライセンス、データ管理責任、認証情報管理、運用コスト、障害時の復旧方針を3類マスター仕様書に追記してから判断する。
 
@@ -539,7 +539,7 @@ Phase 5、Phase 15、Phase 25 のような 5系フェーズは、設計・デザ
 
 Phase 6、Phase 16、Phase 26 のような 6系フェーズは、大規模なバグ修正とドキュメント整合性向上をデフォルト方針とする安定版リリース準備フェーズとする。必要に応じて移行準備と検証強化も行う。6系フェーズ自体は安定版リリースフェーズとして扱わない。
 
-Phase 9 は安定版判定フェーズとして扱う。Phase 19、Phase 29 のような後続9系フェーズは、補助的なリリース判定フェーズとして扱い、ケースバイケースで安定版リリースフェーズになる場合と、ならない場合がある。
+Phase 9 は安定版判定フェーズとして扱う。Phase 19、Phase 29 のような後続9系フェーズは、自動的な安定版判定フェーズまたは補助的なリリース判定フェーズとして扱わない。後続9系フェーズで安定版判定を行う場合は、マスター開発計画と2類ポリシーに明記し、ユーザー承認を得る。
 
 リリースするには、以下を満たす必要がある。
 
