@@ -5,7 +5,7 @@
 **ライセンス**: クローズドライセンス
 **標準ランタイム**: Deno
 **標準言語**: TypeScript
-**文書バージョン**: v.2.20
+**文書バージョン**: v.2.21
 **ステータス**: GitHub Releases 現行配置 / Adlaire Pipeline 付随システム移行候補方針整合
 
 ---
@@ -205,7 +205,7 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - data 側は host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
 - 標準運用基盤は self-host、VPS、専用サーバーを前提とする。
 - リリース配置は現行では GitHub Releases を正式配置元とする。
-- Adlaire Pipeline は、リリース基盤システムである `Adlaire Pipeline Release` と自動実行基盤システムである `Adlaire Pipeline Runner` を担う付随システム候補として扱う。
+- Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ付随システム候補として扱う。
 - Adlaire Pipeline は初期方針では Adlaire Git Repository 本体へ統合せず、将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は仕様確定後に判断する。
 - Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は現時点では未定とし、ユーザー承認なしに固定しない。
 - Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。
@@ -220,7 +220,7 @@ Deno single binary、release notes、checksum、manifest は GitHub Releases 側
 
 GitHub Releases の作成、成果物配置、release notes 公開、tag 作成は、リリース提案を提示し、ユーザー承認を得てから実行する。
 
-Adlaire Pipeline は、将来的に GitHub Releases に代わる、または GitHub Releases を補助配置へ移す `Adlaire Pipeline Release` と、検証・ビルド・デプロイ等を担う `Adlaire Pipeline Runner` の候補として扱う。ただし、現時点では付随システム候補であり、Adlaire Git Repository 本体へ統合しない。Adlaire Pipeline の技術選定は未定であり、本書の Deno / TypeScript / libSQL 採用方針を Adlaire Pipeline へ自動適用してはならない。
+Adlaire Pipeline は、将来的に GitHub Releases に代わる、または GitHub Releases を補助配置へ移す `Adlaire Pipeline Release`、検証・ビルド等を担う `Adlaire Pipeline Runner`、成果物管理を担う `Adlaire Pipeline Artifact`、デプロイ反映を担う `Adlaire Pipeline Deploy`、実行履歴・監査を担う `Adlaire Pipeline Audit` の候補として扱う。ただし、現時点では付随システム候補であり、Adlaire Git Repository 本体へ統合しない。Adlaire Pipeline の技術選定は未定であり、本書の Deno / TypeScript / libSQL 採用方針を Adlaire Pipeline へ自動適用してはならない。
 
 ## 7. 完成判定
 
@@ -474,14 +474,14 @@ Phase 10 は、現行リリース配置を GitHub Releases に整合しつつ、
 
 Phase 10 では、Deno single binary、release notes、checksum、manifest の現行配置先を GitHub Releases とし、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない方針を明確にする。
 
-Phase 10 では、Adlaire Pipeline を付随システム候補として定義し、リリース基盤システムの責務名を `Adlaire Pipeline Release`、自動実行基盤システムの責務名を `Adlaire Pipeline Runner` とする。ただし、Adlaire Pipeline の実装、技術選定、本体統合、GitHub Releases 廃止、GitHub Actions、外部デプロイフレームワーク、Container registry、Docker image 配布の正式化、Node.js / npm 前提ツールは対象外とする。
+Phase 10 では、Adlaire Pipeline を付随システム候補として定義し、将来的な機能群を `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。ただし、Adlaire Pipeline の実装、技術選定、本体統合、GitHub Releases 廃止、GitHub Actions、外部デプロイフレームワーク、Container registry、Docker image 配布の正式化、Node.js / npm 前提ツールは対象外とする。
 
 Phase 10 の完了条件は以下とする。
 
 - 現行リリース配置が GitHub Releases として説明できる。
 - 3類マスター仕様書、2類リリースポリシー、2類デプロイポリシー、マスター開発計画、README の記述が矛盾していない。
 - 標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Deno single binary を本番サーバへ反映する補助導線として説明できる。
-- Adlaire Pipeline が `Adlaire Pipeline Release` と `Adlaire Pipeline Runner` を担う付随システム候補であり、開発言語と技術選定が未定であることを説明できる。
+- Adlaire Pipeline がリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う将来機能群の候補であり、開発言語と技術選定が未定であることを説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
 ---

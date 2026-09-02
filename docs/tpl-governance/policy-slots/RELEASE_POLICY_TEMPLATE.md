@@ -14,7 +14,7 @@
 
 リリース履歴の正本は GitHub Releases 等の承認済みリリース配置先とし、リポジトリ内に変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
 
-Adlaire Pipeline を採用候補にする場合は、リリース基盤システム `Adlaire Pipeline Release` と自動実行基盤システム `Adlaire Pipeline Runner` の責務を分離する。初期方針で付随システムとして扱う場合は、本体統合、技術選定、既存リリース配置先の廃止を自動決定してはならない。
+Adlaire Pipeline を採用候補にする場合は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` の責務を分離する。初期方針で付随システムとして扱う場合は、本体統合、技術選定、既存リリース配置先の廃止を自動決定してはならない。
 
 デプロイ、バックアップ、検証で生成される operational な manifest、checksum、log は変更履歴ファイルではなく運用記録として扱い、デプロイメントポリシーの責務範囲で管理する。
 

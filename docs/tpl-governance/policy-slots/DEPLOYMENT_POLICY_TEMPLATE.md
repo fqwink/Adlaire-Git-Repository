@@ -12,7 +12,7 @@
 
 各プロジェクトは、共通方針を破らない範囲で配置先、接続方式、サーバ名、ドメイン、環境変数などの固有値を具体化する。
 
-Adlaire Pipeline を採用候補にする場合は、リリース基盤システム `Adlaire Pipeline Release` と自動実行基盤システム `Adlaire Pipeline Runner` の2本に分けて定義する。初期方針で付随システムとして扱う場合は、プロジェクト本体への統合、開発言語、ランタイム、データベース、依存関係、実行基盤を自動的に固定してはならない。
+Adlaire Pipeline を採用候補にする場合は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` の将来機能群に分けて定義する。初期方針で付随システムとして扱う場合は、プロジェクト本体への統合、開発言語、ランタイム、データベース、依存関係、実行基盤を自動的に固定してはならない。
 
 ## 2. 個別具体化必須項目
 

@@ -24,7 +24,7 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 
 標準デプロイは、Deno single binary 正本成果物を self-host、VPS、専用サーバーへ配置する方式を基準とする。Docker を利用する場合は、正本成果物である Deno single binary を Docker image に同梱し、host filesystem 上の data 領域を bind mount して実行する。
 
-Adlaire Pipeline は、リリース基盤システムと自動実行基盤システムを担う付随システムとして検討する。リリース基盤システムの責務名は `Adlaire Pipeline Release`、自動実行基盤システムの責務名は `Adlaire Pipeline Runner` とする。初期方針では Adlaire Git Repository 本体へ統合せず、外側の付随システムとして定義する。将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は、Adlaire Pipeline の仕様確定後に別途判断する。
+Adlaire Pipeline は、リリース基盤システムと自動実行基盤システムを担う付随システムとして検討する。将来的な機能群は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。初期方針では Adlaire Git Repository 本体へ統合せず、外側の付随システムとして定義する。将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は、Adlaire Pipeline の仕様確定後に別途判断する。
 
 Adlaire Pipeline の開発言語、ランタイム、データベース、依存関係、実行基盤は現時点では未定とする。Deno、TypeScript、libSQL、Docker、GitHub Actions 等を Adlaire Pipeline の採用技術として勝手に固定してはならない。
 
@@ -42,7 +42,7 @@ Adlaire Pipeline の開発言語、ランタイム、データベース、依存
 | 補助採用 | `gh` | Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って利用する |
 | 補助採用 | systemd timer | バックアップ、定期検証、保守系の定期実行候補として利用する。アプリケーション本体の標準起動方式ではない |
 | 保留 | GitHub Actions | 標準採用しない。外部CIとしての採用可否は保留し、必要時に別途提案と承認を要する |
-| 将来候補 | Adlaire Pipeline | `Adlaire Pipeline Release` と `Adlaire Pipeline Runner` を含む内製付随システム候補。技術選定、統合方針、実装時期は未定 |
+| 将来候補 | Adlaire Pipeline | `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を含む内製付随システム候補。技術選定、統合方針、実装時期は未定 |
 | 保留 | 外部デプロイフレームワーク | 標準採用しない。必要性、依存関係、運用リスクを整理し、別途承認を得るまで採用しない |
 | 採用 | systemd または同等の起動管理 | binary 直実行を選択する場合の起動管理候補。作成または変更は別途承認を得る |
 | 不採用 | Docker named volume 標準運用 | data 正本を Docker named volume に丸投げする運用は禁止 |
@@ -251,6 +251,6 @@ system rollback は旧 Deno single binary または旧 Docker image / tag へ戻
 
 リリースとデプロイを同時に自動化する場合も、それぞれの承認対象、成果物、検証範囲、失敗時対応を分けて提示しなければならない。
 
-Adlaire Pipeline を採用する場合も、リリース基盤システムと自動実行基盤システムの責務を分離する。リリース基盤システムは `Adlaire Pipeline Release` と呼称し、tag、version、release notes、checksum、manifest、成果物保存、release 履歴を扱う。自動実行基盤システムは `Adlaire Pipeline Runner` と呼称し、検証、ビルド、デプロイ、バックアップ、再起動、health check、rollback 準備、実行履歴を扱う。
+Adlaire Pipeline を採用する場合も、リリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査の責務を分離する。`Adlaire Pipeline Release` は tag、version、release notes、checksum、manifest、release 履歴を扱う。`Adlaire Pipeline Runner` は検証、ビルド、定期実行、手動実行、実行制御を扱う。`Adlaire Pipeline Artifact` は成果物管理を扱う。`Adlaire Pipeline Deploy` はデプロイ反映、稼働版切り替え、rollback 準備を扱う。`Adlaire Pipeline Audit` は実行履歴・監査を扱う。
 
 Adlaire Pipeline は、Adlaire Git Repository のソースコード管理正本を GitHub に置く現行方針と共存する。GitHub は当面、ソースコード管理、Pull Request、`main` 管理の正本とする。Adlaire Pipeline はリリース、成果物、デプロイ管理の正本候補として段階的に検討する。
