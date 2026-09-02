@@ -3,8 +3,8 @@
 **位置づけ**: 3類マスター仕様書
 **対象**: Adlaire 公式 SDK
 **ライセンス**: クローズドライセンス
-**文書バージョン**: v.2.26
-**ステータス**: SDK 仕様正本新設
+**文書バージョン**: v.2.28
+**ステータス**: SDK マスター仕様完成
 
 ---
 
@@ -48,6 +48,10 @@ Adlaire 公式 SDK の現行正本仕様は以下とする。
 - SDK 固定採用バージョンは2類技術要件ポリシーに従う。
 - SDK リリース開始フェーズは2類リリースポリシーとマスター開発計画に従う。
 - SDK は Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` の禁止方針を緩和しない。
+- SDK は Adlaire Git Repository 本体の公開 API を利用する。
+- SDK は本体内部の Service、Repository、Database Gateway、driver、Git 操作処理へ直接依存しない。
+- SDK は UI framework、画面実装、状態管理 framework を提供しない。
+- SDK は GitHub API 互換 client ではなく、Adlaire Git Repository の公開 API client とする。
 
 ---
 
@@ -65,11 +69,57 @@ SDK は、Adlaire Git Repository 本体の内部 Service、Repository、Database
 
 ---
 
+## 4.1 SDK の公開境界
+
+SDK は、Adlaire Git Repository の公開 API を扱うための client boundary とする。
+
+SDK の公開境界は以下とする。
+
+| 領域 | SDK の責務 |
+|---|---|
+| 接続 | base URL、request、response、timeout、retry 対象外範囲の管理 |
+| 認証 | Personal Access Token、Basic 認証等の公開 API 用 credential の扱い |
+| Repository | Repository 一覧、作成、取得、更新、削除、visibility、README、settings の公開 API 操作 |
+| Git 関連メタデータ | branch、tag、commit、tree、blob、diff 等の公開 API 操作 |
+| 開発支援 | Issue、Pull Request、Code Review、Wiki、Webhook、Release の公開 API 操作 |
+| 組織 | Organization、Team、Project の公開 API 操作 |
+| Registry | Adlaire 内製 Deno Module Registry の公開 API 操作 |
+| 運用 | health、operations status、audit log 等の公開 API 操作 |
+| 型定義 | TypeScript 利用時の公開 API 入出力型 |
+| JavaScript 生成物 | Vanilla JavaScript から利用可能な出力 |
+
+SDK は、本体公開 API の安定した利用面を提供する。SDK の public API は、本体内部構造ではなく、本体公開 API の仕様に対応させる。
+
+## 4.2 SDK が提供しないもの
+
+SDK は以下を提供しない。
+
+- UI component
+- CSS framework
+- SPA framework
+- routing framework
+- form framework
+- database driver
+- Git command wrapper
+- server runtime
+- 本体内 Service への直接呼び出し
+- 本体内 Repository 層への直接呼び出し
+- Database Gateway または libSQL driver への直接呼び出し
+- GitHub API 互換 client
+- npm package 配布
+- Node.js runtime 前提の build、test、bundle、publish
+
+SDK は、UI を差し替え可能にするための接続境界であり、UI 実装そのものではない。
+
+---
+
 ## 5. 配置
 
 SDK は、当面 `sdk/` 配下で管理する。
 
 `sdk/` は Adlaire Git Repository 本体の Go 実装領域ではない。
+
+`sdk/` は、SDK の TypeScript source、生成設定、公開 API 型、生成済み JavaScript 成果物、SDK 用検証導線を管理する候補領域とする。ただし、具体的なファイル構成、生成コマンド、成果物名、配布対象ファイルは、SDK 実装開始時にマスター開発計画へ反映し、ユーザー承認を得てから確定する。
 
 SDK のリポジトリ分離は現時点では未定である。分離する場合は、分離先リポジトリ、履歴移行、配布方式、リリース方式、バージョン連携を提示し、ユーザー承認を得る。
 
@@ -85,6 +135,76 @@ Deno runtime を利用することは、Adlaire Git Repository 本体の標準�
 
 SDK 生成においても、Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を導入してはならない。
 
+SDK 生成では、以下を標準方針とする。
+
+| 項目 | 方針 |
+|---|---|
+| 実装言語 | TypeScript |
+| 生成 runtime | Deno runtime |
+| 出力 | Vanilla JavaScript から利用できる JavaScript |
+| 型 | TypeScript source で公開 API 入出力型を定義する |
+| 依存関係 | Deno 標準ライブラリを優先し、外部ライブラリは例外採用として別途承認 |
+| 禁止 | Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` |
+
+SDK の生成物は、browser から利用できることを前提とする。生成物が server runtime 固有 API に依存する場合は、SDK の標準成果物として扱わない。
+
+## 6.1 API 設計方針
+
+SDK の API は、Adlaire Git Repository の公開 API を薄く安全に扱う client API とする。
+
+SDK API は、以下を満たす必要がある。
+
+- 本体公開 API の resource 単位に整理する。
+- 認証情報の渡し方を統一する。
+- request body、query、path parameter の組み立てを client 側で一貫させる。
+- HTTP status、error code、validation error を利用者が判別できる形で返す。
+- secret、token、password、内部 file path、driver 固有情報をログや error object へ不用意に含めない。
+- 本体公開 API の破壊的変更を SDK public API へ無検証で反映しない。
+
+SDK の初期 resource 候補は以下とする。
+
+| 種別 | resource 候補 |
+|---|---|
+| 基本 | health、session、user |
+| Repository | repositories、branches、tags、commits、tree、blob、readme |
+| 開発支援 | issues、pull requests、code reviews、wiki、webhooks、releases |
+| 組織 | organizations、teams、projects |
+| Registry | packages、versions、downloads |
+| 運用 | audit logs、operations status |
+
+上記は SDK の設計対象候補であり、実装承認ではない。SDK 実装時は、対象 resource、対象外 resource、検証範囲をマスター開発計画へ反映し、ユーザー承認を得る。
+
+## 6.2 認証方針
+
+SDK は、Adlaire Git Repository の公開 API が認める認証方式だけを扱う。
+
+初期認証候補は以下とする。
+
+- Personal Access Token
+- HTTP Basic 認証
+- cookie / session を公開 API が正式に扱う場合の session 認証
+
+SDK は、秘密情報の保存先を勝手に決めてはならない。browser local storage、session storage、cookie、mobile secure storage、環境変数等の保存場所は、利用側アプリケーションの責務として扱う。
+
+SDK は、token refresh、OAuth、外部 IdP 連携、SAML、OIDC、device flow を現行仕様として提供しない。これらを扱う場合は、本体マスター仕様書、SDK マスター仕様書、マスター開発計画へ反映し、ユーザー承認を得る。
+
+## 6.3 Error / Result 方針
+
+SDK は、成功結果と失敗結果を利用側が判別しやすい形で返す。
+
+SDK の error は、最低限以下を区別できる必要がある。
+
+- network error
+- timeout
+- authentication error
+- authorization error
+- validation error
+- not found
+- conflict
+- server error
+
+ただし、具体的な戻り値形式、例外方式、Result object 方式、error code 名は未確定とし、SDK 実装開始時に提案してユーザー承認を得る。
+
 ---
 
 ## 7. 配布とリリース
@@ -97,6 +217,19 @@ SDK のリリース開始フェーズ、リリース成果物、配置先、rele
 
 SDK のリリースは Adlaire Git Repository 本体の安定版リリースを自動的に意味しない。本体の安定版リリースも SDK のリリースを自動的に意味しない。
 
+SDK の配布対象候補は以下とする。
+
+| 成果物 | 扱い |
+|---|---|
+| TypeScript source | SDK 実装の正本候補 |
+| JavaScript output | Vanilla JavaScript 利用向けの配布成果物候補 |
+| type definition | TypeScript 利用者向けの補助成果物候補 |
+| checksum | リリース時の検証対象候補 |
+| manifest | リリース時の成果物一覧候補 |
+| release notes | SDK 独立リリース時の説明対象候補 |
+
+SDK の配布方式は、現時点では現行リポジトリ配布とする。npm package 配布、JSR 公開、CDN 配布、外部 package registry 配布は現行仕様では採用しない。採用する場合は、ライセンス、公開可否、Node.js / npm 非依存、生成方式、成果物検証、配布先、リリース運用を整理し、ユーザー承認を得る。
+
 ---
 
 ## 8. 対象外
@@ -104,14 +237,42 @@ SDK のリリースは Adlaire Git Repository 本体の安定版リリースを�
 現時点では以下を対象外とする。
 
 - SDK 実装
-- SDK API 詳細仕様の確定
+- SDK public API の具体的な関数名、戻り値形式、error 形式の確定
 - SDK 実装開始フェーズの確定
 - SDK リリース実行
 - SDK リポジトリ分離
 - npm package としての配布
+- JSR 公開
+- CDN 配布
+- GitHub API 互換 client 化
+- UI component 提供
+- UI framework 提供
+- state management framework 提供
+- routing framework 提供
+- Git command wrapper 提供
+- database driver 提供
 - Node.js runtime 前提の生成、検証、配布
 - 外部フレームワーク採用
 - 無承認の外部ライブラリ採用
+
+---
+
+## 8.1 未確定範囲
+
+未確定範囲は以下とする。
+
+| 領域 | 未確定内容 |
+|---|---|
+| 実装開始フェーズ | マスター開発計画で別途確定する |
+| SDK 固定採用バージョン | 2類技術要件ポリシーに従い、別途承認で固定する |
+| ファイル構成 | SDK 実装開始時に確定する |
+| 生成コマンド | SDK 実装開始時に確定する |
+| public API 形式 | SDK 実装開始時に確定する |
+| error 形式 | SDK 実装開始時に確定する |
+| release 成果物 | SDK リリース開始時に確定する |
+| リポジトリ分離 | 未定 |
+
+未確定範囲は、ユーザー承認なしに実装またはリリース対象へ移してはならない。
 
 ---
 
@@ -124,4 +285,7 @@ SDK のリリースは Adlaire Git Repository 本体の安定版リリースを�
 - `sdk/` 配置、リポジトリ分離未定、現行リポジトリ配布を説明できる。
 - TypeScript 実装、Vanilla JavaScript 向け JavaScript 生成、Deno runtime 生成を説明できる。
 - Node.js / npm 禁止方針を緩和しないことを説明できる。
-- SDK 実装、API 詳細、実装開始フェーズ、リリース実行が未確定範囲として分離されている。
+- SDK の公開境界、提供する resource 候補、認証方針、error 方針を説明できる。
+- SDK が UI framework、Git command wrapper、database driver、GitHub API 互換 client ではないことを説明できる。
+- SDK 実装、public API 詳細、実装開始フェーズ、リリース実行が未確定範囲として分離されている。
+- SDK 仕様、本体仕様、Auris システム設計、マスター開発計画、README の参照関係が矛盾していない。

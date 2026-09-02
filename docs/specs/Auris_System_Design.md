@@ -4,8 +4,8 @@
 **対象**: Auris / Adlaire Git Repository 全体
 **ライセンス**: クローズドライセンス
 **標準言語 / ランタイム**: Go
-**文書バージョン**: v.2.27
-**ステータス**: Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針整合
+**文書バージョン**: v.2.28
+**ステータス**: 3類マスター仕様完成
 
 ---
 
@@ -194,6 +194,22 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 
 ---
 
+## 5.1 3類マスター仕様書の責務分担
+
+3類マスター仕様書は、以下の責務分担で管理する。
+
+| ドキュメント | 正本として管理する範囲 |
+|---|---|
+| 本書 | システム全体の目的、上位方針、技術方針、現行正本仕様、完成判定、フェーズ全体の仕様境界 |
+| `docs/specs/Adlaire_Git_Repository_Specification.md` | Adlaire Git Repository 本体の機能、アーキテクチャ、DB、Git、運用、system / data 分離、対象外範囲 |
+| `docs/specs/Adlaire_Official_SDK_Specification.md` | Adlaire 公式 SDK の目的、責務、配置、生成、公開境界、配布、リリース、対象外範囲 |
+
+本書は個別仕様書の詳細を重複管理しない。個別仕様書の責務範囲に属する詳細は、対応する個別3類マスター仕様書を正本とする。
+
+3類マスター仕様書を完成版として扱うには、本書、Adlaire Git Repository 本体仕様、Adlaire 公式 SDK 仕様の3本から、現行採用仕様、保留仕様、対象外仕様、未確定仕様を追跡できる必要がある。
+
+---
+
 ## 6. 現行正本仕様
 
 現行正本仕様は以下とする。
@@ -225,7 +241,48 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく将来候補として保留する。
 - Node.js runtime、npm ecosystem、npm 依存、外部フレームワーク、無承認外部ライブラリは採用しない。
 
-## 6.1 リリース配置
+## 6.1 現行仕様の確定範囲
+
+現行仕様として確定する範囲は以下とする。
+
+| 領域 | 確定内容 |
+|---|---|
+| 本体 | Adlaire Group 内部向けセルフホスト型 Git ホスティング基盤 |
+| 言語 | Go |
+| 成果物 | Go single binary |
+| DB | libSQL |
+| DB 境界 | Database Gateway、Repository 層、driver 層を経由する |
+| Git | 外部 `git` コマンドを Go 標準ライブラリから実行する |
+| UI 方針 | ヘッドレスアーキテクチャ。特定 UI へ固定しない |
+| SDK | TypeScript 実装、Vanilla JavaScript 向け JavaScript 生成、Deno runtime 生成、本体非同梱、独立リリース |
+| 運用 | self-host、VPS、専用サーバー。system / data 分離 |
+| リリース配置 | 現行は GitHub Releases |
+| Docker | Adlaire Pipeline 経由で扱う対象 |
+
+現行仕様として未確定または保留する範囲は以下とする。
+
+| 領域 | 扱い |
+|---|---|
+| Go 固定採用バージョン | 未確定。別途ユーザー承認が必要 |
+| Turso Cloud 等のクラウドDBホスティング | libSQL 接続先候補として保留 |
+| Adlaire Pipeline | 将来の付随システム候補。実装、DB、依存関係、実行基盤、本体統合は未確定 |
+| SDK リポジトリ分離 | 未確定 |
+| SDK 実装開始フェーズ | マスター開発計画に従い、別途承認が必要 |
+
+現行仕様として対象外または禁止する範囲は以下とする。
+
+| 領域 | 扱い |
+|---|---|
+| Node.js runtime / npm ecosystem | 採用禁止 |
+| 外部フレームワーク | 採用禁止 |
+| SQLite 互換維持 | 行わない |
+| PostgreSQL / Key-value DB / DB 使用なし案 | 採用候補として扱わない |
+| Docker の本体直接標準運用化 | 行わない。Adlaire Pipeline 経由で扱う |
+| GitHub UI 互換 | 対象外 |
+
+---
+
+## 6.2 リリース配置
 
 リリース配置は現行では GitHub Releases を正式配置元とする。
 
