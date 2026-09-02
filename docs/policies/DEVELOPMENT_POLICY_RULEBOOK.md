@@ -128,10 +128,11 @@
 - ソースコード実装作業は、ユーザー承認を得てから着手する。
 - 開発言語、ランタイム、データベース、Git、外部コマンド、外部ライブラリ、フレームワーク、採用バージョン、固定バージョン、更新方針は、ユーザーが決定する。
 - エージェントは候補提示、比較、調査、リスク整理、推奨案の提示にとどめ、ユーザー承認なしに採用決定、バージョン固定、方針確定、実装反映をしてはならない。
-- 本番サーバ運用、デプロイ、運用基盤では、Deno single binary 形式と Docker 形式の双方を標準化対象とする。Deno single binary を正本成果物とし、Docker は正本成果物を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、保護対象 data 側は host filesystem を正本として system 側から分離する。詳細は `docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` と `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
+- Adlaire Git Repository 本体は、Go を標準開発言語とし、Go single binary を正本成果物とする。Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする。Adlaire Pipeline は Go 採用方針とする。AdlaireGroup 関連プロジェクト、プロダクトでは、Deno + TypeScript と Go 単体の2系統を有効な開発言語選択肢として扱い、プロジェクトごとにユーザー承認を得て選定する。
+- 本番サーバ運用、デプロイ、運用基盤では、Go single binary 形式と Docker 形式の双方を標準化対象とする。Go single binary を正本成果物とし、Docker は正本成果物を Docker image に同梱して実行する運用選択肢の一つとする。Docker 使用時も非 Docker の binary 直実行時も、保護対象 data 側は host filesystem を正本として system 側から分離する。詳細は `docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` と `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
-- 標準採用は Deno 標準ライブラリ（`jsr:@std/*`）に限定する。ただし、個別モジュールの採用はユーザー承認なしに行ってはならない。
-- JSR レジストリの公開ライブラリは、Deno 標準ライブラリ（`jsr:@std/*`）を除き、必要最小限の外部ライブラリ例外採用として扱う。
+- Go 採用プロジェクトでは Go 標準ライブラリを優先し、Deno + TypeScript 採用プロジェクトでは Deno 標準ライブラリ（`jsr:@std/*`）を優先する。ただし、個別モジュールまたは Go module の採用はユーザー承認なしに行ってはならない。
+- Go module、JSR レジストリの公開ライブラリ、その他外部ライブラリは、必要最小限の外部ライブラリ例外採用として扱う。
 - JSR レジストリの公開ライブラリを採用する場合は、Node.js ランタイム環境が存在しない前提で、Deno runtime だけで動作することを必須条件とする。
 - JSR レジストリの公開ライブラリであっても、npm 互換、`npm:` specifier、`package.json`、`node_modules`、Node.js runtime、npm ecosystem への依存を前提とするものは例外なく採用禁止とする。
 - クローズド資産は JSR へ公開してはならず、クローズドな Adlaire 内製 Deno package の中長期配布基盤は Adlaire 内製 Deno Module Registry とする。Adlaire 内製 Deno Module Registry は、Adlaire Git Repository 本体へ早期実装する方針とする。
