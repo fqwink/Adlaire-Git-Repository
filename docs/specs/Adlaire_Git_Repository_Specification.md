@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.18
-**ステータス**: GitHub Releases リリース配置一本化方針整合
+**文書バージョン**: v.2.19
+**ステータス**: GitHub Releases 現行配置 / Adlaire CI/CD 付随システム移行候補方針整合
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Deno + TypeScript + libSQL + Git
 
@@ -70,7 +70,10 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。
 - Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。
 - Node.js runtime、npm ecosystem、npm 依存、外部フレームワーク、無承認外部ライブラリは採用しない。
-- リリース配置は GitHub Releases へ一本化する。
+- リリース配置は現行では GitHub Releases を正式配置元とする。
+- Adlaire 内製 CI/CD は、リリース基盤システムと自動実行基盤システムを担う付随システム候補として扱う。
+- Adlaire CI/CD は初期方針では本体へ統合せず、将来の統合、一部統合、付随維持、AdlaireGroup 共通基盤化を仕様確定後に判断する。
+- Adlaire CI/CD の開発言語、ランタイム、データベース、依存関係、実行基盤は現時点では未定とする。
 
 ## マスター仕様完成条件
 
@@ -583,7 +586,9 @@ Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用
 
 本番サーバ環境へのデプロイは、Deno single binary 正本成果物、必要に応じた Docker image、host filesystem data 領域、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 
-リリース配置は GitHub Releases へ一本化する。Deno single binary、release notes、checksum、manifest は GitHub Releases 側へ配置し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない。
+リリース配置は現行では GitHub Releases を正式配置元とする。Deno single binary、release notes、checksum、manifest は GitHub Releases 側へ配置し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない。
+
+Adlaire CI/CD は、将来的にリリース基盤システムと自動実行基盤システムを担う内製付随システム候補とする。Adlaire CI/CD は Adlaire Git Repository 本体とは分離して検討し、統合可否は仕様確定後に判断する。Adlaire CI/CD の開発言語、ランタイム、データベース、依存関係、実行基盤は未定であり、本体の採用技術を自動的に適用しない。
 
 Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
@@ -779,13 +784,15 @@ Phase 9 で安定版リリースを行う場合、リリース履歴の正本は
 
 ### Phase 10 リリース配置仕様
 
-Phase 10 は、リリース配置を GitHub Releases へ一本化するための整合フェーズである。
+Phase 10 は、現行リリース配置を GitHub Releases に整合しつつ、将来の Adlaire CI/CD 付随システム化を検討可能にするための整合フェーズである。
 
-Adlaire Git Repository 本体は、Deno single binary、release notes、checksum、manifest の配置先を GitHub Releases に統一する。リポジトリ内には、変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
+Adlaire Git Repository 本体は、Deno single binary、release notes、checksum、manifest の現行配置先を GitHub Releases とする。リポジトリ内には、変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
 
 標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Deno single binary を本番サーバへ反映する補助導線として維持する。デプロイ先、SSH 接続方式、binary 直実行または Docker 運用の選択、バックアップ、ロールバック、本番サーバ反映は、2類デプロイポリシーに従い、別途ユーザー承認を得る。
 
-Phase 10 では、新しい内製デプロイメントシステム、database schema 変更、database migration 実行、database restore 自動実行、Docker image 配布の正式化、Container registry、GitHub Actions、外部デプロイフレームワーク、Node.js / npm 前提ツール、本番データ復元の自動実行は対象外とする。
+Adlaire CI/CD は、リリース基盤システムと自動実行基盤システムを担う内製付随システム候補として扱う。Phase 10 では Adlaire CI/CD の概念と責務を整理するが、実装、技術選定、本体統合、GitHub Releases 廃止は行わない。
+
+Phase 10 では、database schema 変更、database migration 実行、database restore 自動実行、Docker image 配布の正式化、Container registry、GitHub Actions、外部デプロイフレームワーク、Node.js / npm 前提ツール、本番データ復元の自動実行は対象外とする。
 
 `deno.json` の内部バージョン更新、デプロイ実行、成果物配置は、対象範囲と検証方法を提示し、別途ユーザー承認を得てから行う。
 

@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**現行フェーズ**: Phase 10 リリース配置 GitHub Releases 一本化 / v.2.10 baseline
+**現行フェーズ**: Phase 10 GitHub Releases 現行配置 / Adlaire CI/CD 付随システム候補整理 / v.2.10 baseline
 **直近安定版リリース**: Phase 7 / v.1.8
 
 ## ドキュメント
@@ -78,10 +78,12 @@ libSQL は必要最小限の外部依存例外として扱うが、npm 互換 pa
 
 標準デプロイ雛形は [scripts/deploy/](./scripts/deploy/) で管理する。`deploy.env.example` を基準に環境固有値を定義し、`deploy.sh`、`backup.sh`、`verify-server.sh`、`verify-release.sh`、`rollback.sh` を承認済み範囲で実行する。実値を含む環境設定、接続先、秘密情報はコミットしてはならない。
 
-リリース配置は GitHub Releases へ一本化する。Deno single binary、release notes、checksum、manifest は GitHub Releases 側へ配置し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない。
+リリース配置は現行では GitHub Releases を正式配置元とする。Deno single binary、release notes、checksum、manifest は GitHub Releases 側へ配置し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない。
+
+Adlaire CI/CD は、リリース基盤システムと自動実行基盤システムを担う内製付随システム候補として扱う。初期方針では Adlaire Git Repository 本体へ統合せず、将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は仕様確定後に判断する。Adlaire CI/CD の開発言語、ランタイム、データベース、依存関係、実行基盤は現時点では未定であり、別途承認なしに固定しない。
 
 Phase 8.5 では、標準アプリケーション設定と標準デプロイ雛形を system / data 分離構成へ整合した。`ADLAIRE_APP_ROOT=/opt/adlaire-git-repository` を基準に、稼働版 release / current は `system/` 側、libSQL database、Git bare repositories、config、secrets、logs、backups、manifests は `shared/` 側へ分離する。
 
 安定版リリースの標準 Linux バイナリは、ARM64 と x86_64 の2種類を正本成果物とする。VPS デプロイ時は `uname -m` で `aarch64` または `x86_64` を確認し、対象アーキテクチャの Deno single binary を配置する。Docker を選択する場合は、その正本 binary を Docker image に同梱して配置する。
 
-Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして完了済みである。Phase 8 はDB仕様完成としてlibSQL標準化を扱う。Phase 8.1 は本体整合性、Phase 8.5 はAdlaire Git Repository本体とデータ領域の分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備を扱う。`v.2.10` の公開配布は保留し、Phase 10 ではリリース配置を GitHub Releases へ一本化するためのドキュメント整合性と運用方針整理を扱う。
+Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして完了済みである。Phase 8 はDB仕様完成としてlibSQL標準化を扱う。Phase 8.1 は本体整合性、Phase 8.5 はAdlaire Git Repository本体とデータ領域の分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備を扱う。Phase 10 では現行リリース配置を GitHub Releases として整合し、Adlaire CI/CD をリリース基盤システムと自動実行基盤システムを担う付随システム候補として整理する。
