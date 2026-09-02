@@ -3,8 +3,8 @@
 **位置づけ**: 3類マスター仕様書
 **対象**: Adlaire 公式 SDK
 **ライセンス**: クローズドライセンス
-**文書バージョン**: v.2.28
-**ステータス**: SDK マスター仕様完成
+**文書バージョン**: v.2.29
+**ステータス**: SDK マスター仕様改善
 
 ---
 
@@ -90,6 +90,8 @@ SDK の公開境界は以下とする。
 
 SDK は、本体公開 API の安定した利用面を提供する。SDK の public API は、本体内部構造ではなく、本体公開 API の仕様に対応させる。
 
+SDK が安定して扱う境界は、本体公開 API の request / response、認証方式、HTTP status、error response、resource 名、リリース済み互換範囲に限る。SDK は本体内部の Service、Repository、Database Gateway、driver、Git 操作処理、host filesystem path を互換対象にしてはならない。
+
 ## 4.2 SDK が提供しないもの
 
 SDK は以下を提供しない。
@@ -148,7 +150,25 @@ SDK 生成では、以下を標準方針とする。
 
 SDK の生成物は、browser から利用できることを前提とする。生成物が server runtime 固有 API に依存する場合は、SDK の標準成果物として扱わない。
 
-## 6.1 API 設計方針
+## 6.1 Client lifecycle 方針
+
+SDK は、利用側アプリケーションが明示的に client を生成し、設定を渡して利用する形を基本方針とする。
+
+client lifecycle で扱う範囲は以下とする。
+
+| 領域 | 方針 |
+|---|---|
+| 初期化 | base URL、認証情報、timeout 等の接続設定を受け取る |
+| request | 公開 API 仕様に基づいて method、path、query、body、header を構成する |
+| response | HTTP status と response body を利用側が判断できる形へ変換する |
+| error | network、timeout、認証、認可、validation、not found、conflict、server error を区別できるようにする |
+| 終了処理 | browser 利用を前提に、明示的な常駐 process や server runtime 管理を持たない |
+
+SDK は、認証情報の保存先、UI 状態、routing、form state、cache policy、retry policy の詳細、offline queue、background sync を勝手に決めてはならない。これらを扱う場合は、利用側アプリケーションまたは後続の承認済みSDK仕様で定義する。
+
+具体的な client 名、関数名、戻り値形式、例外方式、Result object 方式は未確定とする。
+
+## 6.2 API 設計方針
 
 SDK の API は、Adlaire Git Repository の公開 API を薄く安全に扱う client API とする。
 
@@ -174,7 +194,7 @@ SDK の初期 resource 候補は以下とする。
 
 上記は SDK の設計対象候補であり、実装承認ではない。SDK 実装時は、対象 resource、対象外 resource、検証範囲をマスター開発計画へ反映し、ユーザー承認を得る。
 
-## 6.2 認証方針
+## 6.3 認証方針
 
 SDK は、Adlaire Git Repository の公開 API が認める認証方式だけを扱う。
 
@@ -188,7 +208,7 @@ SDK は、秘密情報の保存先を勝手に決めてはならない。browser
 
 SDK は、token refresh、OAuth、外部 IdP 連携、SAML、OIDC、device flow を現行仕様として提供しない。これらを扱う場合は、本体マスター仕様書、SDK マスター仕様書、マスター開発計画へ反映し、ユーザー承認を得る。
 
-## 6.3 Error / Result 方針
+## 6.4 Error / Result 方針
 
 SDK は、成功結果と失敗結果を利用側が判別しやすい形で返す。
 
@@ -204,6 +224,30 @@ SDK の error は、最低限以下を区別できる必要がある。
 - server error
 
 ただし、具体的な戻り値形式、例外方式、Result object 方式、error code 名は未確定とし、SDK 実装開始時に提案してユーザー承認を得る。
+
+## 6.5 互換性方針
+
+SDK の互換性は、本体公開 API の互換性と連動する。ただし、本体内部実装、DB schema、driver、Service 層、Repository 層の変更は、公開 API が維持される限り SDK の破壊的変更として扱わない。
+
+SDK 互換性で守る対象は以下とする。
+
+- 公開 API resource の意味
+- request parameter の意味
+- response field の意味
+- HTTP status と error 分類
+- 認証方式の扱い
+- JavaScript 生成物からの利用可能性
+
+SDK 互換性で守らない対象は以下とする。
+
+- 本体内部 file path
+- 本体内部関数名
+- DB schema 名
+- driver 実装詳細
+- UI 実装の状態管理
+- build / generate の内部手順
+
+SDK の破壊的変更を行う場合は、SDK マスター仕様書、本体マスター仕様書、マスター開発計画、リリース方針を同一変更範囲で整合し、ユーザー承認を得る。
 
 ---
 
@@ -269,6 +313,8 @@ SDK の配布方式は、現時点では現行リポジトリ配布とする。n
 | 生成コマンド | SDK 実装開始時に確定する |
 | public API 形式 | SDK 実装開始時に確定する |
 | error 形式 | SDK 実装開始時に確定する |
+| client lifecycle の具体API | SDK 実装開始時に確定する |
+| SDK 互換性の具体バージョン連携 | SDK リリース開始時に確定する |
 | release 成果物 | SDK リリース開始時に確定する |
 | リポジトリ分離 | 未定 |
 
@@ -286,6 +332,7 @@ SDK の配布方式は、現時点では現行リポジトリ配布とする。n
 - TypeScript 実装、Vanilla JavaScript 向け JavaScript 生成、Deno runtime 生成を説明できる。
 - Node.js / npm 禁止方針を緩和しないことを説明できる。
 - SDK の公開境界、提供する resource 候補、認証方針、error 方針を説明できる。
+- SDK の client lifecycle と互換性方針を説明できる。
 - SDK が UI framework、Git command wrapper、database driver、GitHub API 互換 client ではないことを説明できる。
 - SDK 実装、public API 詳細、実装開始フェーズ、リリース実行が未確定範囲として分離されている。
 - SDK 仕様、本体仕様、Auris システム設計、マスター開発計画、README の参照関係が矛盾していない。

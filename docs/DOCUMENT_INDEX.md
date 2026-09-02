@@ -2,7 +2,7 @@
 
 **位置づけ**: 参照索引
 **責務**: ドキュメント一覧、参照順序、読了対象、役割確認
-**ステータス**: 3類マスター仕様完成
+**ステータス**: 3類マスター仕様改善
 
 ---
 
@@ -63,11 +63,13 @@
 
 | ドキュメント | 役割 |
 |---|---|
-| `docs/specs/Auris_System_Design.md` | システム全体のマスター仕様書。機能範囲、アーキテクチャ、非機能要件、セキュリティ方針の基準 |
-| `docs/specs/Adlaire_Git_Repository_Specification.md` | Adlaire Git Repository 本体のマスター仕様書 |
-| `docs/specs/Adlaire_Official_SDK_Specification.md` | Adlaire 公式 SDK のマスター仕様書 |
+| `docs/specs/Auris_System_Design.md` | システム全体のマスター仕様書。全体方針、現行正本仕様、未確定、対象外、責務分担の基準 |
+| `docs/specs/Adlaire_Git_Repository_Specification.md` | Adlaire Git Repository 本体のマスター仕様書。本体責務、公開契約、DB、Git、運用、system / data 境界 |
+| `docs/specs/Adlaire_Official_SDK_Specification.md` | Adlaire 公式 SDK のマスター仕様書。クライアント接続境界、生成、配布、client lifecycle、互換性方針 |
 
 3類マスター仕様書は、現行正本仕様、フェーズ別履歴、保留候補、対象外範囲、未確定範囲を分離して読む。Phase 7 初回安定版リリース `v.1.8` は履歴として保持し、Phase 8 / Phase 9 以降の仕様判断では、各マスター仕様書の現行正本仕様、2類ポリシー、マスター開発計画を基準にする。
+
+3類マスター仕様書の改善では、全体仕様、本体仕様、SDK仕様の責務を混同してはならない。全体方針は `docs/specs/Auris_System_Design.md`、本体の公開契約と内部境界は `docs/specs/Adlaire_Git_Repository_Specification.md`、SDK の公開境界と生成・配布・互換性は `docs/specs/Adlaire_Official_SDK_Specification.md` を正本として確認する。
 
 ---
 

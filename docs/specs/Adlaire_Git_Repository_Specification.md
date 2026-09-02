@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.28
-**ステータス**: 本体マスター仕様完成
+**文書バージョン**: v.2.29
+**ステータス**: 本体マスター仕様改善
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Go + libSQL + Git
 
@@ -44,16 +44,20 @@
 
 本書は、Adlaire Git Repository 本体の個別3類マスター仕様書である。
 
-現行仕様判断では、以下を優先して読む。
+本リポジトリの作業では、まず `AGENTS.md`、`docs/DOCUMENT_INDEX.md`、2類ポリシー、3類マスター仕様書群、マスター開発計画、マスター実装機能候補リスト、README を読む。これは本書の読み方より上位の読了義務である。
 
-1. 本書の「現行正本仕様」
-2. `docs/specs/Auris_System_Design.md`
+本体仕様を判断する場合は、以下の順で読む。
+
+1. `docs/specs/Auris_System_Design.md`
+2. 本書の「現行正本仕様」
 3. `docs/specs/Adlaire_Official_SDK_Specification.md`
 4. 本書の各機能仕様
 5. `docs/plans/DEVELOPMENT_PLAN.md`
 6. フェーズ別の実装履歴と検証記録
 
-Phase 1 から Phase 7 までの記述は、実装済みまたはリリース済みの履歴を含む。履歴は削除せず保持するが、現行方針と異なる古い表記がある場合は、本書の現行正本仕様、`docs/specs/Auris_System_Design.md`、2類ポリシー、マスター開発計画を正とする。
+Phase 1 から Phase 10 までの記述は、実装済み、リリース済み、または当時の検討履歴を含む。履歴は削除せず保持するが、現行方針と異なる古い表記がある場合は、`docs/specs/Auris_System_Design.md`、本書の現行正本仕様、2類ポリシー、マスター開発計画を正とする。
+
+旧 Deno + TypeScript 実装資産、旧 SQLite 標準運用、旧 npm 互換 libSQL client、旧 Docker 方針、Adlaire Pipeline 検討事項は、明示的に現行仕様へ移されたものを除き、履歴または未確定事項として扱う。
 
 本書の完成は、ソースコード実装承認を意味しない。新規実装、既存実装変更、DB driver 実装、schema 変更、テスト変更、デプロイ実行は、別途ユーザー承認を得る。
 
@@ -131,6 +135,34 @@ Adlaire Git Repository は、ヘッドレスアーキテクチャ設計思想に
 
 API 詳細を追加または変更する場合は、本書、`docs/specs/Adlaire_Official_SDK_Specification.md`、マスター開発計画、検証範囲を整合し、ユーザー承認を得る。
 
+## 本体公開契約
+
+Adlaire Git Repository 本体が外部へ公開する契約は、公開 API、認証境界、Git 接続境界、リリース成果物、運用上の health / operations status に限定する。
+
+本体公開契約に含めるものは以下とする。
+
+| 領域 | 公開契約として扱うもの |
+|---|---|
+| HTTP API | resource、method、path、request、response、HTTP status、error response |
+| 認証 | 公開 API が受け付ける credential 種別と検証結果 |
+| Git | clone、push、pull、fetch の接続方式、認証境界、repository 権限確認 |
+| 運用 | `/health`、operations status、audit log の公開範囲 |
+| 成果物 | Go single binary、release notes、checksum、manifest |
+| SDK 連携 | SDK が依存してよい公開 API と error / result の互換範囲 |
+
+本体公開契約に含めてはならないものは以下とする。
+
+- Service 層の関数名
+- Repository 層の内部型
+- Database Gateway の内部 interface
+- libSQL driver の実装詳細
+- Git コマンド実行時の内部組み立て手順
+- host filesystem 上の内部絶対パス
+- password hash、token、secret、署名鍵、環境固有値
+- Adlaire Pipeline の内部仕様
+
+本体公開契約を変更する場合は、破壊的変更かどうかを判定し、SDK マスター仕様書、マスター開発計画、検証導線、README を同一変更範囲で整合する。
+
 ## System / Data 境界
 
 本体は、差し替え可能な system 側と保護対象の data 側を分離する。
@@ -140,6 +172,8 @@ system 側は、Go single binary、起動管理定義、Adlaire Pipeline 経由�
 data 側は、host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を含む。
 
 system 側は再配置、再生成、差し替え可能である必要がある。data 側は system 側の差し替え、Docker container lifecycle、release 更新によって失われてはならない。
+
+system 側と data 側の境界は、デプロイ方式に依存させない。Go single binary 直実行、Adlaire Pipeline 経由の Docker image、将来の承認済み配置方式のいずれであっても、data 側の正本は host filesystem とし、保護対象データを system 側へ混在させてはならない。
 
 ## 完成済み仕様と未確定仕様
 
@@ -157,6 +191,8 @@ system 側は再配置、再生成、差し替え可能である必要がある�
 
 未確定仕様は、ユーザー承認なしに実装対象へ移してはならない。
 
+未確定仕様を検討する場合は、現行正本仕様を変更するのか、後続フェーズの候補に留めるのか、保留候補へ移すのかを最初に分ける。検討だけで実装対象、採用技術、固定バージョン、リリース対象へ昇格させてはならない。
+
 ## マスター仕様完成条件
 
 本書は、以下を満たす状態をマスター仕様完成版とする。
@@ -170,6 +206,8 @@ system 側は再配置、再生成、差し替え可能である必要がある�
 - Go single binary 正本成果物方針、Docker の Adlaire Pipeline 経由方針、host filesystem data 正本方針が矛盾していない。
 - 保留候補は、保留解除とユーザー承認なしに実装対象へ戻らない。
 - 仕様書、マスター開発計画、マスター実装機能候補リスト、README の参照関係が整合している。
+- 本体公開契約と本体内部実装の境界が分離され、SDK や外部システムが内部構造へ依存しないことを説明できる。
+- 過去フェーズの履歴、現行正本仕様、未確定仕様を混同せずに読める。
 
 ---
 
