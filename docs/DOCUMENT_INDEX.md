@@ -104,7 +104,22 @@
 
 採用技術、固定バージョン、ライセンス、デプロイ方式、データ保存、依存関係、セキュリティ要件は共通方針として扱う。プロジェクト固有値、仕様書名、Phase 計画、実装対象機能は、共通方針を破らない範囲で各プロジェクトが具体化する。
 
-### 8.1 共通コア
+### 8.1 ガバナンス改良時の参照
+
+ガバナンス改良時は、以下の責務境界を確認する。
+
+| 対象 | 確認内容 |
+|---|---|
+| `AGENTS.md` | 絶対原則、禁止事項、承認義務、上位参照順序 |
+| `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` | 2類ポリシー総則、承認前提示、ガバナンス変更時の判定 |
+| `docs/policies/DOCUMENT_CHARTER.md` | ドキュメント体系、正本境界、共通雛形との同期 |
+| `docs/tpl-governance/README.md` | 共通雛形の目的、更新判定、展開時の扱い |
+| `docs/tpl-governance/core/` | 共通コア雛形 |
+| `docs/tpl-governance/policy-slots/` | 個別具体化枠 |
+
+共通方針に該当する変更は、`docs/tpl-governance/` の更新要否を確認する。プロジェクト固有変更の場合は、共通雛形へ反映しない理由を Pull Request 説明に記載する。
+
+### 8.2 共通コア
 
 | ドキュメント | 役割 |
 |---|---|
@@ -113,7 +128,7 @@
 | `docs/tpl-governance/core/DOCUMENT_CHARTER_TEMPLATE.md` | ドキュメント憲章の共通雛形 |
 | `docs/tpl-governance/core/DEVELOPMENT_POLICY_RULEBOOK_TEMPLATE.md` | 2類ポリシー総則の共通雛形 |
 
-### 8.2 policy slots
+### 8.3 policy slots
 
 | ドキュメント | 役割 |
 |---|---|
