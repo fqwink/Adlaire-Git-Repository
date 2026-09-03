@@ -2,7 +2,7 @@
 
 **位置づけ**: 参照索引
 **責務**: ドキュメント一覧、参照順序、読了対象、役割確認
-**ステータス**: 3類マスター仕様改善
+**ステータス**: バージョンポリシー整合
 
 ---
 
@@ -51,7 +51,7 @@
 | `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` | 2類ドキュメント群の総則、共通原則、参照順序、変更手順 |
 | `docs/policies/DOCUMENT_CHARTER.md` | ドキュメント憲章。ドキュメント体系、責務境界、開発計画、フェーズ単位の改訂方針 |
 | `docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` | 採用技術、ランタイム、依存関係、固定採用バージョン、技術承認 |
-| `docs/policies/VERSION_POLICY.md` | バージョン表記、累積方式、Major / Minor 更新条件 |
+| `docs/policies/VERSION_POLICY.md` | 開発版バージョン、安定版バージョン、累積方式、リセット禁止 |
 | `docs/policies/RELEASE_POLICY.md` | 安定版リリース、リリース対象、リリース禁止条件、リリース配置、自動化方針 |
 | `docs/policies/DEPLOYMENT_POLICY.md` | デプロイ、運用基盤、本番サーバ反映、バックアップ、検証、ロールバック |
 | `docs/policies/TEST_POLICY.md` | 意味のあるテスト、テストピラミッド、テスト追加・削除判断 |
@@ -67,7 +67,7 @@
 | `docs/specs/Adlaire_Git_Repository_Specification.md` | Adlaire Git Repository 本体のマスター仕様書。本体責務、機能ドメイン、公開契約、本体境界、DB、Git、運用、system / data 境界、本体仕様改善チェック |
 | `docs/specs/Adlaire_Official_SDK_Specification.md` | Adlaire 公式 SDK のマスター仕様書。本体から切り離した外部接続境界、公開 API 直接利用禁止、依存可能契約、生成成果物検証、配布、client lifecycle、互換性方針、SDK仕様改善チェック |
 
-3類マスター仕様書は、現行正本仕様、フェーズ別履歴、保留候補、対象外範囲、未確定範囲を分離して読む。Phase 7 初回安定版リリース `v.1.8` は履歴として保持し、Phase 8 / Phase 9 以降の仕様判断では、各マスター仕様書の現行正本仕様、2類ポリシー、マスター開発計画を基準にする。
+3類マスター仕様書は、現行正本仕様、フェーズ別履歴、保留候補、対象外範囲、未確定範囲を分離して読む。Phase 7 初回安定版リリース `v.1.8` は履歴として保持し、Phase 8 / Phase 9 以降の仕様判断では、各マスター仕様書の現行正本仕様、2類ポリシー、マスター開発計画を基準にする。バージョンは開発版 `v.0.N` と安定版 `v.X.Y` を分離して扱う。
 
 3類マスター仕様書の改善では、全体仕様、本体仕様、SDK仕様の責務を混同してはならない。全体方針、仕様判断フロー、3類マスター仕様改善基準は `docs/specs/Auris_System_Design.md`、本体の公開契約、内部境界、本体仕様改善チェックは `docs/specs/Adlaire_Git_Repository_Specification.md`、SDK の公開境界、依存可能契約、生成成果物検証、配布、互換性、SDK仕様改善チェックは `docs/specs/Adlaire_Official_SDK_Specification.md` を正本として確認する。
 
