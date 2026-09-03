@@ -17,14 +17,15 @@
 - Adlaire Git Repository 本体の標準開発言語は Go とする。
 - Adlaire Git Repository 本体は Go single binary を正本成果物とする。
 - Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする。
-- Adlaire Pipeline は、リリース基盤システムおよび自動実行基盤システムを担う内製付随システムとして、Go を採用方針とする。
+- Adlaire Pipeline は、リリース基盤システムおよび自動実行基盤システムを担う機能として、Adlaire Git Repository 本体内部の CI/CD Domain に統合する方針とし、Go を採用方針とする。
 - AdlaireGroup 関連プロジェクト、プロダクトでは、Deno + TypeScript と Go 単体の2系統を有効な開発言語選択肢として扱う。各プロジェクトは、成果物形式、運用要件、保守性、依存関係、セキュリティ要件に基づいて個別に選定する。
 - Node.js ランタイムは採用禁止とする。
 - Go single binary 形式を正本成果物とする。
 - Docker は、Adlaire Git Repository 本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。
 - libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests は host filesystem を正本とする data 側として分離する。
-- Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
-- Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とする。SDK 配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは、2類ポリシーとマスター開発計画に従う。SDK は Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` の禁止方針を緩和しない。
+- Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は、Adlaire 公式 SDK に一本化する。公開 API の直接利用は、SDK 未実装期間を含めて禁止する。
+- Adlaire 公式 SDK は、Adlaire Git Repository 本体の機能ドメインではなく、本体から切り離した外部接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とする。SDK 配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは、2類ポリシーとマスター開発計画に従う。SDK は Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` の禁止方針を緩和しない。
+- Adlaire Git Repository 本体には、機能ドメインアーキテクチャ設計思想を適用する。現行の本体機能ドメインは、`Management Domain`、`Repository Domain`、`Collaboration Domain`、`CI/CD Domain`、`System / Data Foundation` とする。`Access Domain` は採用せず、認証、認可、ユーザー、権限、組織、チーム、管理系の責務は `Management Domain` に含める。
 - フレームワークは、内製したもの以外の採用を禁止する。
 - Go 標準ライブラリを優先する。
 - Deno + TypeScript を採用する別プロジェクトでは、Deno 標準ライブラリ（`jsr:@std/*`）を優先する。ただし、Deno 標準ライブラリの個別モジュールを採用する場合も、必要性、対象モジュール、固定バージョン、検証方法を提示し、ユーザー承認を得る。
@@ -107,7 +108,7 @@ npm registry 互換レジストリ、`npm:` specifier、`package.json` 前提運
 
 Go single binary 形式を、本プロジェクトにおける正本成果物とする。
 
-AdlaireGroup 共通方針では、プロジェクトごとに Go single binary または Deno single binary を選定できる。ただし、Adlaire Git Repository 本体と Adlaire Pipeline は Go single binary 方針とする。
+AdlaireGroup 共通方針では、プロジェクトごとに Go single binary または Deno single binary を選定できる。ただし、Adlaire Git Repository 本体と、同本体内部の CI/CD Domain として扱う Adlaire Pipeline は Go single binary 方針とする。
 
 Docker は、Adlaire Git Repository 本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。Go single binary、起動管理定義は差し替え可能な system 側として扱う。
 
@@ -122,6 +123,23 @@ Go single binary 形式、Docker 形式のいずれでも、Node.js runtime、np
 - Go single binary の Linux ARM64 build
 - Go single binary の Linux x86_64 build
 - Go single binary の release build
+
+Go 実装移行時の方針ディレクトリ構成は以下とする。現時点では構成方針であり、ファイル作成またはソース実装の承認ではない。
+
+```text
+/
+├── AGENTS.md
+├── README.md
+├── go.mod
+├── main.go
+├── internal/
+├── sdk/
+├── scripts/
+├── tools/
+└── docs/
+```
+
+`web/` は標準方針ディレクトリとして採用しない。フロントエンドは本体へ固定せず、SDK 経由で接続する静的フロントエンドまたは外部クライアントとして扱う。
 
 Docker image、Dockerfile、`docker run`、`docker compose`、Docker container は、Adlaire Pipeline 経由で扱う対象とし、Adlaire Pipeline の仕様確定、実装、検証、ユーザー承認が完了するまで本体の直接標準運用対象にしない。
 

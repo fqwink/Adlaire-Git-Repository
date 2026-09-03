@@ -69,7 +69,7 @@ Phase 9 は、ユーザー承認に基づく安定版判定フェーズとして
 
 GitHub Releases には、リリースごとの成果物、release notes、必要な checksum、manifest を配置する方針とする。
 
-Adlaire Pipeline は、リリース基盤システムと自動実行基盤システムを担う付随システムとして検討する。将来的な機能群は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。Adlaire Pipeline が仕様確定、実装、検証、安定運用できるまで、GitHub Releases は現行の正式リリース配置元として維持する。
+Adlaire Pipeline は、リリース基盤システムと自動実行基盤システムを担う機能として、Adlaire Git Repository 本体内部の CI/CD Domain に統合する方針とする。将来的な機能群は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。Adlaire Pipeline が仕様確定、実装、検証、安定運用できるまで、GitHub Releases は現行の正式リリース配置元として維持する。
 
 将来的に Adlaire Pipeline をリリース成果物、release notes、checksum、manifest、release 履歴の正本にする場合は、リリース配置先の変更として扱い、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
@@ -91,7 +91,7 @@ Adlaire 公式 SDK は、Adlaire Git Repository 本体へ同梱せず、独立�
 
 本番サーバ環境へのデプロイ、デプロイ前後の検証、バックアップ、ロールバックは `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。リリース自動化とデプロイ自動化を同時に扱う場合も、承認対象、成果物、検証範囲、失敗時対応を分けて提示する。
 
-Adlaire Pipeline は、将来のリリース自動化とデプロイ自動化の正本候補である。`Adlaire Pipeline Release` は release notes、checksum、manifest、release 履歴を扱う候補とし、`Adlaire Pipeline Artifact` は成果物管理を扱う候補とする。`Adlaire Pipeline Runner` は検証、ビルド、定期実行、手動実行、実行制御を扱う候補とし、`Adlaire Pipeline Deploy` はデプロイ反映、切り替え、ロールバック準備を扱う候補とする。`Adlaire Pipeline Audit` は実行履歴・監査を扱う候補とする。ただし、初期方針では Adlaire Git Repository 本体へ統合せず、付随システムとして扱う。Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は未定とし、別途ユーザー承認を得るまで固定してはならない。
+Adlaire Pipeline は、将来のリリース自動化とデプロイ自動化の正本候補であり、Adlaire Git Repository 本体内部の CI/CD Domain として扱う。`Adlaire Pipeline Release` は release notes、checksum、manifest、release 履歴を扱う候補とし、`Adlaire Pipeline Artifact` は成果物管理を扱う候補とする。`Adlaire Pipeline Runner` は検証、ビルド、定期実行、手動実行、実行制御を扱う候補とし、`Adlaire Pipeline Deploy` はデプロイ反映、切り替え、ロールバック準備を扱う候補とする。`Adlaire Pipeline Audit` は実行履歴・監査を扱う候補とする。これらは同一の CI/CD Domain 内の機能群として扱い、独立した機能ドメインへ細分化しない。Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は未定とし、別途ユーザー承認を得るまで固定してはならない。
 
 ユーザー承認後に限り、以下を自動実行してよい。
 

@@ -3,7 +3,7 @@
 **位置づけ**: 3類マスター仕様書
 **対象**: Adlaire 公式 SDK
 **ライセンス**: クローズドライセンス
-**文書バージョン**: v.2.32
+**文書バージョン**: v.2.33
 **ステータス**: SDK マスター仕様改善
 
 ---
@@ -14,7 +14,9 @@
 
 Adlaire 公式 SDK は、Adlaire Git Repository のヘッドレスアーキテクチャにおけるクライアント接続境界である。
 
-SDK は、HTML / CSS / Vanilla JavaScript で構成される静的フロントエンド、モバイルアプリ、外部システムが、Adlaire Git Repository 本体へ接続するための標準境界を提供する。
+SDK は、HTML / CSS / Vanilla JavaScript で構成される静的フロントエンド、モバイルアプリ、外部システムが、Adlaire Git Repository 本体へ接続するための唯一の標準境界を提供する。
+
+公開 API の直接利用は、SDK 未実装期間を含めて禁止する。SDK は外部接続専用であり、Adlaire Git Repository 本体内部の機能ドメイン間通信には使用しない。
 
 本書は、SDK の目的、責務、配置、生成方式、配布方式、リリース方針、禁止事項、未確定範囲を定義する。
 
@@ -36,7 +38,7 @@ SDK の実装時期、フェーズ、検証範囲、完了条件は、`docs/plan
 
 Adlaire 公式 SDK の現行正本仕様は以下とする。
 
-- SDK は Adlaire Git Repository 本体ではなく、クライアント接続境界として扱う。
+- SDK は Adlaire Git Repository 本体の機能ドメインではなく、本体から切り離した外部接続境界として扱う。
 - SDK は Adlaire Git Repository 本体へ同梱しない。
 - SDK は独立リリース対象とする。
 - SDK のリポジトリ分離は現時点では未定とする。
@@ -49,6 +51,8 @@ Adlaire 公式 SDK の現行正本仕様は以下とする。
 - SDK リリース開始フェーズは2類リリースポリシーとマスター開発計画に従う。
 - SDK は Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` の禁止方針を緩和しない。
 - SDK は Adlaire Git Repository 本体の公開 API を利用する。
+- UI、静的フロントエンド、モバイルアプリ、外部システムは、SDK を通じて接続し、公開 API を直接利用しない。
+- SDK は本体内部の機能ドメイン間通信に使用しない。
 - SDK は本体内部の Service、Repository、Database Gateway、driver、Git 操作処理へ直接依存しない。
 - SDK は UI framework、画面実装、状態管理 framework を提供しない。
 - SDK は GitHub API 互換 client ではなく、Adlaire Git Repository の公開 API client とする。
@@ -71,7 +75,7 @@ SDK は、Adlaire Git Repository 本体の内部 Service、Repository、Database
 
 ## 4.1 SDK の公開境界
 
-SDK は、Adlaire Git Repository の公開 API を扱うための client boundary とする。
+SDK は、Adlaire Git Repository の公開 API を扱うための client boundary とする。外部利用者に対する接続境界は SDK に一本化し、公開 API の直接利用を標準接続面として提供しない。
 
 SDK の公開境界は以下とする。
 
@@ -89,6 +93,8 @@ SDK の公開境界は以下とする。
 | JavaScript 生成物 | Vanilla JavaScript から利用可能な出力 |
 
 SDK は、本体公開 API の安定した利用面を提供する。SDK の public API は、本体内部構造ではなく、本体公開 API の仕様に対応させる。
+
+SDK は Adlaire Git Repository 本体の機能ドメインではない。Management、Repository、Collaboration、CI/CD、System / Data Foundation の内部通信や内部依存解決に SDK を使ってはならない。
 
 SDK が安定して扱う境界は、本体公開 API の request / response、認証方式、HTTP status、error response、resource 名、リリース済み互換範囲に限る。SDK は本体内部の Service、Repository、Database Gateway、driver、Git 操作処理、host filesystem path を互換対象にしてはならない。
 

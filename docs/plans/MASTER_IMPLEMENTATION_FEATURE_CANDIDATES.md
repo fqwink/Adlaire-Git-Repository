@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター実装機能候補リスト
 **対象**: Auris / Adlaire Git Repository
-**文書バージョン**: v.0.41
+**文書バージョン**: v.0.42
 **ステータス**: 3類マスター仕様改善
 
 ---
@@ -41,6 +41,8 @@ Phase 8 のマスター仕様完成後、本書は候補の分類、優先理由
 - セキュリティ、権限管理、監査に必要か
 - 外部依存や運用負荷が過度に増えないか
 - UI 互換ではなく、本プロジェクト独自 UI として実装できるか
+- ヘッドレスアーキテクチャ設計思想、SDK 接続一本化、公開 API 直接利用禁止方針と矛盾しないか
+- 機能ドメインを細分化目的で増やしていないか
 
 ---
 
@@ -161,16 +163,16 @@ Phase 8 は DB 仕様完成フェーズとする。Phase 8.1 は本体整合性�
 | 4 | 安定化 | 優先 | バグ修正、検証強化、ドキュメント整合性を行うため |
 | 5 | 安定版判定 | 優先 | Phase 9 で安定版リリース可否を判断するため |
 
-### 3.9 Phase 10 推奨候補: GitHub Releases 現行配置 / Adlaire Pipeline 付随システム候補整理
+### 3.9 Phase 10 推奨候補: GitHub Releases 現行配置 / 当時の Adlaire Pipeline 付随システム候補整理
 
-Phase 10 推奨候補は、現行リリース配置を GitHub Releases として整合し、Adlaire Pipeline を Release、Runner、Artifact、Deploy、Audit の将来機能群を持つ内製付随システム候補として整理することを優先する。
+Phase 10 推奨候補は、現行リリース配置を GitHub Releases として整合し、当時の方針として Adlaire Pipeline を Release、Runner、Artifact、Deploy、Audit の将来機能群を持つ内製付随システム候補として整理することを優先した。現行方針では、Phase 11 の機能ドメインアーキテクチャに基づき Adlaire Pipeline を本体内部の CI/CD Domain として扱う。
 
 | 優先順 | 機能 | 種別 | 理由 |
 |---:|---|---|---|
 | 1 | GitHub Releases 現行配置整理 | 優先 | Go single binary、release notes、checksum、manifest の現行配置先を明確にするため |
 | 2 | リポジトリ内リリース履歴ファイル廃止維持 | 優先 | 変更履歴、release notes 元資料、リリース配置記録、リリース用 manifest、checksum をリポジトリへ保持しない方針を維持するため |
 | 3 | 標準デプロイ雛形との責務整理 | 優先 | `scripts/deploy/` 配下の shell script を、GitHub Releases 配置済み成果物を本番サーバへ反映する補助導線として説明するため |
-| 4 | Adlaire Pipeline 付随システム候補整理 | 優先 | `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来機能群として扱い、開発言語は Go 採用方針、実装、データベース、依存関係、実行基盤、本体統合は未定とするため |
+| 4 | 当時の Adlaire Pipeline 付随システム候補整理 | 優先 | `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来機能群として扱い、開発言語は Go 採用方針、実装、データベース、依存関係、実行基盤は未定とするため |
 | 5 | リポジトリ整合性確認 | 優先 | 1類、2類、3類、マスター開発計画、README、検証導線、PR説明から古いリリース配置方針を除去するため |
 
 ### 3.10 Phase 11 推奨候補: Go移行準備
@@ -184,13 +186,15 @@ Phase 11 推奨候補は、Adlaire Git Repository 本体を Go へ移行する�
 | 3 | 外部依存例外候補整理 | 優先 | Go module を含む外部ライブラリを必要最小限に抑え、採用前承認を徹底するため |
 | 4 | 旧 Deno + TypeScript 資産整理 | 優先 | 本体終了方針に基づき、撤去対象、履歴保持対象、移行対象を混同しないため |
 | 5 | Go 検証導線整理 | 優先 | `go fmt`、`go test`、`go build`、Linux ARM64 / x86_64 build の確認範囲を定義するため |
-| 6 | ヘッドレスアーキテクチャ方針整理 | 優先 | UI を本体に固定せず、静的フロントエンドやモバイルアプリ等のクライアントを可能にし、Adlaire 公式 SDK 経由の接続方針を仕様へ反映するため |
+| 6 | ヘッドレスアーキテクチャ方針整理 | 優先 | UI を本体に固定せず、静的フロントエンドやモバイルアプリ等のクライアントを可能にし、Adlaire 公式 SDK 接続一本化と公開 API 直接利用禁止方針を仕様へ反映するため |
 | 7 | Docker の Adlaire Pipeline 経由方針整理 | 優先 | Docker を本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で扱う方針へ整合するため |
 | 8 | Adlaire 公式 SDK 仕様完成 | 優先 | SDK 専用の3類マスター仕様書を完成させ、SDK の公開境界、非責務、TypeScript 実装、Vanilla JavaScript 向け JavaScript 生成、本体非同梱、`sdk/` 管理、独立リリース、対象外、未確定範囲を、実装前に仕様へ固定するため |
 | 9 | 3類マスター仕様改善 | 優先 | 全体仕様、本体仕様、SDK仕様の責務分担、本体公開契約、SDK client lifecycle、互換性方針、履歴と現行正本仕様の読み分けを明確化するため |
 | 10 | 3類マスター仕様の判断条件整理 | 優先 | 仕様判断フロー、本体境界判定、system / data 境界判断、SDK 依存可能契約、SDK 生成成果物検証条件を整理し、実装前判断を誤らないようにするため |
 | 11 | 3類マスター仕様の実装前チェック整理 | 優先 | マスター仕様判断チェック、本体実装前契約チェック、SDK 実装前チェックを整理し、現行 Go 方針と旧 Deno 実装資産の履歴を混同しないため |
 | 12 | 3類マスター仕様の改善チェック整理 | 優先 | 3類マスター仕様書の改善基準、本体仕様改善チェック、SDK仕様改善チェックを整理し、全体仕様、本体仕様、SDK仕様の責務境界と未確定事項を混同しないため |
+| 13 | 機能ドメインアーキテクチャ方針整理 | 優先 | Management、Repository、Collaboration、CI/CD、System / Data Foundation の本体機能ドメインを定義し、`Access Domain` を採用せず、Adlaire Pipeline を CI/CD Domain として扱う方針を仕様へ反映するため |
+| 14 | Go 実装移行時のルート構成方針整理 | 優先 | `go.mod`、`main.go`、`internal/`、`sdk/`、`scripts/`、`tools/`、`docs/` を基本構成とし、`web/` を標準方針ディレクトリにしないため |
 
 ## 4. 保留候補
 
@@ -262,3 +266,4 @@ Phase 11 推奨候補は、Adlaire Git Repository 本体を Go へ移行する�
 | v.0.39 | Phase 11 の3類マスター仕様追加改善に合わせ、仕様判断フロー、本体境界判定、system / data 境界判断、SDK 依存可能契約、SDK 生成成果物検証条件を候補整理へ反映 |
 | v.0.40 | Phase 11 の3類マスター仕様継続改善に合わせ、マスター仕様判断チェック、本体実装前契約チェック、SDK 実装前チェック、旧 Deno 実装資産 build 例の履歴扱いを候補整理へ反映 |
 | v.0.41 | Phase 11 の3類マスター仕様改善継続に合わせ、3類マスター仕様書の改善基準、本体仕様改善チェック、SDK仕様改善チェックを候補整理へ反映 |
+| v.0.42 | Phase 11 の3類マスター仕様改善に合わせ、SDK 接続一本化、公開 API 直接利用禁止、機能ドメインアーキテクチャ、Adlaire Pipeline の CI/CD Domain 統合方針、Go 実装移行時のルート構成方針を候補整理へ反映 |

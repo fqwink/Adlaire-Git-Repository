@@ -128,9 +128,10 @@
 - ソースコード実装作業は、ユーザー承認を得てから着手する。
 - 開発言語、ランタイム、データベース、Git、外部コマンド、外部ライブラリ、フレームワーク、採用バージョン、固定バージョン、更新方針は、ユーザーが決定する。
 - エージェントは候補提示、比較、調査、リスク整理、推奨案の提示にとどめ、ユーザー承認なしに採用決定、バージョン固定、方針確定、実装反映をしてはならない。
-- Adlaire Git Repository 本体は、Go を標準開発言語とし、Go single binary を正本成果物とする。Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする。Adlaire Pipeline は Go 採用方針とする。AdlaireGroup 関連プロジェクト、プロダクトでは、Deno + TypeScript と Go 単体の2系統を有効な開発言語選択肢として扱い、プロジェクトごとにユーザー承認を得て選定する。
-- Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
-- Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
+- Adlaire Git Repository 本体は、Go を標準開発言語とし、Go single binary を正本成果物とする。Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする。Adlaire Pipeline は Adlaire Git Repository 本体内部の CI/CD Domain に統合する方針とし、Go 採用方針とする。AdlaireGroup 関連プロジェクト、プロダクトでは、Deno + TypeScript と Go 単体の2系統を有効な開発言語選択肢として扱い、プロジェクトごとにユーザー承認を得て選定する。
+- Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は、Adlaire 公式 SDK に一本化する。公開 API の直接利用は、SDK 未実装期間を含めて禁止する。
+- Adlaire 公式 SDK は、Adlaire Git Repository 本体の機能ドメインではなく、本体から切り離した外部接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
+- Adlaire Git Repository 本体には、機能ドメインアーキテクチャ設計思想を適用する。現行の本体機能ドメインは、`Management Domain`、`Repository Domain`、`Collaboration Domain`、`CI/CD Domain`、`System / Data Foundation` とし、細分化を目的にした追加ドメインを作らない。`Access Domain` は採用せず、認証、認可、ユーザー、権限、組織、チーム、管理系の責務は `Management Domain` に含める。
 - 本番サーバ運用、デプロイ、運用基盤では、Go single binary 形式を標準化対象とする。Go single binary を正本成果物とし、Docker は Adlaire Git Repository 本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。保護対象 data 側は host filesystem を正本として system 側から分離する。詳細は `docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` と `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` を正本とする。
 - Go 採用プロジェクトでは Go 標準ライブラリを優先し、Deno + TypeScript 採用プロジェクトでは Deno 標準ライブラリ（`jsr:@std/*`）を優先する。ただし、個別モジュールまたは Go module の採用はユーザー承認なしに行ってはならない。
