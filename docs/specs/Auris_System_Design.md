@@ -4,7 +4,7 @@
 **対象**: Auris / Adlaire Git Repository 全体
 **ライセンス**: クローズドライセンス
 **標準言語 / ランタイム**: Go
-**文書バージョン**: v.2.32
+**文書バージョン**: v.2.33
 **ステータス**: 3類マスター仕様改善
 
 ---
@@ -85,7 +85,7 @@ Phase 7 の初回安定版リリース `v.1.8` は履歴として保持する。
 | 仕様書 | 改善時に強化する範囲 | 詳細化してはならない範囲 |
 |---|---|---|
 | 本書 | 全体方針、仕様判断フロー、現行正本仕様、未確定、保留、対象外、履歴の分類 | 本体内部実装の詳細、SDK public API の具体形 |
-| `docs/specs/Adlaire_Git_Repository_Specification.md` | 本体責務、公開契約、DB / Git / Storage / 運用 / リリース境界、system / data 分離 | SDK 実装、SDK 配布、Adlaire Pipeline 実装詳細 |
+| `docs/specs/Adlaire_Git_Repository_Specification.md` | 本体責務、機能ドメイン、公開契約、DB / Git / Storage / 運用 / リリース境界、system / data 分離 | SDK 実装、SDK 配布、UI 実装詳細 |
 | `docs/specs/Adlaire_Official_SDK_Specification.md` | SDK の公開境界、依存可能契約、生成方式、配布、互換性、未確定API | 本体内部構造、DB driver、Git コマンド実行詳細 |
 
 改善後は、以下を確認する。
@@ -108,11 +108,11 @@ GitHub 互換とは、Repository、Issue、Pull Request、Code Review、Wiki、R
 
 ただし、UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換の対象外とする。UI は本プロジェクト独自の設計とし、GitHub の画面、デザイン、ブランド表現、商標表現を模倣しない。
 
-Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は、Adlaire 公式 SDK に一本化する。公開 API の直接利用は、SDK 未実装期間を含めて禁止する。
 
 GitHub 互換は本書および個別3類マスター仕様書に定義された範囲に限る。GitHub の全機能、外部サービス依存、商標・ブランド表現、GitHub 固有サービスへの直接依存を無条件に採用してはならない。現時点で不要な機能は、GitHub に存在する機能であっても実装対象から除外する。
 
-オープンソースの Git プロバイダーやセルフホスト型 Git ホスティング製品は、サブの機能互換インスパイア対象として扱う。ただし、これらは主たる互換基準ではない。Gitea、Forgejo、GitLab、GitPrep 等の機能、画面、API、運用モデルをそのまま互換対象として扱わず、本プロジェクトの仕様として再定義したうえで、現時点で必要な機能かどうかを判断する。
+オープンソースの Git プロバイダーやセルフホスト型 Git ホスティング製品は、サブの機能互換インスパイア対象として扱う。ただし、これらは主たる互換基準ではない。Gitea は同等機能の参考対象とするが、Gitea 互換は行わない。Gitea、Forgejo、GitLab、GitPrep 等の機能、画面、API、運用モデルをそのまま互換対象として扱わず、本プロジェクトの仕様として再定義したうえで、現時点で必要な機能かどうかを判断する。
 
 主な提供範囲は以下とする。
 
@@ -122,7 +122,7 @@ GitHub 互換は本書および個別3類マスター仕様書に定義された
 - SSH 公開鍵管理
 - HTTP Basic 認証
 - Personal Access Token 管理
-- Web UI によるリポジトリ閲覧と管理
+- SDK 経由のフロントエンドによるリポジトリ閲覧と管理
 - README、Wiki、Issue、Pull Request などの開発支援機能
 - 操作ログと監査ログ
 - バックアップとリリース運用
@@ -280,7 +280,8 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換対象外とする。
 - ヘッドレスアーキテクチャ設計思想を採用し、UI は Adlaire Git Repository 本体に固定しない。
 - HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。
-- UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+- UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は、Adlaire 公式 SDK に一本化する。
+- 公開 API の直接利用は、SDK 未実装期間を含めて禁止する。
 - Adlaire 公式 SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。
 - Adlaire 公式 SDK は本体へ同梱せず、独立リリース対象とする。
 - SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。
@@ -295,8 +296,10 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 - data 側は host filesystem を正本とし、libSQL database、移行元 SQLite database、Git bare repositories、config、secrets、logs、backups、manifests を保護対象とする。
 - 標準運用基盤は self-host、VPS、専用サーバーを前提とする。
 - リリース配置は現行では GitHub Releases を正式配置元とする。
-- Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ付随システム候補として扱う。
-- Adlaire Pipeline は初期方針では Adlaire Git Repository 本体へ統合せず、将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は仕様確定後に判断する。
+- Adlaire Git Repository 本体には、機能ドメインアーキテクチャ設計思想を適用する。
+- 現行の本体機能ドメインは、`Management Domain`、`Repository Domain`、`Collaboration Domain`、`CI/CD Domain`、`System / Data Foundation` とする。
+- `Access Domain` は採用せず、認証、認可、ユーザー、権限、組織、チーム、管理系の責務は `Management Domain` に含める。
+- Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ `CI/CD Domain` として扱う。
 - Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は現時点では未定とし、ユーザー承認なしに固定しない。
 - Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。
 - Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく将来候補として保留する。
@@ -319,6 +322,7 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 | 運用 | self-host、VPS、専用サーバー。system / data 分離 |
 | リリース配置 | 現行は GitHub Releases |
 | Docker | Adlaire Pipeline 経由で扱う対象 |
+| 本体機能ドメイン | Management、Repository、Collaboration、CI/CD、System / Data Foundation |
 
 現行仕様として未確定または保留する範囲は以下とする。
 
@@ -326,7 +330,7 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 |---|---|
 | Go 固定採用バージョン | 未確定。別途ユーザー承認が必要 |
 | Turso Cloud 等のクラウドDBホスティング | libSQL 接続先候補として保留 |
-| Adlaire Pipeline | 将来の付随システム候補。実装、DB、依存関係、実行基盤、本体統合は未確定 |
+| Adlaire Pipeline | CI/CD Domain として本体統合方針。実装、DB、依存関係、実行基盤、詳細仕様は未確定 |
 | SDK リポジトリ分離 | 未確定 |
 | SDK 実装開始フェーズ | マスター開発計画に従い、別途承認が必要 |
 
@@ -340,6 +344,7 @@ Turso Cloud 等のクラウドDBサービスを採用候補にする場合も、
 | PostgreSQL / Key-value DB / DB 使用なし案 | 採用候補として扱わない |
 | Docker の本体直接標準運用化 | 行わない。Adlaire Pipeline 経由で扱う |
 | GitHub UI 互換 | 対象外 |
+| `web/` 標準方針ディレクトリ | 採用しない。フロントエンドは本体へ固定せず、SDK 経由の静的フロントエンドまたは外部クライアントとして扱う |
 
 ### 6.1.1 現行仕様・未確定・対象外の判定
 
@@ -369,7 +374,7 @@ Go single binary、release notes、checksum、manifest は GitHub Releases 側�
 
 GitHub Releases の作成、成果物配置、release notes 公開、tag 作成は、リリース提案を提示し、ユーザー承認を得てから実行する。
 
-Adlaire Pipeline は、将来的に GitHub Releases に代わる、または GitHub Releases を補助配置へ移す `Adlaire Pipeline Release`、検証・ビルド等を担う `Adlaire Pipeline Runner`、成果物管理を担う `Adlaire Pipeline Artifact`、デプロイ反映を担う `Adlaire Pipeline Deploy`、実行履歴・監査を担う `Adlaire Pipeline Audit` の候補として扱う。ただし、現時点では付随システム候補であり、Adlaire Git Repository 本体へ統合しない。Adlaire Pipeline の開発言語は Go 採用方針とし、データベース、依存関係、実行基盤は未定とする。本書の libSQL 採用方針を Adlaire Pipeline へ自動適用してはならない。
+Adlaire Pipeline は、将来的に GitHub Releases に代わる、または GitHub Releases を補助配置へ移す `Adlaire Pipeline Release`、検証・ビルド等を担う `Adlaire Pipeline Runner`、成果物管理を担う `Adlaire Pipeline Artifact`、デプロイ反映を担う `Adlaire Pipeline Deploy`、実行履歴・監査を担う `Adlaire Pipeline Audit` の候補として扱う。現行方針では、これらを Adlaire Git Repository 本体内部の `CI/CD Domain` に含める。Adlaire Pipeline の開発言語は Go 採用方針とし、データベース、依存関係、実行基盤は未定とする。本書の libSQL 採用方針を Adlaire Pipeline へ自動適用してはならない。
 
 ## 7. 完成判定
 
@@ -625,34 +630,34 @@ Phase 9 の完了条件は以下とする。
 
 基準バージョン: `v.2.10`
 
-Phase 10 は、現行リリース配置を GitHub Releases に整合しつつ、将来の Adlaire Pipeline 付随システム化を検討可能にするための整合フェーズである。
+Phase 10 は、現行リリース配置を GitHub Releases に整合しつつ、当時の方針として将来の Adlaire Pipeline 付随システム化を検討可能にするための整合フェーズである。
 
 Phase 10 では、Go single binary、release notes、checksum、manifest の現行配置先を GitHub Releases とし、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない方針を明確にする。
 
-Phase 10 では、Adlaire Pipeline を付随システム候補として定義し、将来的な機能群を `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。ただし、Adlaire Pipeline の実装、本体統合、GitHub Releases 廃止、GitHub Actions、外部デプロイフレームワーク、Container registry、Docker image 配布の正式化、Node.js / npm 前提ツールは対象外とする。Adlaire Pipeline の開発言語は Go 採用方針とし、データベース、依存関係、実行基盤は未定とする。
+Phase 10 では、当時の方針として Adlaire Pipeline を付随システム候補として定義し、将来的な機能群を `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とした。現行方針では、Phase 11 の機能ドメインアーキテクチャに基づき Adlaire Pipeline を本体内部の CI/CD Domain として扱う。ただし、Adlaire Pipeline の実装、GitHub Releases 廃止、GitHub Actions、外部デプロイフレームワーク、Container registry、Docker image 配布の正式化、Node.js / npm 前提ツールは対象外とする。Adlaire Pipeline の開発言語は Go 採用方針とし、データベース、依存関係、実行基盤は未定とする。
 
 Phase 10 の完了条件は以下とする。
 
 - 現行リリース配置が GitHub Releases として説明できる。
 - 3類マスター仕様書、2類リリースポリシー、2類デプロイポリシー、マスター開発計画、README の記述が矛盾していない。
 - 標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Go single binary を本番サーバへ反映する補助導線として説明できる。
-- Adlaire Pipeline がリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う将来機能群の候補であり、開発言語は Go 採用方針、データベース、依存関係、実行基盤、本体統合は未定であることを説明できる。
+- Adlaire Pipeline が Phase 10 当時はリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補であり、現行方針では本体内部の CI/CD Domain として扱うことを説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
 ### 8.11 Phase 11
 
 基準バージョン: `v.2.10`
 
-Phase 11 は、Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理するフェーズである。
+Phase 11 は、Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続一本化方針、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理するフェーズである。
 
-Phase 11 では、Adlaire Git Repository 本体を特定 UI に依存させず、HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は原則として Adlaire 公式 SDK 経由にする。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。
+Phase 11 では、Adlaire Git Repository 本体を特定 UI に依存させず、HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は Adlaire 公式 SDK に一本化し、公開 API の直接利用は SDK 未実装期間を含めて禁止する。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。
 
 Phase 11 では、Docker を Adlaire Git Repository 本体の直接標準運用選択肢として扱わず、Adlaire Pipeline 経由で生成、管理、配布、利用する対象として整理する。
 
 Phase 11 の完了条件は以下とする。
 
 - Go 採用方針、Go single binary 正本成果物方針、ヘッドレスアーキテクチャ設計思想が矛盾していない。
-- UI が Adlaire Git Repository 本体に固定されず、特定 UI 非依存、静的フロントエンド、モバイルアプリ等のクライアント拡張、Adlaire 公式 SDK 接続方針を説明できる。
+- UI が Adlaire Git Repository 本体に固定されず、特定 UI 非依存、静的フロントエンド、モバイルアプリ等のクライアント拡張、Adlaire 公式 SDK 接続一本化、公開 API 直接利用禁止方針を説明できる。
 - Adlaire 公式 SDK の TypeScript 実装、JavaScript 生成、`sdk/` 配置、本体非同梱、独立リリース方針を説明できる。
 - Docker が Adlaire Pipeline 経由で扱う対象として説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。

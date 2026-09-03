@@ -22,7 +22,7 @@ VPS、self-host、専用サーバーを対象にする場合は、SSH 使用可�
 
 標準デプロイは、Go single binary 正本成果物を self-host、VPS、専用サーバーへ配置する方式を基準とする。Docker image を扱う場合は、Adlaire Pipeline 経由で生成、管理、配布、利用する。
 
-Adlaire Pipeline は、リリース基盤システムと自動実行基盤システムを担う付随システムとして検討する。将来的な機能群は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。初期方針では Adlaire Git Repository 本体へ統合せず、外側の付随システムとして定義する。将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は、Adlaire Pipeline の仕様確定後に別途判断する。
+Adlaire Pipeline は、リリース基盤システムと自動実行基盤システムを担う機能として、Adlaire Git Repository 本体内部の CI/CD Domain に統合する方針とする。将来的な機能群は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。これらは同一の CI/CD Domain 内の機能群として扱い、独立した機能ドメインへ細分化しない。
 
 Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は現時点では未定とする。libSQL、Docker、GitHub Actions 等を Adlaire Pipeline の採用技術として勝手に固定してはならない。
 
@@ -38,7 +38,7 @@ Adlaire Pipeline の開発言語は Go 採用方針とする。データベー�
 | 補助採用 | `gh` | Pull Request、tag、GitHub Releases、成果物配置、release notes、PR説明更新など GitHub 側の補助操作に限って利用する |
 | 補助採用 | systemd timer | バックアップ、定期検証、保守系の定期実行候補として利用する。アプリケーション本体の標準起動方式ではない |
 | 保留 | GitHub Actions | 標準採用しない。外部CIとしての採用可否は保留し、必要時に別途提案と承認を要する |
-| 将来候補 | Adlaire Pipeline | `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を含む内製付随システム候補。Docker image の生成、管理、配布、利用は Adlaire Pipeline 経由で扱う。開発言語は Go 採用方針。データベース、依存関係、実行基盤、統合方針、実装時期は未定 |
+| 将来候補 | Adlaire Pipeline | Adlaire Git Repository 本体内部の CI/CD Domain として扱うリリース基盤、自動実行基盤、成果物管理、デプロイ反映、実行履歴・監査機能候補。Docker image の生成、管理、配布、利用は Adlaire Pipeline 経由で扱う。開発言語は Go 採用方針。データベース、依存関係、実行基盤、実装時期は未定 |
 | 保留 | 外部デプロイフレームワーク | 標準採用しない。必要性、依存関係、運用リスクを整理し、別途承認を得るまで採用しない |
 | 採用 | systemd または同等の起動管理 | binary 直実行を選択する場合の起動管理候補。作成または変更は別途承認を得る |
 | 不採用 | Docker named volume 標準運用 | data 正本を Docker named volume に丸投げする運用は禁止 |

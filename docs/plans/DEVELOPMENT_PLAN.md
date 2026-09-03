@@ -2,7 +2,7 @@
 
 **位置づけ**: マスター開発計画
 **対象**: Auris / Adlaire Git Repository 全体
-**計画バージョン**: v.2.32
+**計画バージョン**: v.2.33
 **現行フェーズ基準バージョン**: v.2.10
 **ステータス**: 3類マスター仕様改善
 
@@ -16,7 +16,7 @@
 
 実装は、1類ルールブック、2類ポリシー、3類マスター仕様書に従い、本書で定義したフェーズ計画に基づいて進める。
 
-Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。Phase 10 は現行リリース配置を GitHub Releases に整合しつつ、Adlaire Pipeline をリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として定義した履歴である。Phase 11 の現行フェーズ基準バージョンは `v.2.10` とする。Phase 11 は Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続方針、SDK マスター仕様書、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理し、3類マスター仕様書を完成版として整合する。さらに、3類マスター仕様改善として、全体仕様、本体仕様、SDK仕様の責務分担、本体公開契約、client lifecycle、互換性方針、履歴と現行正本仕様の読み分けを強化する。追加改善では、仕様判断フロー、本体境界の判定表、system / data 境界の判断基準、SDK が依存してよい契約、SDK 生成成果物の検証条件を明確化する。継続改善では、マスター仕様判断チェック、本体実装前契約チェック、SDK 実装前チェックを追加し、旧 Deno 実装資産の build 例が現行 Go 本体標準手順ではないことを明確化する。今回の改善では、3類マスター仕様書の改善基準、本体仕様改善チェック、SDK仕様改善チェックを追加し、全体仕様、本体仕様、SDK仕様の責務境界と未確定事項の扱いをさらに明確化する。Phase 11 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
+Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である。Phase 8 は DB 仕様完成フェーズとして libSQL 標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はシステム分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備として完了済みの履歴である。Phase 10 は現行リリース配置を GitHub Releases に整合しつつ、Adlaire Pipeline をリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として定義した履歴である。Phase 11 の現行フェーズ基準バージョンは `v.2.10` とする。Phase 11 は Go 移行準備、ヘッドレスアーキテクチャ設計思想、Adlaire 公式 SDK 接続一本化、公開 API 直接利用禁止、SDK マスター仕様書、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理し、3類マスター仕様書を完成版として整合する。さらに、3類マスター仕様改善として、全体仕様、本体仕様、SDK仕様の責務分担、本体公開契約、client lifecycle、互換性方針、履歴と現行正本仕様の読み分けを強化する。追加改善では、仕様判断フロー、本体境界の判定表、system / data 境界の判断基準、SDK が依存してよい契約、SDK 生成成果物の検証条件を明確化する。継続改善では、マスター仕様判断チェック、本体実装前契約チェック、SDK 実装前チェックを追加し、旧 Deno 実装資産の build 例が現行 Go 本体標準手順ではないことを明確化する。今回の改善では、機能ドメインアーキテクチャ設計思想、Management / Repository / Collaboration / CI/CD / System / Data Foundation の本体機能ドメイン、Adlaire Pipeline の CI/CD Domain 統合方針、SDK が本体機能ドメインではないこと、Go 実装移行時のルート構成方針を追加し、全体仕様、本体仕様、SDK仕様の責務境界と未確定事項の扱いをさらに明確化する。Phase 11 以降の計画判断では、3類マスター仕様書の現行正本仕様、2類ポリシー、本書の現行フェーズ定義を基準にする。
 
 本計画における「マスター仕様完成」は、実装承認ではない。仕様完成後にソースコード実装、DB driver 実装、schema 変更、テスト変更、デプロイ実行を行う場合は、対象範囲と検証方法を提示し、別途ユーザー承認を得る。
 
@@ -63,9 +63,9 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 - リリース提案、リリース配置、リリース成果物、リリース自動化は `docs/policies/RELEASE_POLICY.md` に従う。現行のリリース履歴の正本は GitHub Releases とし、リポジトリ内に変更履歴、リリース履歴、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を履歴ファイルとして保持しない。
 - 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とし、詳細は `docs/policies/DEPLOYMENT_POLICY.md` に従う。
 - Adlaire Git Repository 本体は Go を標準開発言語とし、Go single binary 形式を正本成果物とする。Deno + TypeScript は本体開発言語として終了方針とする。Docker は、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。1 VPS 上の差し替え可能な system 側と host filesystem data 側を分離する構成にする。shell script + SSH は binary 転送、起動定義更新、backup、再起動、検証の補助方式とし、`gh` と systemd timer を補助採用とする。リリース配置は現行では GitHub Releases を正式配置元とする。GitHub Actions と外部デプロイフレームワークは保留、Node.js系は不採用とする。
-- Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
-- Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
-- Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ内製付随システム候補とする。初期方針では Adlaire Git Repository 本体へ統合せず、将来の統合、一部統合、付随維持、AdlaireGroup 共通基盤化は仕様確定後に判断する。Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は未定とし、別途ユーザー承認を得るまで固定しない。
+- Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は、Adlaire 公式 SDK に一本化する。公開 API の直接利用は、SDK 未実装期間を含めて禁止する。
+- Adlaire 公式 SDK は、Adlaire Git Repository 本体の機能ドメインではなく、本体から切り離した外部接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
+- Adlaire Git Repository 本体には、機能ドメインアーキテクチャ設計思想を適用する。現行の本体機能ドメインは、`Management Domain`、`Repository Domain`、`Collaboration Domain`、`CI/CD Domain`、`System / Data Foundation` とする。`Access Domain` は採用せず、認証、認可、ユーザー、権限、組織、チーム、管理系の責務は `Management Domain` に含める。Adlaire Pipeline は `CI/CD Domain` として扱い、Release、Runner、Artifact、Deploy、Audit を同一ドメイン内の機能群として扱う。これらを独立した機能ドメインへ細分化しない。Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は未定とし、別途ユーザー承認を得るまで固定しない。
 - 標準データベースは libSQL とし、唯一の標準DBとして完全確定する。SQLite 互換維持は行わず、SQLite は既存データ移行元確認用としてのみ扱う。DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは採用候補として扱わない。
 - ローカルに Deno が存在しない場合、実行系検証は停止ではなく VPS または承認済み検証サーバで実施する方針とする。
 - ドキュメント参照導線は `docs/DOCUMENT_INDEX.md` を索引として確認する。AdlaireGroup 共通ガバナンス雛形の正本は `docs/tpl-governance/` 配下で管理し、現行プロジェクト固有の正本とは分離する。
@@ -113,8 +113,8 @@ Phase 7 の初回安定版リリース `v.1.8` は完了済みの履歴である
 | Phase 8.5 | v.1.9 | 完了 | システム分割。Adlaire Git Repository 本体とデータ領域の分割 |
 | Phase 8.7 | v.1.9 | 完了 | 安定化。バグ修正、検証強化、ドキュメント整合性 |
 | Phase 9 | v.2.10 | 完了 | バグ修正ゼロ化、安定版判定、リリース準備 |
-| Phase 10 | v.2.10 | 完了 | GitHub Releases 現行配置整合、Adlaire Pipeline 付随システム候補整理、Go 採用方針整合 |
-| Phase 11 | v.2.10 | 着手 | Go 移行準備。固定採用バージョン、実装構成、検証導線、旧 Deno + TypeScript 資産、ヘッドレスアーキテクチャ方針、3類マスター仕様完成、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理 |
+| Phase 10 | v.2.10 | 完了 | GitHub Releases 現行配置整合、当時の Adlaire Pipeline 付随システム候補整理、Go 採用方針整合 |
+| Phase 11 | v.2.10 | 着手 | Go 移行準備。固定採用バージョン、実装構成、検証導線、旧 Deno + TypeScript 資産、ヘッドレスアーキテクチャ方針、SDK 接続一本化、公開 API 直接利用禁止、機能ドメインアーキテクチャ、3類マスター仕様完成、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理 |
 
 上記は各フェーズの基準バージョンである。表の `Major` は安定版リリース系列であり、累積フェーズ番号ではない。初回安定版リリース前は `v.0.x` 系を維持する。
 
@@ -1204,7 +1204,7 @@ Phase 9 PR が GitHub の `main` へ取り込まれるまで、tag 作成、GitH
 
 ---
 
-## 15. Phase 10: GitHub Releases 現行配置整合 / Adlaire Pipeline 付随システム候補整理
+## 15. Phase 10: GitHub Releases 現行配置整合 / 当時の Adlaire Pipeline 付随システム候補整理
 
 ### 15.1 基準バージョン
 
@@ -1218,7 +1218,7 @@ Go single binary、release notes、checksum、manifest の配置先を GitHub Re
 
 標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Go single binary を本番サーバへ反映する補助導線として維持する。
 
-Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ内製付随システム候補として整理する。初期方針では Adlaire Git Repository 本体へ統合しない。将来的な統合、一部統合、付随維持、AdlaireGroup 共通基盤化は、Adlaire Pipeline の仕様確定後に別途判断する。
+Adlaire Pipeline は、Phase 10 当時の方針として、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ内製付随システム候補として整理した。現行方針では、Phase 11 の機能ドメインアーキテクチャに基づき、Adlaire Pipeline を Adlaire Git Repository 本体内部の CI/CD Domain として扱う。
 
 Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は未定とする。Adlaire Git Repository 本体の libSQL 方針を、Adlaire Pipeline へ自動的に固定してはならない。
 
@@ -1228,8 +1228,8 @@ Adlaire Pipeline の開発言語は Go 採用方針とする。データベー�
 - Go single binary、release notes、checksum、manifest の GitHub Releases 配置方針整理
 - リポジトリ内リリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum の不保持方針整理
 - `scripts/deploy/` 配下の標準デプロイ雛形との責務整理
-- Adlaire Pipeline を Release、Runner、Artifact、Deploy、Audit の将来機能群を持つ付随システム候補として整理
-- Adlaire Pipeline の開発言語は Go 採用方針とし、データベース、依存関係、実行基盤、本体統合、GitHub Releases からの移行は未定であることを明記
+- Adlaire Pipeline を Release、Runner、Artifact、Deploy、Audit の将来機能群を持つ付随システム候補として当時の方針で整理
+- Adlaire Pipeline の開発言語は Go 採用方針とし、データベース、依存関係、実行基盤、GitHub Releases からの移行は未定であることを明記
 - 3類マスター仕様書、2類ポリシー、マスター開発計画、README の整合性向上
 - Pull Request 説明の整合
 
@@ -1237,7 +1237,6 @@ Adlaire Pipeline の開発言語は Go 採用方針とする。データベー�
 
 - Adlaire Pipeline の実装
 - Adlaire Pipeline のデータベース、依存関係、実行基盤の採用決定
-- Adlaire Pipeline の Adlaire Git Repository 本体統合
 - GitHub Releases の廃止
 - database schema 変更
 - database migration 実行
@@ -1260,7 +1259,7 @@ Adlaire Pipeline の開発言語は Go 採用方針とする。データベー�
 ### 15.5 検証範囲
 
 - GitHub Releases 現行配置方針とリリースポリシー、デプロイポリシー、マスター開発計画、README の整合
-- Adlaire Pipeline 付随システム候補方針とリリースポリシー、デプロイポリシー、マスター仕様書、README の整合
+- 当時の Adlaire Pipeline 付随システム候補方針とリリースポリシー、デプロイポリシー、マスター仕様書、README の整合
 - Go single binary 正本成果物方針との整合
 - Docker image は Adlaire Pipeline 経由で扱う方針との整合
 - Node.js runtime、npm ecosystem、外部デプロイフレームワークを導入していないこと
@@ -1274,7 +1273,7 @@ Adlaire Pipeline の開発言語は Go 採用方針とする。データベー�
 - Phase 10 の実装対象、対象外、検証範囲、完了条件が本書に定義されている。
 - Go single binary、release notes、checksum、manifest の配置先が GitHub Releases として説明できる。
 - 標準デプロイ雛形 `scripts/deploy/` が GitHub Releases 配置済み成果物を本番サーバへ反映する補助導線として説明できる。
-- Adlaire Pipeline が Release、Runner、Artifact、Deploy、Audit の将来機能群を持つ付随システム候補であり、実装、技術選定、本体統合、GitHub Releases 廃止が未定であることを説明できる。
+- Adlaire Pipeline が Phase 10 当時は Release、Runner、Artifact、Deploy、Audit の将来機能群を持つ付随システム候補であり、現行方針では本体内部の CI/CD Domain として扱うことを説明できる。
 - リポジトリ整合性確認と整合性向上を完了している。
 
 ---
@@ -1296,7 +1295,10 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 - Go 実装基盤のディレクトリ構成案
 - Go 固定採用バージョン候補の提示
 - Go single binary の Linux ARM64 / x86_64 build 方針
-- ヘッドレスアーキテクチャ設計思想と Adlaire 公式 SDK 接続方針
+- ヘッドレスアーキテクチャ設計思想と Adlaire 公式 SDK 接続一本化方針
+- 公開 API 直接利用禁止方針
+- 機能ドメインアーキテクチャ設計思想
+- Management、Repository、Collaboration、CI/CD、System / Data Foundation の本体機能ドメイン整理
 - 3類マスター仕様書の完成
 - Adlaire 公式 SDK マスター仕様書の完成
 - SDK の TypeScript 実装 / JavaScript 生成方針
@@ -1313,10 +1315,29 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 - libSQL 接続境界を Database Gateway と driver 層に閉じ込める方針の維持
 - Deno + TypeScript 旧資産の扱い、撤去順序、履歴保持範囲の整理
 - 標準検証導線を Go 方針へ移行する計画
-- ヘッドレスアーキテクチャ設計思想、UI 差し替え可能方針、静的フロントエンド、モバイルアプリ等のクライアント拡張方針、Adlaire 公式 SDK 接続方針
+- ヘッドレスアーキテクチャ設計思想、UI 差し替え可能方針、静的フロントエンド、モバイルアプリ等のクライアント拡張方針、Adlaire 公式 SDK 接続一本化方針
+- SDK が本体の機能ドメインではないこと
+- 公開 API の直接利用は SDK 未実装期間を含めて禁止する方針
 - Adlaire 公式 SDK の TypeScript 実装 / JavaScript 生成方針
 - Docker を Adlaire Pipeline 経由で生成、管理、配布、利用する方針
 - 1類ルールブック、2類ポリシー、3類マスター仕様書、README の整合性確認
+
+Go 実装移行時の方針ディレクトリ構成は以下とする。現時点ではドキュメント方針であり、ファイル作成またはソース実装の承認ではない。
+
+```text
+/
+├── AGENTS.md
+├── README.md
+├── go.mod
+├── main.go
+├── internal/
+├── sdk/
+├── scripts/
+├── tools/
+└── docs/
+```
+
+`web/` は標準方針ディレクトリとして採用しない。フロントエンドは本体へ固定せず、SDK 経由で接続する静的フロントエンドまたは外部クライアントとして扱う。
 
 ### 16.4 対象外
 
@@ -1328,6 +1349,8 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 - SDK 実装開始フェーズの確定
 - Docker image の本体直接標準運用化
 - 既存 Deno + TypeScript 実装の削除
+- `go.mod`、`main.go`、`internal/` の作成
+- `web/` の新設
 - `deno.json`、`deno.lock`、既存検証スクリプトの撤去
 - database schema 変更
 - デプロイ実行
@@ -1339,8 +1362,11 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 - Go 固定採用バージョンと外部依存の承認が別工程で必要であることを説明できる。
 - Deno + TypeScript 本体終了方針と、AdlaireGroup 共通の Deno + TypeScript / Go 単体2系統選択方針が矛盾していない。
 - Go single binary 正本成果物方針、GitHub Releases 現行配置、system / data 分離、libSQL 標準DB方針、ヘッドレスアーキテクチャ設計思想、Docker の Adlaire Pipeline 経由方針が矛盾していない。
-- UI が Adlaire Git Repository 本体に固定されず、特定 UI 非依存、静的フロントエンド、モバイルアプリ等のクライアント拡張、Adlaire 公式 SDK 接続方針を説明できる。
+- UI が Adlaire Git Repository 本体に固定されず、特定 UI 非依存、静的フロントエンド、モバイルアプリ等のクライアント拡張、Adlaire 公式 SDK 接続一本化、公開 API 直接利用禁止方針を説明できる。
 - Adlaire 公式 SDK マスター仕様書を3類マスター仕様書として参照でき、SDK の公開境界、非責務、対象外、未確定範囲を説明できる。
+- SDK が本体の機能ドメインではなく、本体から切り離した外部接続境界であることを説明できる。
+- Management、Repository、Collaboration、CI/CD、System / Data Foundation の本体機能ドメインと、`Access Domain` を採用しない理由を説明できる。
+- Adlaire Pipeline を CI/CD Domain として扱い、Release、Runner、Artifact、Deploy、Audit を独立ドメインへ細分化しないことを説明できる。
 - Adlaire 公式 SDK の TypeScript 実装、JavaScript 生成、`sdk/` 配置、本体非同梱、独立リリース方針を説明できる。
 - 本体公開契約と内部実装境界、SDK client lifecycle、SDK 互換性方針を説明できる。
 - 3類マスター仕様書の現行正本仕様、過去履歴、未確定、対象外を混同せずに説明できる。
@@ -1467,3 +1493,4 @@ Go 採用方針は確定済みとする。ただし、Go 固定採用バージ�
 | v.2.30 | 全フェーズ共通 / Phase 11 | v.2.10 | 3類マスター仕様の追加改善として、仕様判断フロー、本体境界判定、system / data 境界判断、SDK 依存可能契約、SDK 生成成果物検証条件を明確化 |
 | v.2.31 | 全フェーズ共通 / Phase 11 | v.2.10 | 3類マスター仕様の継続改善として、マスター仕様判断チェック、本体実装前契約チェック、SDK 実装前チェック、旧 Deno 実装資産 build 例の履歴扱いを明確化 |
 | v.2.32 | 全フェーズ共通 / Phase 11 | v.2.10 | 3類マスター仕様の改善継続として、3類マスター仕様書の改善基準、本体仕様改善チェック、SDK仕様改善チェックを追加し、全体仕様、本体仕様、SDK仕様の責務境界と未確定事項の扱いを明確化 |
+| v.2.33 | 全フェーズ共通 / Phase 11 | v.2.10 | ヘッドレスアーキテクチャにおける SDK 接続一本化、公開 API 直接利用禁止、機能ドメインアーキテクチャ、Adlaire Pipeline の CI/CD Domain 統合方針、Go 実装移行時のルート構成方針を反映 |

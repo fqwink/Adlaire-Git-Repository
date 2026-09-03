@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.32
+**文書バージョン**: v.2.33
 **ステータス**: 本体マスター仕様改善
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Go + libSQL + Git
@@ -25,7 +25,8 @@
 - Git 基本操作と開発支援機能を段階的に実装する
 - UI は GitHub 互換の対象外とし、本プロジェクト独自の利用体験として段階的に拡張する
 - UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する
-- UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う
+- UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は Adlaire 公式 SDK に一本化する
+- 公開 API の直接利用は、SDK 未実装期間を含めて禁止する
 - Adlaire 公式 SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする
 - Adlaire 公式 SDK は本体へ同梱せず、独立リリース対象とする
 - SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する
@@ -70,9 +71,10 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換対象外とする。
 - UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。
 - UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。
-- UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+- UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は、Adlaire 公式 SDK に一本化する。
+- 公開 API の直接利用は、SDK 未実装期間を含めて禁止する。
 - HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。
-- Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
+- Adlaire 公式 SDK は、Adlaire Git Repository 本体の機能ドメインではなく、本体から切り離した外部接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
 - 標準開発言語は Go とする。
 - Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする。
 - 標準データベースは libSQL とし、DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは現行正本仕様の採用候補として扱わない。
@@ -87,8 +89,11 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - Turso Cloud、その他 libSQL 系クラウドDBサービスは標準採用ではなく、将来候補として保留する。
 - Node.js runtime、npm ecosystem、npm 依存、外部フレームワーク、無承認外部ライブラリは採用しない。
 - リリース配置は現行では GitHub Releases を正式配置元とする。
-- Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ付随システム候補として扱う。
-- Adlaire Pipeline は初期方針では本体へ統合せず、将来の統合、一部統合、付随維持、AdlaireGroup 共通基盤化を仕様確定後に判断する。
+- Adlaire Git Repository 本体には、機能ドメインアーキテクチャ設計思想を適用する。
+- 現行の本体機能ドメインは、`Management Domain`、`Repository Domain`、`Collaboration Domain`、`CI/CD Domain`、`System / Data Foundation` とする。
+- `Access Domain` は採用せず、認証、認可、ユーザー、権限、組織、チーム、管理系の責務は `Management Domain` に含める。
+- Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ `CI/CD Domain` として扱う。
+- Adlaire Pipeline の機能群を独立した機能ドメインへ細分化しない。
 - Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は現時点では未定とする。
 
 ## 本体仕様の責務境界
@@ -102,13 +107,35 @@ Adlaire Git Repository 本体は、Git ホスティング基盤として以下�
 | 開発支援 | Issue、Pull Request、Code Review、Wiki、Webhook、Release の本体側 API と永続化 |
 | 組織管理 | Organization、Team、Project の最小運用と権限境界 |
 | 認証・認可 | User、session、HTTP Basic、Personal Access Token、SSH key、admin 権限、repository 権限 |
-| API | Adlaire 公式 SDK と外部システムが利用する公開 API |
+| API | Adlaire 公式 SDK が利用する公開 API |
 | DB | libSQL 標準DB、Database Gateway、Repository 層、driver 層、schema、migration、seed |
 | Storage | Git bare repositories、data 領域、config、secrets、logs、backups、manifests |
 | 運用 | health check、backup、restore、rollback、audit log、operations status |
 | リリース | Go single binary 成果物、GitHub Releases 現行配置、tag / release notes / checksum / manifest の扱い |
 
-本体は、SDK 実装、クライアント UI 実装、Adlaire Pipeline 実装、GitHub Actions 互換実装、外部フレームワーク、npm ecosystem、Node.js runtime を責務に持たない。
+本体は、SDK 実装、クライアント UI 実装、GitHub Actions 互換実装、外部フレームワーク、npm ecosystem、Node.js runtime を責務に持たない。Adlaire Pipeline は本体内部の CI/CD Domain として扱うが、実装詳細、DB、依存関係、実行基盤は未確定とする。
+
+## 機能ドメインアーキテクチャ
+
+Adlaire Git Repository 本体には、機能ドメインアーキテクチャ設計思想を適用する。
+
+機能ドメインは、責務境界を明確にするための単位であり、細分化そのものを目的にしてはならない。
+
+現行の本体機能ドメインは以下とする。
+
+| 機能ドメイン | 含める主な責務 |
+|---|---|
+| Management Domain | User、session、認証、認可、Personal Access Token、SSH key、Organization、Team、Project、admin、権限、管理系操作 |
+| Repository Domain | Repository CRUD、visibility、settings、Git clone / push / pull / fetch、branch、tag、commit、tree、blob、diff、README |
+| Collaboration Domain | Issue、Pull Request、Code Review、Wiki、Discussions、comment、review state、Webhook |
+| CI/CD Domain | Adlaire Pipeline、release、runner、artifact、deploy、audit、検証、ビルド、成果物管理、リリース配置、デプロイ反映、実行履歴 |
+| System / Data Foundation | Go single binary、libSQL、Database Gateway、driver、schema、migration、Git bare repositories、host filesystem data、config、secrets、logs、backups、manifests、system / data 分離 |
+
+`Access Domain` は採用しない。Access を独立ドメインとして切り出さず、認証、認可、ユーザー、権限、組織、チーム、管理系の責務は `Management Domain` に含める。
+
+Adlaire Pipeline は `CI/CD Domain` に含める。`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` は同一ドメイン内の機能群として扱い、独立した機能ドメインへ分割しない。
+
+Adlaire 公式 SDK、UI、静的フロントエンド、モバイルアプリ、外部システムは、本体の機能ドメインではない。
 
 ## ヘッドレス境界
 
@@ -116,13 +143,13 @@ Adlaire Git Repository は、ヘッドレスアーキテクチャ設計思想に
 
 本体は、UI が必要とする操作を公開 API と認証境界として提供する。UI、モバイルアプリ、外部システムは、本体内部の Service、Repository、Database Gateway、driver、Git 操作処理へ直接依存してはならない。
 
-接続境界は原則として Adlaire 公式 SDK とする。SDK が未実装または対象外の範囲では、公開 API 仕様に基づく直接 HTTP 利用を一時的な接続手段として扱える。ただし、その場合も本体内部構造への依存を仕様化してはならない。
+接続境界は Adlaire 公式 SDK に一本化する。SDK が未実装または対象外の範囲であっても、UI、静的フロントエンド、モバイルアプリ、外部システムによる公開 API の直接 HTTP 利用を一時的な接続手段として扱ってはならない。
 
-本体に含まれる HTML / CSS / Vanilla JavaScript は、運用上必要な最小 UI または参照 UI として扱う。本体の仕様判断では、UI の見た目、画面配置、ブランド表現を GitHub UI 互換として扱わない。
+HTML / CSS / Vanilla JavaScript で構成されるフロントエンドは、本体へ固定せず、静的コンテンツ専用サーバー等で動作するクライアントとして扱う。本体の仕様判断では、UI の見た目、画面配置、ブランド表現を GitHub UI 互換として扱わない。
 
 ## API 境界
 
-本体の公開 API は、Adlaire 公式 SDK、管理用スクリプト、外部システムが利用する標準接続面である。
+本体の公開 API は、Adlaire 公式 SDK が利用する本体接続面である。UI、静的フロントエンド、モバイルアプリ、外部システムは、公開 API を直接利用せず、Adlaire 公式 SDK を通じて接続する。
 
 公開 API は、以下を満たす必要がある。
 
@@ -187,7 +214,7 @@ Adlaire Git Repository 本体が外部へ公開する契約は、公開 API、�
 |---|---|
 | 本体責務 | 変更内容が Git ホスティング本体、公開 API、DB、Git、Storage、運用、リリースのいずれかに属する |
 | SDK 分離 | SDK 実装、SDK 配布、SDK public API 詳細を本体仕様として固定していない |
-| Pipeline 分離 | Adlaire Pipeline の実装、DB、依存関係、実行基盤を本体仕様として固定していない |
+| CI/CD Domain | Adlaire Pipeline を本体内部の CI/CD Domain として扱いつつ、DB、依存関係、実行基盤を未承認のまま固定していない |
 | 旧資産分離 | 旧 Deno + TypeScript、旧 SQLite、旧 Docker 方針を現行 Go 本体仕様として扱っていない |
 | 上位整合 | `docs/specs/Auris_System_Design.md` の全体方針、2類ポリシー、マスター開発計画と矛盾しない |
 
@@ -199,13 +226,13 @@ Adlaire Git Repository 本体が外部へ公開する契約は、公開 API、�
 
 | 境界 | 本体が提供するもの | 本体が直接提供しないもの |
 |---|---|---|
-| 公開 API | 外部システムと SDK が利用する HTTP 接続面 | SDK public API の具体関数名 |
+| 公開 API | SDK が利用する HTTP 接続面 | SDK public API の具体関数名、外部システムによる直接HTTP利用 |
 | Git 接続 | clone、push、pull、fetch、branch、tag、Git Smart HTTP、SSH / HTTP 認証境界 | 外部CIの job 実行、GitHub Actions 互換 |
 | DB | libSQL 標準DB、Database Gateway、Repository 層、driver 層、schema、migration | 上位層からの driver 直接利用、SQLite 互換維持 |
 | Storage | Git bare repositories、config、secrets、logs、backups、manifests の data 側保存 | Docker named volume への data 正本委譲 |
 | 運用 | health、operations status、audit log、backup / rollback 境界 | 本番データ復元の無承認自動実行 |
-| リリース | Go single binary、GitHub Releases 現行配置、checksum、manifest | Adlaire Pipeline の実装、GitHub Releases 廃止 |
-| UI | 最小 UI または参照 UI | GitHub UI 互換、外部フレームワークUI |
+| リリース | Go single binary、GitHub Releases 現行配置、checksum、manifest、CI/CD Domain 連携候補 | GitHub Releases 廃止 |
+| UI | SDK 経由で接続する差し替え可能なクライアント | GitHub UI 互換、外部フレームワークUI、本体固定UI |
 | SDK | SDK が利用できる公開 API と互換範囲 | SDK 実装、SDK 配布、SDK リリース |
 
 上記の右列にあるものは、本体仕様の現行実装対象として扱わない。扱う場合は、対象外または未確定から現行正本仕様へ移すための仕様改訂、マスター開発計画改訂、ユーザー承認を必要とする。
@@ -232,6 +259,25 @@ system / data 境界の判断では、以下を確認する。
 | ロールバック | system rollback と data rollback を分離できる |
 | 秘密情報 | secrets は system 側や公開成果物へ混在させない |
 
+## Go 実装移行時のルート構成方針
+
+Go 実装移行時の方針ディレクトリ構成は以下とする。現時点では構成方針であり、ファイル作成またはソース実装の承認ではない。
+
+```text
+/
+├── AGENTS.md
+├── README.md
+├── go.mod
+├── main.go
+├── internal/
+├── sdk/
+├── scripts/
+├── tools/
+└── docs/
+```
+
+`internal/` は Adlaire Git Repository 本体の Go 実装領域とする。`sdk/` は Adlaire 公式 SDK の管理領域であり、本体の機能ドメインではない。`web/` は標準方針ディレクトリとして採用しない。フロントエンドは本体へ固定せず、SDK 経由で接続する静的フロントエンドまたは外部クライアントとして扱う。
+
 ## 完成済み仕様と未確定仕様
 
 本書における完成済み仕様は、現行正本仕様、責務境界、Phase 1 から Phase 11 までの完了済みまたは着手済み範囲、対象外範囲、保留候補、検証方針を追跡できる状態を指す。
@@ -243,7 +289,7 @@ system / data 境界の判断では、以下を確認する。
 | 領域 | 未確定内容 |
 |---|---|
 | Go 固定採用バージョン | 最新安定版方針に従い、別途承認で固定する |
-| Adlaire Pipeline | 付随システム候補。実装、DB、依存関係、実行基盤、本体統合は未確定 |
+| Adlaire Pipeline | CI/CD Domain として本体統合方針。実装、DB、依存関係、実行基盤、詳細仕様は未確定 |
 | SDK 詳細 API | SDK マスター仕様書と対応する公開 API 詳細を別途確定する |
 | SDK リポジトリ分離 | 未定 |
 | Turso Cloud 等 | libSQL 接続先候補として保留 |
@@ -258,9 +304,9 @@ system / data 境界の判断では、以下を確認する。
 
 - 現行正本仕様、フェーズ別履歴、保留候補、対象外範囲を分離している。
 - GitHub 機能互換方針と GitHub UI 非互換方針を同時に定義している。
-- ヘッドレスアーキテクチャ設計思想、UI 差し替え可能方針、静的フロントエンド、モバイルアプリ等のクライアント拡張、Adlaire 公式 SDK 経由の接続方針を定義している。
+- ヘッドレスアーキテクチャ設計思想、UI 差し替え可能方針、静的フロントエンド、モバイルアプリ等のクライアント拡張、Adlaire 公式 SDK への接続一本化、公開 API 直接利用禁止方針を定義している。
 - Adlaire 公式 SDK の TypeScript 実装、JavaScript 生成、`sdk/` 配置、本体非同梱、独立リリース方針を定義している。
-- Repository、User、Auth、Git Smart HTTP、Issue、Pull Request、Code Review、Wiki、Webhook、Release、Organizations、Teams、Projects、Adlaire 内製 Deno Module Registry、Audit、Operations、REST API、Web UI、Deployment、Database の主要境界を追跡できる。
+- Management、Repository、Collaboration、CI/CD、System / Data Foundation の主要機能ドメインを追跡できる。
 - libSQL 標準DB方針と SQLite 互換維持なし方針が矛盾していない。
 - Go single binary 正本成果物方針、Docker の Adlaire Pipeline 経由方針、host filesystem data 正本方針が矛盾していない。
 - 保留候補は、保留解除とユーザー承認なしに実装対象へ戻らない。
@@ -269,7 +315,7 @@ system / data 境界の判断では、以下を確認する。
 - 過去フェーズの履歴、現行正本仕様、未確定仕様を混同せずに読める。
 - 本体境界の判定表により、公開 API、Git 接続、DB、Storage、運用、リリース、UI、SDK の責務を分けて説明できる。
 - system / data 境界の判断基準により、差し替え可能な system 側と保護対象 data 側を分けて説明できる。
-- 本体仕様改善チェックにより、SDK、Adlaire Pipeline、旧 Deno + TypeScript 実装資産を本体現行仕様へ混入させていないことを確認できる。
+- 本体仕様改善チェックにより、SDK、UI、旧 Deno + TypeScript 実装資産を本体現行仕様へ混入させていないことを確認できる。
 - Go 本体実装、固定採用バージョン、外部依存例外、内製 libSQL driver 実装詳細が、未承認のまま実装済みまたは確定済みとして扱われていない。
 
 ---
@@ -293,11 +339,11 @@ GitHub 互換は、マスター仕様書とマスター開発計画で定義さ�
 
 UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換の対象外とする。UI は本プロジェクト独自の設計とし、GitHub の画面、デザイン、ブランド表現、商標表現を模倣しない。
 
-Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は、Adlaire 公式 SDK に一本化する。公開 API の直接利用は、SDK 未実装期間を含めて禁止する。
 
 Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
 
-Adlaire 公式 SDK の詳細仕様は、`docs/specs/Adlaire_Official_SDK_Specification.md` を正本とする。本書は Adlaire Git Repository 本体との接続境界、責務分離、ヘッドレスアーキテクチャ上の位置づけを管理し、SDK API 詳細、生成、配布、対象外範囲は SDK マスター仕様書へ集約する。
+Adlaire 公式 SDK の詳細仕様は、`docs/specs/Adlaire_Official_SDK_Specification.md` を正本とする。本書は Adlaire Git Repository 本体との接続境界、責務分離、ヘッドレスアーキテクチャ上の位置づけを管理し、SDK API 詳細、生成、配布、対象外範囲は SDK マスター仕様書へ集約する。SDK は本体の機能ドメインではなく、本体から切り離した外部接続境界である。
 
 GitHub Actions、GitHub Pages、汎用 Package registry、Container registry、Copilot、Advanced Security 等は、個別に採用可否、実装時期、必要性、外部依存、セキュリティ、ライセンスを評価し、ユーザー承認を得るまで実装対象に含めない。
 
@@ -646,7 +692,7 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 
 オープンソースの Git プロバイダーやセルフホスト型 Git ホスティング製品は、サブの機能互換インスパイア対象として扱う。
 
-参考対象には、Gitea、Forgejo、GitLab、GitPrep 等を含めてよい。
+参考対象には、Gitea、Forgejo、GitLab、GitPrep 等を含めてよい。Gitea は同等機能の参考対象とするが、Gitea 互換は行わない。
 
 ただし、これらは主たる互換基準ではない。特定 OSS Git プロバイダーとの機能互換、API 互換、UI 互換、画面設計互換、運用モデル互換を目標にしてはならない。
 
@@ -778,7 +824,7 @@ Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用
 
 リリース配置は現行では GitHub Releases を正式配置元とする。Go single binary、release notes、checksum、manifest は GitHub Releases 側へ配置し、リポジトリ内にリリース履歴ファイル、release notes 元資料、リリース配置記録、リリース用 manifest、リリース用 checksum を保持しない。
 
-Adlaire Pipeline は、将来的にリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う内製付随システム候補とする。機能群は `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。Adlaire Pipeline は Adlaire Git Repository 本体とは分離して検討し、統合可否は仕様確定後に判断する。Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は未定であり、別途ユーザー承認なしに固定しない。
+Adlaire Pipeline は、将来的にリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う CI/CD Domain の機能候補とする。機能群は `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。これらは同一の CI/CD Domain 内の機能群として扱い、独立した機能ドメインへ細分化しない。Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は未定であり、別途ユーザー承認なしに固定しない。
 
 Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
 
@@ -980,7 +1026,7 @@ Adlaire Git Repository 本体は、Go single binary、release notes、checksum�
 
 標準デプロイ雛形 `scripts/deploy/` は、GitHub Releases に配置された Go single binary を本番サーバへ反映する補助導線として維持する。デプロイ先、SSH 接続方式、Docker 経由の扱い、バックアップ、ロールバック、本番サーバ反映は、2類デプロイポリシーに従い、別途ユーザー承認を得る。
 
-Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ内製付随システム候補として扱う。Phase 10 では Adlaire Pipeline の概念と責務を整理するが、実装、本体統合、GitHub Releases 廃止は行わない。開発言語は Go 採用方針とする。
+Adlaire Pipeline は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` を将来的な機能群として持つ CI/CD Domain として扱う。Phase 10 では Adlaire Pipeline の概念と責務を付随システム候補として整理したが、現行方針では本体内部の CI/CD Domain に含める。実装、GitHub Releases 廃止、DB、依存関係、実行基盤は未確定とする。開発言語は Go 採用方針とする。
 
 Phase 10 では、database schema 変更、database migration 実行、database restore 自動実行、Docker image 配布の正式化、Container registry、GitHub Actions、外部デプロイフレームワーク、Node.js / npm 前提ツール、本番データ復元の自動実行は対象外とする。
 
@@ -996,9 +1042,9 @@ UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依�
 
 HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドを可能にする。
 
-Web UI 以外に、モバイルアプリ等のクライアント開発を可能にする。
+静的フロントエンド以外に、モバイルアプリ等のクライアント開発を可能にする。
 
-UI および外部システムとの接続は、原則として Adlaire 公式 SDK を通じて行う。
+UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は、Adlaire 公式 SDK に一本化する。公開 API の直接利用は、SDK 未実装期間を含めて禁止する。
 
 Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
 
