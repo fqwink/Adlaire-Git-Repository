@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.2.30
+**文書バージョン**: v.2.32
 **ステータス**: 本体マスター仕様改善
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Go + libSQL + Git
@@ -163,6 +163,36 @@ Adlaire Git Repository 本体が外部へ公開する契約は、公開 API、�
 
 本体公開契約を変更する場合は、破壊的変更かどうかを判定し、SDK マスター仕様書、マスター開発計画、検証導線、README を同一変更範囲で整合する。
 
+### 本体実装前契約チェック
+
+本体仕様を根拠に実装へ進む場合は、最低限以下を確認する。
+
+| 確認項目 | 判定基準 |
+|---|---|
+| 公開契約 | 変更対象が公開 API、認証境界、Git 接続境界、health / operations status、リリース成果物のどれに影響するか説明できる |
+| 内部境界 | Service、Repository、Database Gateway、driver、Git 操作処理、host filesystem path を外部契約へ露出しない |
+| DB 境界 | libSQL は Database Gateway と driver 層に閉じ、上位層から直接触らない |
+| SDK 影響 | SDK が依存してよい契約だけが変わるか、SDK 仕様の同時更新が必要か説明できる |
+| system / data | system 側の差し替えと data 側の保全を分離できる |
+| 履歴混同 | 旧 Deno + TypeScript、旧 SQLite、旧 Docker 方針を現行標準仕様として扱っていない |
+| 承認 | 実装、schema、migration、依存、固定バージョン、リリース、デプロイの別承認要否を説明できる |
+
+上記を満たさない場合、その変更は本体仕様に基づく実装対象として扱わない。
+
+### 本体仕様改善チェック
+
+本書を改善する場合は、以下を確認する。
+
+| 確認項目 | 判定基準 |
+|---|---|
+| 本体責務 | 変更内容が Git ホスティング本体、公開 API、DB、Git、Storage、運用、リリースのいずれかに属する |
+| SDK 分離 | SDK 実装、SDK 配布、SDK public API 詳細を本体仕様として固定していない |
+| Pipeline 分離 | Adlaire Pipeline の実装、DB、依存関係、実行基盤を本体仕様として固定していない |
+| 旧資産分離 | 旧 Deno + TypeScript、旧 SQLite、旧 Docker 方針を現行 Go 本体仕様として扱っていない |
+| 上位整合 | `docs/specs/Auris_System_Design.md` の全体方針、2類ポリシー、マスター開発計画と矛盾しない |
+
+本書の改善は、本体仕様の正本性を高めるために行う。全体方針は `docs/specs/Auris_System_Design.md`、SDK の詳細は `docs/specs/Adlaire_Official_SDK_Specification.md`、フェーズ順序と完了条件は `docs/plans/DEVELOPMENT_PLAN.md` を正本とする。
+
 ## 本体境界の判定表
 
 本体仕様を読む場合は、以下の境界で判断する。
@@ -206,6 +236,8 @@ system / data 境界の判断では、以下を確認する。
 
 本書における完成済み仕様は、現行正本仕様、責務境界、Phase 1 から Phase 11 までの完了済みまたは着手済み範囲、対象外範囲、保留候補、検証方針を追跡できる状態を指す。
 
+完成済み仕様は、実装済みコードの存在を意味しない。特に Go 本体実装、Go 固定採用バージョン、Go module 例外採用、内製 libSQL driver の実装詳細は、承認済みフェーズ計画と別途実装承認がある場合にのみ実装対象へ進める。
+
 未確定仕様は以下とする。
 
 | 領域 | 未確定内容 |
@@ -237,6 +269,8 @@ system / data 境界の判断では、以下を確認する。
 - 過去フェーズの履歴、現行正本仕様、未確定仕様を混同せずに読める。
 - 本体境界の判定表により、公開 API、Git 接続、DB、Storage、運用、リリース、UI、SDK の責務を分けて説明できる。
 - system / data 境界の判断基準により、差し替え可能な system 側と保護対象 data 側を分けて説明できる。
+- 本体仕様改善チェックにより、SDK、Adlaire Pipeline、旧 Deno + TypeScript 実装資産を本体現行仕様へ混入させていないことを確認できる。
+- Go 本体実装、固定採用バージョン、外部依存例外、内製 libSQL driver 実装詳細が、未承認のまま実装済みまたは確定済みとして扱われていない。
 
 ---
 
@@ -1322,8 +1356,9 @@ NAS は自動複製機能 or スナップショット機能を活用
 標準アップグレードは、`scripts/deploy/deploy.sh` を用いた Go single binary 配置、process 再起動、配置後検証を基本とする。Docker image を扱う場合は Adlaire Pipeline 経由とする。
 
 ```bash
-# 1. 新バイナリの compile
-$ deno task compile
+# 1. 新バイナリの build
+# 現行 Go 方針では go build 系の導線を採用する。
+# 具体的な build command は Go 固定採用バージョンと Go 実装構成の承認後に確定する。
 
 # 2. デプロイ環境設定を確認
 $ cp scripts/deploy/deploy.env.example scripts/deploy/deploy.env

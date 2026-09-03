@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**現行フェーズ**: Phase 11 3類マスター仕様改善 / Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針 / Docker の Adlaire Pipeline 経由方針 / v.2.10 baseline
+**現行フェーズ**: Phase 11 3類マスター仕様改善 / Go 採用方針 / ヘッドレスアーキテクチャ・SDK 方針 / Docker の Adlaire Pipeline 経由方針 / v.2.10 baseline / 文書改訂 v.2.32
 **直近安定版リリース**: Phase 7 / v.1.8
 
 ## ドキュメント
@@ -60,11 +60,11 @@
 
 Adlaire 公式 SDK の詳細仕様は [docs/specs/Adlaire_Official_SDK_Specification.md](./docs/specs/Adlaire_Official_SDK_Specification.md) を正本とする。同仕様書は、SDK の公開境界、非責務、依存可能契約、生成方式、生成成果物検証、配布、リリース、client lifecycle、互換性方針、対象外、未確定範囲を管理する。
 
-3類マスター仕様書は、現行正本仕様、フェーズ別履歴、保留候補、対象外範囲、未確定範囲を分離して管理する。Phase 7 / `v.1.8` は初回安定版リリース済みの履歴であり、Phase 8 以降の仕様判断では現行正本仕様を参照する。
+3類マスター仕様書は、現行正本仕様、フェーズ別履歴、保留候補、対象外範囲、未確定範囲を分離して管理する。Phase 7 / `v.1.8` は初回安定版リリース済みの履歴であり、Phase 8 以降の仕様判断では現行正本仕様を参照する。3類マスター仕様書の最新改訂は `v.2.32` とし、Phase 11 のフェーズ基準バージョン `v.2.10` とは分けて扱う。
 
 本体の公開契約と内部実装境界は [docs/specs/Adlaire_Git_Repository_Specification.md](./docs/specs/Adlaire_Git_Repository_Specification.md) を正本とする。SDK や外部システムが依存してよいのは公開 API、認証境界、Git 接続境界、health / operations status、リリース成果物であり、本体内部の Service、Repository、Database Gateway、driver、Git 操作処理、host filesystem path へ依存してはならない。本体境界の判定表と system / data 境界の判断基準は同仕様書で確認する。
 
-仕様判断では、[docs/specs/Auris_System_Design.md](./docs/specs/Auris_System_Design.md) の仕様判断フローを確認し、現行正本仕様、未確定、保留、対象外、履歴を分けて扱う。
+仕様判断では、[docs/specs/Auris_System_Design.md](./docs/specs/Auris_System_Design.md) の仕様判断フローと3類マスター仕様書の改善基準を確認し、現行正本仕様、未確定、保留、対象外、履歴を分けて扱う。
 
 本プロジェクトの変更が AdlaireGroup 共通方針に該当する場合は、`docs/tpl-governance/` の更新要否を判定し、必要な場合は同一変更範囲で雛形も整合させる。
 
@@ -100,4 +100,4 @@ Phase 8.5 では、標準アプリケーション設定と標準デプロイ雛�
 
 安定版リリースの標準 Linux バイナリは、ARM64 と x86_64 の2種類を正本成果物とする。VPS デプロイ時は `uname -m` で `aarch64` または `x86_64` を確認し、対象アーキテクチャの Go single binary を配置する。Docker image を扱う場合は、Adlaire Pipeline 経由で扱う。
 
-Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして完了済みである。Phase 8 はDB仕様完成としてlibSQL標準化を扱う。Phase 8.1 は本体整合性、Phase 8.5 はAdlaire Git Repository本体とデータ領域の分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備を扱う。Phase 10 では現行リリース配置を GitHub Releases として整合し、Adlaire Pipeline を将来のリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として整理した。Phase 11 では Go 移行準備、ヘッドレスアーキテクチャ方針、Adlaire 公式 SDK 接続方針、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理し、3類マスター仕様書を完成版として整合した。現在は3類マスター仕様改善として、全体仕様、本体仕様、SDK仕様の責務分担、本体公開契約、本体境界判定、system / data 境界判断、SDK client lifecycle、SDK 互換性方針、SDK 依存可能契約、SDK 生成成果物検証、履歴と現行正本仕様の読み分けを強化している。
+Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして完了済みである。Phase 8 はDB仕様完成としてlibSQL標準化を扱う。Phase 8.1 は本体整合性、Phase 8.5 はAdlaire Git Repository本体とデータ領域の分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備を扱う。Phase 10 では現行リリース配置を GitHub Releases として整合し、Adlaire Pipeline を将来のリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として整理した。Phase 11 では Go 移行準備、ヘッドレスアーキテクチャ方針、Adlaire 公式 SDK 接続方針、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針を整理し、3類マスター仕様書を完成版として整合した。現在は3類マスター仕様改善として、全体仕様、本体仕様、SDK仕様の責務分担、本体公開契約、本体境界判定、system / data 境界判断、SDK client lifecycle、SDK 互換性方針、SDK 依存可能契約、SDK 生成成果物検証、履歴と現行正本仕様の読み分け、各マスター仕様の実装前チェック、各マスター仕様の改善チェックを強化している。
