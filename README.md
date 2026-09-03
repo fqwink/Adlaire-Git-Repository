@@ -1,15 +1,14 @@
 # Adlaire Git Repository
 
-**現行フェーズ**: Phase 11 バージョンポリシー整合 / Go 採用方針 / ヘッドレスアーキテクチャ・SDK 一本化 / 機能ドメインアーキテクチャ / Docker の Adlaire Pipeline 経由方針 / 安定版 v.2.10 baseline / 文書改訂 v.0.49
-**直近安定版リリース**: Phase 9 / v.2.10
+**現行作業管理**: タスク管理方式 / Go 採用方針 / ヘッドレスアーキテクチャ・SDK 一本化 / 機能ドメインアーキテクチャ / Docker の Adlaire Pipeline 経由方針 / 安定版 v.2.10 baseline / 文書改訂 v.0.51
+**直近安定版リリース**: v.2.10
 
 ## ドキュメント
 
 - 最上位ルールブック: [AGENTS.md](./AGENTS.md)
 - ドキュメント索引: [docs/DOCUMENT_INDEX.md](./docs/DOCUMENT_INDEX.md)
 - ポリシー群: [docs/policies/](./docs/policies/)
-- マスター開発計画: [docs/plans/DEVELOPMENT_PLAN.md](./docs/plans/DEVELOPMENT_PLAN.md)
-- マスター実装機能候補リスト: [docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md](./docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md)
+- タスク管理: [docs/tasks/TASK_MANAGEMENT.md](./docs/tasks/TASK_MANAGEMENT.md)
 - マスター仕様書群: [docs/specs/](./docs/specs/)
 - AdlaireGroup 共通ガバナンス雛形: [docs/tpl-governance/](./docs/tpl-governance/)
 
@@ -35,9 +34,8 @@
 │       └── verify-build.sh
 └── docs/
     ├── DOCUMENT_INDEX.md
-    ├── plans/
-    │   ├── DEVELOPMENT_PLAN.md
-    │   └── MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md
+    ├── tasks/
+    │   └── TASK_MANAGEMENT.md
     ├── policies/
     │   ├── DEVELOPMENT_POLICY_RULEBOOK.md
     │   ├── DOCUMENT_CHARTER.md
@@ -56,11 +54,11 @@
         └── policy-slots/
 ```
 
-`AGENTS.md` は本リポジトリの最上位ルールブックである。`docs/DOCUMENT_INDEX.md` は参照索引であり、正本ではない。`docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` は2類ドキュメント群の総則であり、ドキュメント憲章と責務別ポリシーは `docs/policies/` 配下で管理する。`docs/specs/Auris_System_Design.md` は、3類マスター仕様書群におけるシステム全体の最上位マスター仕様書である。`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` は候補整理の正本であり、実装承認ではない。`docs/tpl-governance/` は AdlaireGroup 関連プロジェクト、プロダクトへ共通展開する共通ガバナンス雛形の正本であり、現行プロジェクト固有の正本ではない。ソースコード実装作業は、1類ルールブック、2類ドキュメント群、3類マスター仕様書、`docs/plans/DEVELOPMENT_PLAN.md` の承認済みフェーズ計画に基づいて行う。
+`AGENTS.md` は本リポジトリの最上位ルールブックである。`docs/DOCUMENT_INDEX.md` は参照索引であり、正本ではない。`docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` は2類ドキュメント群の総則であり、ドキュメント憲章と責務別ポリシーは `docs/policies/` 配下で管理する。`docs/specs/Auris_System_Design.md` は、3類マスター仕様書群におけるシステム全体の最上位マスター仕様書である。`docs/tasks/TASK_MANAGEMENT.md` は未策定、未改訂、未実装タスクを管理するタスク管理ファイルであり、実装承認ではない。`docs/tpl-governance/` は AdlaireGroup 関連プロジェクト、プロダクトへ共通展開する共通ガバナンス雛形の正本であり、現行プロジェクト固有の正本ではない。ソースコード実装作業は、1類ルールブック、2類ドキュメント群、3類マスター仕様書、`docs/tasks/TASK_MANAGEMENT.md` の承認済みタスクに基づいて行う。
 
 Adlaire 公式 SDK の詳細仕様は [docs/specs/Adlaire_Official_SDK_Specification.md](./docs/specs/Adlaire_Official_SDK_Specification.md) を正本とする。同仕様書は、SDK の公開境界、非責務、依存可能契約、生成方式、生成成果物検証、配布、リリース、client lifecycle、互換性方針、対象外、未確定範囲を管理する。
 
-3類マスター仕様書は、現行正本仕様、フェーズ別履歴、保留候補、対象外範囲、未確定範囲を分離して管理する。Phase 7 / `v.1.8` は初回安定版リリース済みの履歴であり、Phase 8 以降の仕様判断では現行正本仕様を参照する。3類マスター仕様書の最新改訂は開発版 `v.0.49` とし、Phase 11 のフェーズ基準バージョンである安定版 `v.2.10` とは分けて扱う。
+3類マスター仕様書は、現行正本仕様、過去履歴、保留候補、対象外範囲、未確定範囲を分離して管理する。過去の Phase 表記は履歴として保持し、今後の仕様判断では現行正本仕様とタスク管理ファイルを参照する。3類マスター仕様書の最新改訂は開発版 `v.0.51` とし、安定版 `v.2.10` とは分けて扱う。
 
 本体の公開契約と内部実装境界は [docs/specs/Adlaire_Git_Repository_Specification.md](./docs/specs/Adlaire_Git_Repository_Specification.md) を正本とする。SDK が依存してよいのは公開 API、認証境界、Git 接続境界、health / operations status、リリース成果物であり、本体内部の Service、Repository、Database Gateway、driver、Git 操作処理、host filesystem path へ依存してはならない。UI、静的フロントエンド、モバイルアプリ、外部システムは公開 API を直接利用せず、Adlaire 公式 SDK を通じて接続する。本体境界の判定表と system / data 境界の判断基準は同仕様書で確認する。
 
@@ -68,7 +66,7 @@ Adlaire 公式 SDK の詳細仕様は [docs/specs/Adlaire_Official_SDK_Specifica
 
 本プロジェクトの変更が AdlaireGroup 共通方針に該当する場合は、`docs/tpl-governance/` の更新要否を判定し、必要な場合は同一変更範囲で雛形も整合させる。
 
-フェーズ単位で、必ずドキュメント等の整合性向上を行う。リポジトリ整合性が取れていない状態で、次のフェーズに進んではならない。
+変更作業ごとに、必ずドキュメント等の整合性向上を行う。リポジトリ整合性が取れていない状態で、次のタスクに進んではならない。
 
 本番サーバ環境へのデプロイは、承認工程を省かず、バックアップ、検証、ロールバック前提を含めて自動化を標準とする。詳細は [docs/policies/DEPLOYMENT_POLICY.md](./docs/policies/DEPLOYMENT_POLICY.md) を参照する。
 
@@ -76,7 +74,7 @@ Go single binary を正本成果物とする。Docker は Adlaire Git Repository
 
 Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は、Adlaire 公式 SDK に一本化する。公開 API の直接利用は、SDK 未実装期間を含めて禁止する。
 
-Adlaire 公式 SDK は、Adlaire Git Repository 本体の機能ドメインではなく、本体から切り離した外部接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
+Adlaire 公式 SDK は、Adlaire Git Repository 本体の機能ドメインではなく、本体から切り離した外部接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず独立リリース対象とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始は2類ポリシーとタスク管理ファイルに従う。
 
 Adlaire Git Repository 本体には、機能ドメインアーキテクチャ設計思想を適用する。現行の本体機能ドメインは `Management Domain`、`Repository Domain`、`Collaboration Domain`、`CI/CD Domain`、`System / Data Foundation` とする。`Access Domain` は採用せず、認証、認可、ユーザー、権限、組織、チーム、管理系の責務は `Management Domain` に含める。Adlaire Pipeline は `CI/CD Domain` として扱い、Release、Runner、Artifact、Deploy、Audit を同一ドメイン内の機能群として扱う。
 
@@ -100,8 +98,8 @@ libSQL は必要最小限の外部依存例外として扱うが、npm 互換 pa
 
 Adlaire Pipeline は、リリース基盤システムと自動実行基盤システムを担う CI/CD Domain の機能候補として扱う。将来的な機能群は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。`Adlaire Pipeline Artifact` は成果物管理、`Adlaire Pipeline Deploy` はデプロイ反映、`Adlaire Pipeline Audit` は実行履歴・監査を扱う候補とする。これらは同一ドメイン内の機能群として扱い、独立した機能ドメインへ細分化しない。Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は現時点では未定であり、別途承認なしに固定しない。
 
-Phase 8.5 では、標準アプリケーション設定と標準デプロイ雛形を system / data 分離構成へ整合した。`ADLAIRE_APP_ROOT=/opt/adlaire-git-repository` を基準に、稼働版 release / current は `system/` 側、libSQL database、Git bare repositories、config、secrets、logs、backups、manifests は `shared/` 側へ分離する。
+system / data 分離構成では、標準アプリケーション設定と標準デプロイ雛形を同一方針へ整合する。`ADLAIRE_APP_ROOT=/opt/adlaire-git-repository` を基準に、稼働版 release / current は `system/` 側、libSQL database、Git bare repositories、config、secrets、logs、backups、manifests は `shared/` 側へ分離する。
 
 安定版リリースの標準 Linux バイナリは、ARM64 と x86_64 の2種類を正本成果物とする。VPS デプロイ時は `uname -m` で `aarch64` または `x86_64` を確認し、対象アーキテクチャの Go single binary を配置する。Docker image を扱う場合は、Adlaire Pipeline 経由で扱う。
 
-Phase 7 は7系フェーズのデフォルト安定版リリース判定フェーズであり、`v.1.8` を初回安定版リリースとして完了済みである。Phase 8 はDB仕様完成としてlibSQL標準化を扱う。Phase 8.1 は本体整合性、Phase 8.5 はAdlaire Git Repository本体とデータ領域の分割、Phase 8.7 は安定化として完了済みである。Phase 9 は Phase 8 系成果のバグ修正ゼロ化、安定版判定、リリース準備を扱う。Phase 10 では現行リリース配置を GitHub Releases として整合し、Adlaire Pipeline を将来のリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として整理した。Phase 11 では Go 移行準備、ヘッドレスアーキテクチャ方針、Adlaire 公式 SDK 接続一本化、公開 API 直接利用禁止、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針、機能ドメインアーキテクチャ、Adlaire Pipeline の CI/CD Domain 統合方針を整理し、3類マスター仕様書を完成版として整合した。現在は3類マスター仕様改善として、全体仕様、本体仕様、SDK仕様の責務分担、本体公開契約、本体境界判定、system / data 境界判断、SDK client lifecycle、SDK 互換性方針、SDK 依存可能契約、SDK 生成成果物検証、履歴と現行正本仕様の読み分け、各マスター仕様の実装前チェック、各マスター仕様の改善チェックを強化している。
+過去履歴として、Phase 7 で `v.1.8` を初回安定版リリースとして完了し、Phase 9 で `v.2.10` を安定版リリースとして完了した。Phase 8 はDB仕様完成としてlibSQL標準化を扱い、Phase 8.1 は本体整合性、Phase 8.5 はAdlaire Git Repository本体とデータ領域の分割、Phase 8.7 は安定化として完了した。Phase 10 では現行リリース配置を GitHub Releases として整合し、Adlaire Pipeline を将来のリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う付随システム候補として整理した。Phase 11 では Go 移行準備、ヘッドレスアーキテクチャ方針、Adlaire 公式 SDK 接続一本化、公開 API 直接利用禁止、SDK の TypeScript 実装 / JavaScript 生成 / `sdk/` 配置 / 独立リリース方針、Docker の Adlaire Pipeline 経由方針、機能ドメインアーキテクチャ、Adlaire Pipeline の CI/CD Domain 統合方針を整理し、3類マスター仕様書を完成版として整合した。今後の作業管理は Phase ではなく、タスク管理ファイルを基準にする。

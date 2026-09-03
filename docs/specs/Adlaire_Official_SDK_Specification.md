@@ -3,8 +3,8 @@
 **位置づけ**: 3類マスター仕様書
 **対象**: Adlaire 公式 SDK
 **ライセンス**: クローズドライセンス
-**文書バージョン**: v.0.49
-**ステータス**: バージョンポリシー整合
+**文書バージョン**: v.0.51
+**ステータス**: タスク管理方式整合
 
 ---
 
@@ -28,7 +28,7 @@ SDK は、HTML / CSS / Vanilla JavaScript で構成される静的フロント�
 
 Adlaire Git Repository 本体との接続境界は、`docs/specs/Adlaire_Git_Repository_Specification.md` と整合させる。
 
-SDK の実装時期、フェーズ、検証範囲、完了条件は、`docs/plans/DEVELOPMENT_PLAN.md` を正本として管理する。
+SDK の実装時期、検証範囲、完了条件は、`docs/tasks/TASK_MANAGEMENT.md` をタスク管理ファイルとして管理する。
 
 本書と上位ドキュメントに矛盾がある場合は、上位ドキュメントを正とし、本書を修正する。
 
@@ -48,7 +48,7 @@ Adlaire 公式 SDK の現行正本仕様は以下とする。
 - SDK の生成方式は Deno runtime とする。
 - SDK 配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。
 - SDK 固定採用バージョンは2類技術要件ポリシーに従う。
-- SDK リリース開始フェーズは2類リリースポリシーとマスター開発計画に従う。
+- SDK リリース開始は2類リリースポリシーとタスク管理ファイルに従う。
 - SDK は Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` の禁止方針を緩和しない。
 - SDK は Adlaire Git Repository 本体の公開 API を利用する。
 - UI、静的フロントエンド、モバイルアプリ、外部システムは、SDK を通じて接続し、公開 API を直接利用しない。
@@ -140,7 +140,7 @@ SDK は、当面 `sdk/` 配下で管理する。
 
 `sdk/` は Adlaire Git Repository 本体の Go 実装領域ではない。
 
-`sdk/` は、SDK の TypeScript source、生成設定、公開 API 型、生成済み JavaScript 成果物、SDK 用検証導線を管理する候補領域とする。ただし、具体的なファイル構成、生成コマンド、成果物名、配布対象ファイルは、SDK 実装開始時にマスター開発計画へ反映し、ユーザー承認を得てから確定する。
+`sdk/` は、SDK の TypeScript source、生成設定、公開 API 型、生成済み JavaScript 成果物、SDK 用検証導線を管理する候補領域とする。ただし、具体的なファイル構成、生成コマンド、成果物名、配布対象ファイルは、SDK 実装開始時にタスク管理ファイルへ反映し、ユーザー承認を得てから確定する。
 
 SDK のリポジトリ分離は現時点では未定である。分離する場合は、分離先リポジトリ、履歴移行、配布方式、リリース方式、バージョン連携を提示し、ユーザー承認を得る。
 
@@ -209,7 +209,7 @@ SDK 仕様を改善する場合は、以下を確認する。
 | API 未確定維持 | client 名、関数名、戻り値形式、error 形式、生成コマンドを未承認のまま固定していない |
 | 生成境界 | TypeScript 実装、Deno runtime 生成、Vanilla JavaScript 向け output の方針と矛盾しない |
 | 禁止依存 | Node.js runtime、npm ecosystem、`npm:` specifier、`package.json`、`node_modules` を要求しない |
-| 上位整合 | `docs/specs/Auris_System_Design.md`、本体仕様書、2類ポリシー、マスター開発計画と矛盾しない |
+| 上位整合 | `docs/specs/Auris_System_Design.md`、本体仕様書、2類ポリシー、タスク管理ファイルと矛盾しない |
 
 SDK 仕様の改善は、SDK の接続境界と未確定範囲を明確にするために行う。本体の公開 API そのもの、DB driver、Git 操作、system / data 分離、Adlaire Pipeline の実装詳細は本書で固定しない。
 
@@ -255,7 +255,7 @@ SDK の初期 resource 候補は以下とする。
 | Registry | packages、versions、downloads |
 | 運用 | audit logs、operations status |
 
-上記は SDK の設計対象候補であり、実装承認ではない。SDK 実装時は、対象 resource、対象外 resource、検証範囲をマスター開発計画へ反映し、ユーザー承認を得る。
+上記は SDK の設計対象候補であり、実装承認ではない。SDK 実装時は、対象 resource、対象外 resource、検証範囲をタスク管理ファイルへ反映し、ユーザー承認を得る。
 
 ## 6.3 認証方針
 
@@ -269,7 +269,7 @@ SDK は、Adlaire Git Repository の公開 API が認める認証方式だけを
 
 SDK は、秘密情報の保存先を勝手に決めてはならない。browser local storage、session storage、cookie、mobile secure storage、環境変数等の保存場所は、利用側アプリケーションの責務として扱う。
 
-SDK は、token refresh、OAuth、外部 IdP 連携、SAML、OIDC、device flow を現行仕様として提供しない。これらを扱う場合は、本体マスター仕様書、SDK マスター仕様書、マスター開発計画へ反映し、ユーザー承認を得る。
+SDK は、token refresh、OAuth、外部 IdP 連携、SAML、OIDC、device flow を現行仕様として提供しない。これらを扱う場合は、本体マスター仕様書、SDK マスター仕様書、タスク管理ファイルへ反映し、ユーザー承認を得る。
 
 ## 6.4 Error / Result 方針
 
@@ -310,7 +310,7 @@ SDK 互換性で守らない対象は以下とする。
 - UI 実装の状態管理
 - build / generate の内部手順
 
-SDK の破壊的変更を行う場合は、SDK マスター仕様書、本体マスター仕様書、マスター開発計画、リリース方針を同一変更範囲で整合し、ユーザー承認を得る。
+SDK の破壊的変更を行う場合は、SDK マスター仕様書、本体マスター仕様書、タスク管理ファイル、リリース方針を同一変更範囲で整合し、ユーザー承認を得る。
 
 ---
 
@@ -320,7 +320,7 @@ SDK は本体へ同梱せず、独立リリース対象とする。
 
 現時点の SDK 配布方式は、現行リポジトリで扱う。リポジトリ分離時は、分離先リポジトリで扱う。
 
-SDK のリリース開始フェーズ、リリース成果物、配置先、release notes、checksum、manifest は、2類リリースポリシーとマスター開発計画に従い、リリース作業ごとにユーザー承認を得る。
+SDK のリリース開始、リリース成果物、配置先、release notes、checksum、manifest は、2類リリースポリシーとタスク管理ファイルに従い、リリース作業ごとにユーザー承認を得る。
 
 SDK のリリースは Adlaire Git Repository 本体の安定版リリースを自動的に意味しない。本体の安定版リリースも SDK のリリースを自動的に意味しない。
 
@@ -370,8 +370,7 @@ SDK の配布方式は、現時点では現行リポジトリ配布とする。n
 
 | 領域 | 未確定内容 |
 |---|---|
-| 実装開始フェーズ | マスター開発計画で別途確定する |
-| SDK 固定採用バージョン | 2類技術要件ポリシーに従い、別途承認で固定する |
+| 実装開始 | タスク管理ファイルで別途確定する |
 | ファイル構成 | SDK 実装開始時に確定する |
 | 生成コマンド | SDK 実装開始時に確定する |
 | public API 形式 | SDK 実装開始時に確定する |
@@ -385,7 +384,7 @@ SDK の配布方式は、現時点では現行リポジトリ配布とする。n
 
 未確定範囲は、ユーザー承認なしに実装またはリリース対象へ移してはならない。
 
-未確定範囲を検討する場合は、SDK 仕様として確定する項目、マスター開発計画へ落とす項目、本体公開 API の同時改訂が必要な項目を分ける。検討だけで SDK 実装、生成導線、配布対象、リリース対象へ昇格させてはならない。
+未確定範囲を検討する場合は、SDK 仕様として確定する項目、タスク管理ファイルへ落とす項目、本体公開 API の同時改訂が必要な項目を分ける。検討だけで SDK 実装、生成導線、配布対象、リリース対象へ昇格させてはならない。
 
 ---
 
@@ -406,4 +405,4 @@ SDK の配布方式は、現時点では現行リポジトリ配布とする。n
 - SDK 仕様改善チェックにより、SDK責務、本体非依存、API未確定維持、生成境界、禁止依存、上位整合を確認できる。
 - SDK が UI framework、Git command wrapper、database driver、GitHub API 互換 client ではないことを説明できる。
 - SDK 実装、public API 詳細、実装開始フェーズ、リリース実行が未確定範囲として分離されている。
-- SDK 仕様、本体仕様、Auris システム設計、マスター開発計画、README の参照関係が矛盾していない。
+- SDK 仕様、本体仕様、Auris システム設計、タスク管理ファイル、README の参照関係が矛盾していない。

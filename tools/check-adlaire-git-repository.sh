@@ -50,8 +50,8 @@ check_required_paths() {
     docs/policies/LICENSE_POLICY.md \
     docs/specs/Auris_System_Design.md \
     docs/specs/Adlaire_Git_Repository_Specification.md \
-    docs/plans/DEVELOPMENT_PLAN.md \
-    docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md \
+    docs/specs/Adlaire_Official_SDK_Specification.md \
+    docs/tasks/TASK_MANAGEMENT.md \
     src/main.ts \
     src/server.ts \
     src/config.ts \
@@ -126,8 +126,8 @@ check_version_policy() {
   fi
 
   formal_version="v.$major_version.$minor_version"
-  if ! grep -F "**現行フェーズ基準バージョン**: $formal_version" docs/plans/DEVELOPMENT_PLAN.md >/dev/null 2>&1; then
-    echo "deno.json version must match current phase baseline in DEVELOPMENT_PLAN.md: $formal_version" >&2
+  if ! grep -F "$formal_version" README.md docs/policies/VERSION_POLICY.md >/dev/null 2>&1; then
+    echo "deno.json version must match documented formal version references: $formal_version" >&2
     exit 1
   fi
 }
