@@ -45,7 +45,7 @@
 | `docs/policies/DEVELOPMENT_POLICY_RULEBOOK.md` | 2類ポリシー総則 |
 | `docs/policies/DOCUMENT_CHARTER.md` | ドキュメント憲章 |
 | `docs/policies/TECHNICAL_REQUIREMENTS_POLICY.md` | 技術要件 |
-| `docs/policies/VERSION_POLICY.md` | バージョン |
+| `docs/policies/VERSION_POLICY.md` | 開発版バージョン、安定版バージョン |
 | `docs/policies/RELEASE_POLICY.md` | リリース |
 | `docs/policies/TEST_POLICY.md` | テスト |
 | `docs/policies/LICENSE_POLICY.md` | ライセンス |

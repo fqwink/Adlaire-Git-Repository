@@ -1,7 +1,7 @@
 # Adlaire Git Repository
 
-**現行フェーズ**: Phase 11 3類マスター仕様改善 / Go 採用方針 / ヘッドレスアーキテクチャ・SDK 一本化 / 機能ドメインアーキテクチャ / Docker の Adlaire Pipeline 経由方針 / v.2.10 baseline / 文書改訂 v.2.33
-**直近安定版リリース**: Phase 7 / v.1.8
+**現行フェーズ**: Phase 11 バージョンポリシー整合 / Go 採用方針 / ヘッドレスアーキテクチャ・SDK 一本化 / 機能ドメインアーキテクチャ / Docker の Adlaire Pipeline 経由方針 / 安定版 v.2.10 baseline / 文書改訂 v.0.49
+**直近安定版リリース**: Phase 9 / v.2.10
 
 ## ドキュメント
 
@@ -60,7 +60,7 @@
 
 Adlaire 公式 SDK の詳細仕様は [docs/specs/Adlaire_Official_SDK_Specification.md](./docs/specs/Adlaire_Official_SDK_Specification.md) を正本とする。同仕様書は、SDK の公開境界、非責務、依存可能契約、生成方式、生成成果物検証、配布、リリース、client lifecycle、互換性方針、対象外、未確定範囲を管理する。
 
-3類マスター仕様書は、現行正本仕様、フェーズ別履歴、保留候補、対象外範囲、未確定範囲を分離して管理する。Phase 7 / `v.1.8` は初回安定版リリース済みの履歴であり、Phase 8 以降の仕様判断では現行正本仕様を参照する。3類マスター仕様書の最新改訂は `v.2.33` とし、Phase 11 のフェーズ基準バージョン `v.2.10` とは分けて扱う。
+3類マスター仕様書は、現行正本仕様、フェーズ別履歴、保留候補、対象外範囲、未確定範囲を分離して管理する。Phase 7 / `v.1.8` は初回安定版リリース済みの履歴であり、Phase 8 以降の仕様判断では現行正本仕様を参照する。3類マスター仕様書の最新改訂は開発版 `v.0.49` とし、Phase 11 のフェーズ基準バージョンである安定版 `v.2.10` とは分けて扱う。
 
 本体の公開契約と内部実装境界は [docs/specs/Adlaire_Git_Repository_Specification.md](./docs/specs/Adlaire_Git_Repository_Specification.md) を正本とする。SDK が依存してよいのは公開 API、認証境界、Git 接続境界、health / operations status、リリース成果物であり、本体内部の Service、Repository、Database Gateway、driver、Git 操作処理、host filesystem path へ依存してはならない。UI、静的フロントエンド、モバイルアプリ、外部システムは公開 API を直接利用せず、Adlaire 公式 SDK を通じて接続する。本体境界の判定表と system / data 境界の判断基準は同仕様書で確認する。
 

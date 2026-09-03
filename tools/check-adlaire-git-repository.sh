@@ -116,12 +116,12 @@ check_version_policy() {
   patch_version=${version##*.}
   case "$major_version$minor_version$patch_version" in
     ''|*[!0-9]*)
-      echo "deno.json version must use numeric Major.Minor.Patch: $version" >&2
+      echo "deno.json version must use numeric X.Y.Patch mapping: $version" >&2
       exit 1
       ;;
   esac
   if [ "$patch_version" != "0" ]; then
-    echo "deno.json patch version must remain 0 for formal v.<major>.<minor> mapping: $version" >&2
+    echo "deno.json patch version must remain 0 for formal v.X.Y mapping: $version" >&2
     exit 1
   fi
 
