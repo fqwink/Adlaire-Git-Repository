@@ -50,6 +50,7 @@ check_required_paths() {
     docs/policies/LICENSE_POLICY.md \
     docs/specs/Auris_System_Design.md \
     docs/specs/Adlaire_Git_Repository_Specification.md \
+    docs/specs/Adlaire_Official_SDK_Specification.md \
     docs/tasks/TASK_MANAGEMENT.md \
     src/main.ts \
     src/server.ts \

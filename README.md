@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**現行作業管理**: タスク管理方式 / Go 採用方針 / ヘッドレスアーキテクチャ・SDK 一本化 / 機能ドメインアーキテクチャ / Docker の Adlaire Pipeline 経由方針 / 安定版 v.2.10 baseline / 文書改訂 v.0.50
+**現行作業管理**: タスク管理方式 / Go 採用方針 / ヘッドレスアーキテクチャ・SDK 一本化 / 機能ドメインアーキテクチャ / Docker の Adlaire Pipeline 経由方針 / 安定版 v.2.10 baseline / 文書改訂 v.0.51
 **直近安定版リリース**: v.2.10
 
 ## ドキュメント
@@ -58,7 +58,7 @@
 
 Adlaire 公式 SDK の詳細仕様は [docs/specs/Adlaire_Official_SDK_Specification.md](./docs/specs/Adlaire_Official_SDK_Specification.md) を正本とする。同仕様書は、SDK の公開境界、非責務、依存可能契約、生成方式、生成成果物検証、配布、リリース、client lifecycle、互換性方針、対象外、未確定範囲を管理する。
 
-3類マスター仕様書は、現行正本仕様、過去履歴、保留候補、対象外範囲、未確定範囲を分離して管理する。過去の Phase 表記は履歴として保持し、今後の仕様判断では現行正本仕様とタスク管理ファイルを参照する。3類マスター仕様書の最新改訂は開発版 `v.0.50` とし、安定版 `v.2.10` とは分けて扱う。
+3類マスター仕様書は、現行正本仕様、過去履歴、保留候補、対象外範囲、未確定範囲を分離して管理する。過去の Phase 表記は履歴として保持し、今後の仕様判断では現行正本仕様とタスク管理ファイルを参照する。3類マスター仕様書の最新改訂は開発版 `v.0.51` とし、安定版 `v.2.10` とは分けて扱う。
 
 本体の公開契約と内部実装境界は [docs/specs/Adlaire_Git_Repository_Specification.md](./docs/specs/Adlaire_Git_Repository_Specification.md) を正本とする。SDK が依存してよいのは公開 API、認証境界、Git 接続境界、health / operations status、リリース成果物であり、本体内部の Service、Repository、Database Gateway、driver、Git 操作処理、host filesystem path へ依存してはならない。UI、静的フロントエンド、モバイルアプリ、外部システムは公開 API を直接利用せず、Adlaire 公式 SDK を通じて接続する。本体境界の判定表と system / data 境界の判断基準は同仕様書で確認する。
 
@@ -98,7 +98,7 @@ libSQL は必要最小限の外部依存例外として扱うが、npm 互換 pa
 
 Adlaire Pipeline は、リリース基盤システムと自動実行基盤システムを担う CI/CD Domain の機能候補として扱う。将来的な機能群は、`Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。`Adlaire Pipeline Artifact` は成果物管理、`Adlaire Pipeline Deploy` はデプロイ反映、`Adlaire Pipeline Audit` は実行履歴・監査を扱う候補とする。これらは同一ドメイン内の機能群として扱い、独立した機能ドメインへ細分化しない。Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は現時点では未定であり、別途承認なしに固定しない。
 
-Phase 8.5 では、標準アプリケーション設定と標準デプロイ雛形を system / data 分離構成へ整合した。`ADLAIRE_APP_ROOT=/opt/adlaire-git-repository` を基準に、稼働版 release / current は `system/` 側、libSQL database、Git bare repositories、config、secrets、logs、backups、manifests は `shared/` 側へ分離する。
+system / data 分離構成では、標準アプリケーション設定と標準デプロイ雛形を同一方針へ整合する。`ADLAIRE_APP_ROOT=/opt/adlaire-git-repository` を基準に、稼働版 release / current は `system/` 側、libSQL database、Git bare repositories、config、secrets、logs、backups、manifests は `shared/` 側へ分離する。
 
 安定版リリースの標準 Linux バイナリは、ARM64 と x86_64 の2種類を正本成果物とする。VPS デプロイ時は `uname -m` で `aarch64` または `x86_64` を確認し、対象アーキテクチャの Go single binary を配置する。Docker image を扱う場合は、Adlaire Pipeline 経由で扱う。
 
