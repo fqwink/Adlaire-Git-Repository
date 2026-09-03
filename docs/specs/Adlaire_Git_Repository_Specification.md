@@ -1,6 +1,6 @@
 # Adlaire Git Repository
 
-**文書バージョン**: v.0.49
+**文書バージョン**: v.0.50
 **ステータス**: バージョンポリシー整合
 **ベース**: GitPrep（セルフホスト型 Git ホスティング）
 **技術スタック**: Go + libSQL + Git
@@ -45,7 +45,7 @@
 
 本書は、Adlaire Git Repository 本体の個別3類マスター仕様書である。
 
-本リポジトリの作業では、まず `AGENTS.md`、`docs/DOCUMENT_INDEX.md`、2類ポリシー、3類マスター仕様書群、マスター開発計画、マスター実装機能候補リスト、README を読む。これは本書の読み方より上位の読了義務である。
+本リポジトリの作業では、まず `AGENTS.md`、`docs/DOCUMENT_INDEX.md`、2類ポリシー、3類マスター仕様書群、タスク管理ファイル、README を読む。これは本書の読み方より上位の読了義務である。
 
 本体仕様を判断する場合は、以下の順で読む。
 
@@ -53,10 +53,10 @@
 2. 本書の「現行正本仕様」
 3. `docs/specs/Adlaire_Official_SDK_Specification.md`
 4. 本書の各機能仕様
-5. `docs/plans/DEVELOPMENT_PLAN.md`
+5. `docs/tasks/TASK_MANAGEMENT.md`
 6. フェーズ別の実装履歴と検証記録
 
-Phase 1 から Phase 10 までの記述は、実装済み、リリース済み、または当時の検討履歴を含む。履歴は削除せず保持するが、現行方針と異なる古い表記がある場合は、`docs/specs/Auris_System_Design.md`、本書の現行正本仕様、2類ポリシー、マスター開発計画を正とする。
+Phase 1 から Phase 11 までの記述は、実装済み、リリース済み、または当時の検討履歴を含む。履歴は削除せず保持するが、現行方針と異なる古い表記がある場合は、`docs/specs/Auris_System_Design.md`、本書の現行正本仕様、2類ポリシー、タスク管理ファイルを正とする。
 
 旧 Deno + TypeScript 実装資産、旧 SQLite 標準運用、旧 npm 互換 libSQL client、旧 Docker 方針、Adlaire Pipeline 検討事項は、明示的に現行仕様へ移されたものを除き、履歴または未確定事項として扱う。
 
@@ -74,7 +74,7 @@ Adlaire Git Repository 本体の現行正本仕様は以下とする。
 - UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は、Adlaire 公式 SDK に一本化する。
 - 公開 API の直接利用は、SDK 未実装期間を含めて禁止する。
 - HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。
-- Adlaire 公式 SDK は、Adlaire Git Repository 本体の機能ドメインではなく、本体から切り離した外部接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
+- Adlaire 公式 SDK は、Adlaire Git Repository 本体の機能ドメインではなく、本体から切り離した外部接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始は2類ポリシーとタスク管理ファイルに従う。
 - 標準開発言語は Go とする。
 - Deno + TypeScript は、本リポジトリ本体の開発言語として終了方針とする。
 - 標準データベースは libSQL とし、DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは現行正本仕様の採用候補として扱わない。
@@ -160,7 +160,7 @@ HTML / CSS / Vanilla JavaScript で構成されるフロントエンドは、本
 - driver、Database Gateway、内部 Service の型や関数名を API 契約にしない。
 - GitHub 互換基準の用語と主要 workflow に寄せるが、GitHub API の完全再現を前提にしない。
 
-API 詳細を追加または変更する場合は、本書、`docs/specs/Adlaire_Official_SDK_Specification.md`、マスター開発計画、検証範囲を整合し、ユーザー承認を得る。
+API 詳細を追加または変更する場合は、本書、`docs/specs/Adlaire_Official_SDK_Specification.md`、タスク管理ファイル、検証範囲を整合し、ユーザー承認を得る。
 
 ## 本体公開契約
 
@@ -188,7 +188,7 @@ Adlaire Git Repository 本体が外部へ公開する契約は、公開 API、�
 - password hash、token、secret、署名鍵、環境固有値
 - Adlaire Pipeline の内部仕様
 
-本体公開契約を変更する場合は、破壊的変更かどうかを判定し、SDK マスター仕様書、マスター開発計画、検証導線、README を同一変更範囲で整合する。
+本体公開契約を変更する場合は、破壊的変更かどうかを判定し、SDK マスター仕様書、タスク管理ファイル、検証導線、README を同一変更範囲で整合する。
 
 ### 本体実装前契約チェック
 
@@ -216,9 +216,9 @@ Adlaire Git Repository 本体が外部へ公開する契約は、公開 API、�
 | SDK 分離 | SDK 実装、SDK 配布、SDK public API 詳細を本体仕様として固定していない |
 | CI/CD Domain | Adlaire Pipeline を本体内部の CI/CD Domain として扱いつつ、DB、依存関係、実行基盤を未承認のまま固定していない |
 | 旧資産分離 | 旧 Deno + TypeScript、旧 SQLite、旧 Docker 方針を現行 Go 本体仕様として扱っていない |
-| 上位整合 | `docs/specs/Auris_System_Design.md` の全体方針、2類ポリシー、マスター開発計画と矛盾しない |
+| 上位整合 | `docs/specs/Auris_System_Design.md` の全体方針、2類ポリシー、タスク管理ファイルと矛盾しない |
 
-本書の改善は、本体仕様の正本性を高めるために行う。全体方針は `docs/specs/Auris_System_Design.md`、SDK の詳細は `docs/specs/Adlaire_Official_SDK_Specification.md`、フェーズ順序と完了条件は `docs/plans/DEVELOPMENT_PLAN.md` を正本とする。
+本書の改善は、本体仕様の正本性を高めるために行う。全体方針は `docs/specs/Auris_System_Design.md`、SDK の詳細は `docs/specs/Adlaire_Official_SDK_Specification.md`、作業対象と完了条件は `docs/tasks/TASK_MANAGEMENT.md` を正本とする。
 
 ## 本体境界の判定表
 
@@ -235,7 +235,7 @@ Adlaire Git Repository 本体が外部へ公開する契約は、公開 API、�
 | UI | SDK 経由で接続する差し替え可能なクライアント | GitHub UI 互換、外部フレームワークUI、本体固定UI |
 | SDK | SDK が利用できる公開 API と互換範囲 | SDK 実装、SDK 配布、SDK リリース |
 
-上記の右列にあるものは、本体仕様の現行実装対象として扱わない。扱う場合は、対象外または未確定から現行正本仕様へ移すための仕様改訂、マスター開発計画改訂、ユーザー承認を必要とする。
+上記の右列にあるものは、本体仕様の現行実装対象として扱わない。扱う場合は、対象外または未確定から現行正本仕様へ移すための仕様改訂、タスク管理ファイル改訂、ユーザー承認を必要とする。
 
 ## System / Data 境界
 
@@ -310,7 +310,7 @@ Go 実装移行時の方針ディレクトリ構成は以下とする。現時�
 - libSQL 標準DB方針と SQLite 互換維持なし方針が矛盾していない。
 - Go single binary 正本成果物方針、Docker の Adlaire Pipeline 経由方針、host filesystem data 正本方針が矛盾していない。
 - 保留候補は、保留解除とユーザー承認なしに実装対象へ戻らない。
-- 仕様書、マスター開発計画、マスター実装機能候補リスト、README の参照関係が整合している。
+- 仕様書、タスク管理ファイル、README の参照関係が整合している。
 - 本体公開契約と本体内部実装の境界が分離され、SDK や外部システムが内部構造へ依存しないことを説明できる。
 - 過去フェーズの履歴、現行正本仕様、未確定仕様を混同せずに読める。
 - 本体境界の判定表により、公開 API、Git 接続、DB、Storage、運用、リリース、UI、SDK の責務を分けて説明できる。
@@ -335,13 +335,13 @@ GitHub 互換とは、GitHub の機能概念、用語、主要ワークフロー
 - Webhook、REST API、Personal Access Token、SSH key
 - README、commit、tree、blob、diff、履歴表示
 
-GitHub 互換は、マスター仕様書とマスター開発計画で定義された範囲に限る。GitHub の全機能を無条件に実装対象へ含めるものではない。現時点で不要な機能は、GitHub に存在する機能であっても実装対象から除外する。
+GitHub 互換は、マスター仕様書とタスク管理ファイルで定義された範囲に限る。GitHub の全機能を無条件に実装対象へ含めるものではない。現時点で不要な機能は、GitHub に存在する機能であっても実装対象から除外する。
 
 UI、画面デザイン、画面レイアウト、視覚表現は GitHub 互換の対象外とする。UI は本プロジェクト独自の設計とし、GitHub の画面、デザイン、ブランド表現、商標表現を模倣しない。
 
 Adlaire Git Repository は、UI を差し替え可能にするため、ヘッドレスアーキテクチャ設計思想を採用する。UI は Adlaire Git Repository 本体に固定せず、本体は特定 UI に依存しない。HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サーバー等で動作するフロントエンドや、モバイルアプリ等のクライアントを可能にする。UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は、Adlaire 公式 SDK に一本化する。公開 API の直接利用は、SDK 未実装期間を含めて禁止する。
 
-Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
+Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始は2類ポリシーとタスク管理ファイルに従う。
 
 Adlaire 公式 SDK の詳細仕様は、`docs/specs/Adlaire_Official_SDK_Specification.md` を正本とする。本書は Adlaire Git Repository 本体との接続境界、責務分離、ヘッドレスアーキテクチャ上の位置づけを管理し、SDK API 詳細、生成、配布、対象外範囲は SDK マスター仕様書へ集約する。SDK は本体の機能ドメインではなく、本体から切り離した外部接続境界である。
 
@@ -573,7 +573,7 @@ Phase 2 の Issue 最小実装では、以下を対象外とする。
 - Pull Request との自動リンク
 - Webhook イベント送信
 
-これらの対象外機能を追加する場合は、マスター開発計画と本仕様書を改訂し、ユーザー承認を得てから実装する。
+これらの対象外機能を追加する場合は、タスク管理ファイルと本仕様書を改訂し、ユーザー承認を得てから実装する。
 
 ### Pull Request / Code Review 最小仕様
 
@@ -698,9 +698,9 @@ Phase 2 最小実装では、Git tag の実在確認、成果物アップロー�
 
 参考にした機能を採用する場合は、本プロジェクトの目的、セキュリティ方針、依存関係方針、運用方針に合わせて3類マスター仕様書へ再定義し、現時点で必要な機能かどうかを判断し、ユーザー承認を得てから実装対象に含める。
 
-実装機能候補、優先実装候補、保留候補は、`docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` を参照する。同ファイルは候補整理であり、実装承認ではない。候補を実装対象へ確定する場合は、本書、`docs/specs/Auris_System_Design.md`、`docs/plans/DEVELOPMENT_PLAN.md` へ反映し、ユーザー承認を得る。
+今後の未策定、未改訂、未実装タスクは、`docs/tasks/TASK_MANAGEMENT.md` を参照する。同ファイルはタスク管理であり、実装承認ではない。タスクを実装対象へ確定する場合は、本書、`docs/specs/Auris_System_Design.md`、`docs/tasks/TASK_MANAGEMENT.md` へ反映し、ユーザー承認を得る。
 
-候補リストは、機能候補と選定理由を管理する。正式仕様、実装対象、対象外、Phase 割り当て、完了条件、検証範囲は、本書、`docs/specs/Auris_System_Design.md`、`docs/plans/DEVELOPMENT_PLAN.md` で管理する。
+タスク管理ファイルは、未策定、未改訂、未実装タスクを管理する。正式仕様、実装対象、対象外、完了条件、検証範囲は、本書、`docs/specs/Auris_System_Design.md`、`docs/tasks/TASK_MANAGEMENT.md` で管理する。
 
 ---
 
@@ -826,7 +826,7 @@ Adlaire Git Repository 本体の標準運用基盤は、self-host、VPS、専用
 
 Adlaire Pipeline は、将来的にリリース、自動実行、成果物管理、デプロイ反映、実行履歴・監査を担う CI/CD Domain の機能候補とする。機能群は `Adlaire Pipeline Release`、`Adlaire Pipeline Runner`、`Adlaire Pipeline Artifact`、`Adlaire Pipeline Deploy`、`Adlaire Pipeline Audit` とする。これらは同一の CI/CD Domain 内の機能群として扱い、独立した機能ドメインへ細分化しない。Adlaire Pipeline の開発言語は Go 採用方針とする。データベース、依存関係、実行基盤は未定であり、別途ユーザー承認なしに固定しない。
 
-Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂し、ユーザー承認を得る。
+Deno Deploy 環境対応は白紙とし、標準採用、将来候補、参考互換対象として扱わない。再検討する場合は、方針変更として1類ルールブック、2類ポリシー、3類マスター仕様書、タスク管理ファイルを改訂し、ユーザー承認を得る。
 
 Turso Cloud、その他 libSQL 系クラウドDBサービスは、標準採用ではなく将来候補として保留する。検討する場合は、補助API、管理機能、Webhook 受信、読み取り専用ミラー等の補助的用途を優先して評価し、Git repository 実体保存、Git 操作、永続ファイル、バックアップ、復旧、データ所在、認証情報管理、運用費用、Node.js / npm 非依存方針との整合を確認する。
 
@@ -888,7 +888,7 @@ Phase 8 は、Adlaire Git Repository 本体の DB 仕様完成フェーズであ
 
 Phase 8 では、標準データベースを libSQL として扱い、SQLite 互換維持を行わない。SQLite は既存データ移行元確認用に限定し、標準運用、互換維持、最小ローカル検証用として扱わない。
 
-libSQL は唯一の標準DBとして完全確定する。DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは Phase 8 以降の採用候補として扱わない。DB 選定を再検討する場合は、通常の依存置換ではなく、1類ルールブック、2類ポリシー、3類マスター仕様書、マスター開発計画を改訂する方針変更として扱い、ユーザー承認を得る。
+libSQL は唯一の標準DBとして完全確定する。DB 使用なし案、PostgreSQL、Key-value DB、SQLite 標準運用、その他のデータベースエンジンは Phase 8 以降の採用候補として扱わない。DB 選定を再検討する場合は、通常の依存置換ではなく、1類ルールブック、2類ポリシー、3類マスター仕様書、タスク管理ファイルを改訂する方針変更として扱い、ユーザー承認を得る。
 
 Phase 8 の DB 接続仕様は以下とする。
 
@@ -935,8 +935,7 @@ Phase 8.1 では、以下を確認対象とする。
 - 1類ルールブック
 - 2類ポリシー
 - 3類マスター仕様書
-- マスター開発計画
-- マスター実装機能候補リスト
+- タスク管理ファイル
 - README
 - 実装と DB schema
 - テストと検証導線
@@ -1046,7 +1045,7 @@ HTML / CSS / Vanilla JavaScript で構成され、静的コンテンツ専用サ
 
 UI、静的フロントエンド、モバイルアプリ、外部システムからの接続は、Adlaire 公式 SDK に一本化する。公開 API の直接利用は、SDK 未実装期間を含めて禁止する。
 
-Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始フェーズは2類ポリシーとマスター開発計画に従う。
+Adlaire 公式 SDK は、Adlaire Git Repository 本体ではなくクライアント接続境界として扱う。SDK は TypeScript で実装し、Vanilla JavaScript から利用できる JavaScript を生成する方針とする。SDK は本体へ同梱せず、独立リリース対象とする。SDK のリポジトリ分離は現時点では未定とし、当面は現行リポジトリ内の `sdk/` で管理する。SDK の生成方式は Deno runtime とし、配布方式は現行リポジトリで扱い、リポジトリ分離時は分離先リポジトリで扱う。SDK 固定採用バージョンと SDK リリース開始は2類ポリシーとタスク管理ファイルに従う。
 
 Docker は、Adlaire Git Repository 本体の直接標準運用選択肢ではなく、Adlaire Pipeline 経由で生成、管理、配布、利用する対象とする。
 
@@ -1423,7 +1422,7 @@ $ scripts/deploy/verify-release.sh
 
 初回本番デプロイ、デプロイ先サーバ、SSH接続方式、接続ユーザー、配置パス、Docker Engine / Docker Compose 導入または更新、バックアップ保存先、保持世代、暗号化方針は、必ず別途ユーザー承認を得る。Docker Engine / Docker Compose は Adlaire Pipeline 経由で扱う場合のみ対象とする。
 
-複数インスタンス、ロードバランサー切替、ダウンタイムなしアップグレードは将来候補とし、採用時に3類マスター仕様書、マスター開発計画、デプロイポリシーへ反映する。
+複数インスタンス、ロードバランサー切替、ダウンタイムなしアップグレードは将来候補とし、採用時に3類マスター仕様書、タスク管理ファイル、デプロイポリシーへ反映する。
 
 ---
 
@@ -1979,11 +1978,11 @@ Optimization:
 
 ## 実装機能候補リストとの関係
 
-GitHub 機能、OSS Git ホスティング機能、将来拡張機能の候補分類、優先候補、保留候補、選定理由は `docs/plans/MASTER_IMPLEMENTATION_FEATURE_CANDIDATES.md` で管理する。
+GitHub 機能、OSS Git ホスティング機能、将来拡張機能の未策定、未改訂、未実装タスクは `docs/tasks/TASK_MANAGEMENT.md` で管理する。
 
-本書では、正式仕様として確定した機能の振る舞い、データ、権限、セキュリティ、運用要件を管理する。候補リストに記載された機能であっても、本書、`docs/specs/Auris_System_Design.md`、`docs/plans/DEVELOPMENT_PLAN.md` に反映され、ユーザー承認を得るまでは実装対象ではない。
+本書では、正式仕様として確定した機能の振る舞い、データ、権限、セキュリティ、運用要件を管理する。タスク管理ファイルに記載された機能であっても、本書、`docs/specs/Auris_System_Design.md`、`docs/tasks/TASK_MANAGEMENT.md` に反映され、ユーザー承認を得るまでは実装対象ではない。
 
-Phase 別の実装対象、対象外、完了条件、検証範囲は `docs/plans/DEVELOPMENT_PLAN.md` を正とする。候補リストと本書またはマスター開発計画に差異がある場合は、本書とマスター開発計画を正とし、候補リストを整理する。
+今後の実装対象、対象外、完了条件、検証範囲は `docs/tasks/TASK_MANAGEMENT.md` を正とする。タスク管理ファイルと本書に差異がある場合は、本書を正とし、タスク管理ファイルを整理する。
 
 ---
 
